@@ -43,7 +43,7 @@ public class CS {
     /**
      * 默认密码
      */
-    public static final String DEFAULT_PWD = "jeepay666";
+    public static final String DEFAULT_PWD = "ilian666";
     /**
      * 允许上传的的图片文件格式，需要与 WebSecurityConfig对应
      */
