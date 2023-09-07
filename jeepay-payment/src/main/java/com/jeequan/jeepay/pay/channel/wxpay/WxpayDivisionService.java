@@ -1,21 +1,5 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.channel.wxpay;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -47,17 +31,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
-* 分账接口： 微信官方
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/8/22 09:05
-*/
+ * 分账接口： 微信官方
+ *
+ * @date 2021/8/22 09:05
+ */
 @Slf4j
 @Service
 public class WxpayDivisionService implements IDivisionService {
 
-    @Autowired private ConfigContextQueryService configContextQueryService;
+    @Autowired
+    private ConfigContextQueryService configContextQueryService;
 
     @Override
     public String getIfCode() {
@@ -98,7 +81,7 @@ public class WxpayDivisionService implements IDivisionService {
 
                 // 明确成功
                 return ChannelRetMsg.confirmSuccess(null);
-            }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
+            } else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
 
                 ProfitSharingReceiver profitSharingReceiver = new ProfitSharingReceiver();
                 profitSharingReceiver.setType(mchDivisionReceiver.getAccType() == 0 ? "PERSONAL_OPENID" : "MERCHANT_ID");
@@ -109,7 +92,7 @@ public class WxpayDivisionService implements IDivisionService {
 
                 profitSharingReceiver.setAppid(WxpayKit.getWxPayConfig(wxServiceWrapper).getAppId());
                 // 特约商户
-                if(mchAppConfigContext.isIsvsubMch()){
+                if (mchAppConfigContext.isIsvsubMch()) {
                     WxpayIsvsubMchParams isvsubMchParams =
                             (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
 
@@ -153,9 +136,9 @@ public class WxpayDivisionService implements IDivisionService {
                 //放置isv信息
                 WxpayKit.putApiIsvInfo(mchAppConfigContext, request);
 
-                if(recordList.isEmpty()){
+                if (recordList.isEmpty()) {
                     request.setOutOrderNo(SeqKit.genDivisionBatchId()); // 随机生成一个订单号
-                }else{
+                } else {
                     request.setOutOrderNo(recordList.get(0).getBatchOrderId()); //取到批次号
                 }
 
@@ -164,7 +147,7 @@ public class WxpayDivisionService implements IDivisionService {
                 for (int i = 0; i < recordList.size(); i++) {
 
                     PayOrderDivisionRecord record = recordList.get(i);
-                    if(record.getCalDivisionAmount() <= 0){
+                    if (record.getCalDivisionAmount() <= 0) {
                         continue;
                     }
 
@@ -178,7 +161,7 @@ public class WxpayDivisionService implements IDivisionService {
                 }
 
                 //不存在接收账号时，订单完结（解除冻结金额）
-                if(receiverJSONArray.isEmpty()){
+                if (receiverJSONArray.isEmpty()) {
                     return ChannelRetMsg.confirmSuccess(this.divisionFinish(payOrder, mchAppConfigContext));
                 }
 
@@ -187,7 +170,7 @@ public class WxpayDivisionService implements IDivisionService {
                 ProfitSharingResult profitSharingResult = wxServiceWrapper.getWxPayService().getProfitSharingService().profitSharing(request);
                 return ChannelRetMsg.waiting();
 
-            }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
+            } else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
 
                 com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingRequest request = new com.github.binarywang.wxpay.bean.profitsharingV3.ProfitSharingRequest();
                 request.setTransactionId(payOrder.getChannelOrderNo());
@@ -195,16 +178,16 @@ public class WxpayDivisionService implements IDivisionService {
 
                 request.setAppid(WxpayKit.getWxPayConfig(wxServiceWrapper).getAppId());
                 // 特约商户
-                if(mchAppConfigContext.isIsvsubMch()){
+                if (mchAppConfigContext.isIsvsubMch()) {
                     WxpayIsvsubMchParams isvsubMchParams =
                             (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
 
                     request.setSubMchId(isvsubMchParams.getSubMchId());
                 }
 
-                if(recordList.isEmpty()){
+                if (recordList.isEmpty()) {
                     request.setOutOrderNo(SeqKit.genDivisionBatchId()); // 随机生成一个订单号
-                }else{
+                } else {
                     request.setOutOrderNo(recordList.get(0).getBatchOrderId()); //取到批次号
                 }
 
@@ -212,7 +195,7 @@ public class WxpayDivisionService implements IDivisionService {
                 for (int i = 0; i < recordList.size(); i++) {
 
                     PayOrderDivisionRecord record = recordList.get(i);
-                    if(record.getCalDivisionAmount() <= 0){
+                    if (record.getCalDivisionAmount() <= 0) {
                         continue;
                     }
 
@@ -225,7 +208,7 @@ public class WxpayDivisionService implements IDivisionService {
                     receivers.add(receiver);
                 }
                 //不存在接收账号时，订单完结（解除冻结金额）
-                if(receivers.isEmpty()){
+                if (receivers.isEmpty()) {
                     return ChannelRetMsg.confirmSuccess(this.divisionFinish(payOrder, mchAppConfigContext));
                 }
                 request.setReceivers(receivers);
@@ -295,7 +278,7 @@ public class WxpayDivisionService implements IDivisionService {
 
                             resultMap.put(recordId, ChannelRetMsg.confirmSuccess(null));
 
-                        }else if ("CLOSED".equals(receiver.getResult())) {
+                        } else if ("CLOSED".equals(receiver.getResult())) {
 
                             resultMap.put(recordId, ChannelRetMsg.confirmFail(null, null, receiver.getFailReason()));
                         }
@@ -303,13 +286,13 @@ public class WxpayDivisionService implements IDivisionService {
 
                 }
 
-            }else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
+            } else if (CS.PAY_IF_VERSION.WX_V3.equals(wxServiceWrapper.getApiVersion())) {
 
                 String url = String.format("%s/v3/profitsharing/orders/%s?transaction_id=%s",
-                            wxServiceWrapper.getWxPayService().getPayBaseUrl(), recordList.get(0).getBatchOrderId(), payOrder.getChannelOrderNo());
+                        wxServiceWrapper.getWxPayService().getPayBaseUrl(), recordList.get(0).getBatchOrderId(), payOrder.getChannelOrderNo());
 
                 // 特约商户
-                if(mchAppConfigContext.isIsvsubMch()){
+                if (mchAppConfigContext.isIsvsubMch()) {
                     WxpayIsvsubMchParams isvsubMchParams =
                             (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
                     url += "&sub_mchid=" + isvsubMchParams.getSubMchId();
@@ -334,7 +317,7 @@ public class WxpayDivisionService implements IDivisionService {
 
                             resultMap.put(recordId, ChannelRetMsg.confirmSuccess(null));
 
-                        }else if ("CLOSED".equals(receiver.getResult())) {
+                        } else if ("CLOSED".equals(receiver.getResult())) {
 
                             resultMap.put(recordId, ChannelRetMsg.confirmFail(null, null, receiver.getFailReason()));
                         }
@@ -356,8 +339,10 @@ public class WxpayDivisionService implements IDivisionService {
         return resultMap;
     }
 
-    /** 调用订单的完结接口 (分账对象不存在时) */
-    private String divisionFinish(PayOrder payOrder,MchAppConfigContext mchAppConfigContext) throws WxPayException {
+    /**
+     * 调用订单的完结接口 (分账对象不存在时)
+     */
+    private String divisionFinish(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws WxPayException {
 
         WxServiceWrapper wxServiceWrapper = configContextQueryService.getWxServiceWrapper(mchAppConfigContext);
 
@@ -376,11 +361,11 @@ public class WxpayDivisionService implements IDivisionService {
 
             return wxServiceWrapper.getWxPayService().getProfitSharingService().profitSharingFinish(request).getOrderId();
 
-        }else {
+        } else {
 
             ProfitSharingUnfreezeRequest request = new ProfitSharingUnfreezeRequest();
             // 特约商户
-            if(mchAppConfigContext.isIsvsubMch()){
+            if (mchAppConfigContext.isIsvsubMch()) {
                 WxpayIsvsubMchParams isvsubMchParams =
                         (WxpayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
 

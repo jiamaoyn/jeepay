@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.channel.xxpay.payway;
 
 import com.jeequan.jeepay.core.entity.PayOrder;
@@ -48,7 +33,7 @@ public class AliBar extends XxpayPaymentService {
     public String preCheck(UnifiedOrderRQ rq, PayOrder payOrder) {
 
         AliBarOrderRQ bizRQ = (AliBarOrderRQ) rq;
-        if(StringUtils.isEmpty(bizRQ.getAuthCode())){
+        if (StringUtils.isEmpty(bizRQ.getAuthCode())) {
             throw new BizException("用户支付条码[authCode]不可为空");
         }
 
@@ -56,11 +41,11 @@ public class AliBar extends XxpayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
         AliBarOrderRQ bizRQ = (AliBarOrderRQ) rq;
-        XxpayNormalMchParams params = (XxpayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
+        XxpayNormalMchParams params = (XxpayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
         // 构造支付请求参数
-        Map<String,Object> paramMap = new TreeMap();
+        Map<String, Object> paramMap = new TreeMap();
         paramMap.put("mchId", params.getMchId());
         paramMap.put("productId", "8021"); // 支付宝条码
         paramMap.put("mchOrderNo", payOrder.getPayOrderId());

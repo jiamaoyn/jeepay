@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.channel.xxpay.payway;
 
 import com.alibaba.fastjson.JSONObject;
@@ -24,8 +9,6 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliJsapiOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliJsapiOrderRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxJsapiOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxJsapiOrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
@@ -49,19 +32,19 @@ public class WxJsapi extends XxpayPaymentService {
     public String preCheck(UnifiedOrderRQ rq, PayOrder payOrder) {
 
         WxJsapiOrderRQ bizRQ = (WxJsapiOrderRQ) rq;
-        if(StringUtils.isEmpty(bizRQ.getOpenid())){
+        if (StringUtils.isEmpty(bizRQ.getOpenid())) {
             throw new BizException("[openId]不可为空");
         }
         return null;
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception{
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
         WxJsapiOrderRQ bizRQ = (WxJsapiOrderRQ) rq;
 
-        XxpayNormalMchParams params = (XxpayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
+        XxpayNormalMchParams params = (XxpayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
         // 构造支付请求参数
-        Map<String,Object> paramMap = new TreeMap();
+        Map<String, Object> paramMap = new TreeMap();
         paramMap.put("mchId", params.getMchId());
         paramMap.put("productId", "8004"); // 微信公众号支付
         paramMap.put("mchOrderNo", payOrder.getPayOrderId());
@@ -80,7 +63,7 @@ public class WxJsapi extends XxpayPaymentService {
         res.setChannelRetMsg(channelRetMsg);
         // 发起支付
         JSONObject resObj = doPay(payOrder, params, paramMap, channelRetMsg);
-        if(resObj == null) {
+        if (resObj == null) {
             return res;
         }
         res.setPayInfo(resObj.getString("payParams"));

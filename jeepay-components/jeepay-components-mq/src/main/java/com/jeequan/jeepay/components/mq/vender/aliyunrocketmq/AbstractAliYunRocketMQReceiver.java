@@ -15,22 +15,16 @@ public abstract class AbstractAliYunRocketMQReceiver implements IMQMsgReceiver, 
 
     /**
      * 获取topic名称
-     *
-     * @return
      */
     public abstract String getMQName();
 
     /**
      * 获取业务名称
-     *
-     * @return
      */
     public abstract String getConsumerName();
 
     /**
      * 发送类型
-     *
-     * @return
      */
     public MQSendTypeEnum getMQType() {
         // QUEUE - 点对点 （只有1个消费者可消费。 ActiveMQ的queue模式 ）

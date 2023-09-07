@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.core.utils;
 
 import com.alibaba.fastjson.JSONArray;
@@ -32,16 +17,42 @@ import java.util.List;
  *      2. 使用构造函数创建对象，参数为转换好的对象， 如果自定义字段key 则将字段名称一并传入；
  *      3. 使用buildTreeString() 或者 buildTreeObject() 生成所需对象；
  *
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2019/12/8 06:37
-*/
+ * @date 2019/12/8 06:37
+ */
 public class TreeDataBuilder {
 
 
-    /** 私有构造器 + 指定参数构造器 **/
-    private TreeDataBuilder(){}
+    /**
+     * 所有数据集合
+     **/
+    private Collection<JSONObject> nodes;
+    /**
+     * 默认数据中的主键key
+     */
+    private String idName = "id";
+    /**
+     * 默认数据中的父级id的key
+     */
+    private String pidName = "pid";
+    /**
+     * 默认数据中的子类对象key
+     */
+    private String childrenName = "children";
+    /**
+     * 排序字段， 默认按照ID排序
+     **/
+    private String sortName = idName;
+    /**
+     * 默认按照升序排序
+     **/
+    private boolean isAscSort = true;
+
+    /**
+     * 私有构造器 + 指定参数构造器
+     **/
+    private TreeDataBuilder() {
+    }
+
     public TreeDataBuilder(Collection nodes) {
         super();
         this.nodes = nodes;
@@ -56,7 +67,9 @@ public class TreeDataBuilder {
         this.childrenName = childrenName;
     }
 
-    /** 自定义字段 + 排序标志 **/
+    /**
+     * 自定义字段 + 排序标志
+     **/
     public TreeDataBuilder(Collection nodes, String idName, String pidName, String childrenName, String sortName, boolean isAscSort) {
         super();
         this.nodes = nodes;
@@ -66,24 +79,6 @@ public class TreeDataBuilder {
         this.sortName = sortName;
         this.isAscSort = isAscSort;
     }
-
-    /** 所有数据集合 **/
-    private Collection<JSONObject> nodes;
-
-    /** 默认数据中的主键key */
-    private String idName = "id";
-
-    /** 默认数据中的父级id的key */
-    private String pidName = "pid";
-
-    /** 默认数据中的子类对象key   */
-    private String childrenName = "children";
-
-    /** 排序字段， 默认按照ID排序 **/
-    private String sortName = idName;
-
-    /** 默认按照升序排序 **/
-    private boolean isAscSort = true;
 
     // 构建JSON树形结构
     public String buildTreeString() {
@@ -114,7 +109,9 @@ public class TreeDataBuilder {
         return resultNodes;
     }
 
-    /** 递归查找并赋值子节点 **/
+    /**
+     * 递归查找并赋值子节点
+     **/
     private void buildChildNodes(JSONObject node) {
         List<JSONObject> children = getChildNodes(node);
         if (!children.isEmpty()) {
@@ -127,7 +124,9 @@ public class TreeDataBuilder {
         }
     }
 
-    /** 查找当前节点的子节点 */
+    /**
+     * 查找当前节点的子节点
+     */
     private List<JSONObject> getChildNodes(JSONObject currentNode) {
         List<JSONObject> childNodes = new ArrayList<>();
         for (JSONObject n : nodes) {
@@ -138,7 +137,9 @@ public class TreeDataBuilder {
         return childNodes;
     }
 
-    /** 判断是否为根节点 */
+    /**
+     * 判断是否为根节点
+     */
     private boolean isRootNode(JSONObject node) {
         boolean isRootNode = true;
         for (JSONObject n : nodes) {
@@ -150,7 +151,9 @@ public class TreeDataBuilder {
         return isRootNode;
     }
 
-    /** 获取集合中所有的根节点 */
+    /**
+     * 获取集合中所有的根节点
+     */
     private List<JSONObject> getRootNodes() {
         List<JSONObject> rootNodes = new ArrayList<>();
         for (JSONObject n : nodes) {
@@ -161,18 +164,20 @@ public class TreeDataBuilder {
         return rootNodes;
     }
 
-    /** 将list进行排序  */
-    private void listSort(List<JSONObject> list){
+    /**
+     * 将list进行排序
+     */
+    private void listSort(List<JSONObject> list) {
         Collections.sort(list, (o1, o2) -> {
 
             int result;
-            if(o1.get(sortName) instanceof Integer){
+            if (o1.get(sortName) instanceof Integer) {
                 result = o1.getInteger(sortName).compareTo(o2.getInteger(sortName));
-            }else{
+            } else {
                 result = o1.get(sortName).toString().compareTo(o2.get(sortName).toString());
             }
 
-            if(!isAscSort){  //倒序， 取反数
+            if (!isAscSort) {  //倒序， 取反数
                 return -result;
             }
 

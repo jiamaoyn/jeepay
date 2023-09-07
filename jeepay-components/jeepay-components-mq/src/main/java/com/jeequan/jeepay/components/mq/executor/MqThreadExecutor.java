@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.components.mq.executor;
 
 import org.springframework.context.annotation.Bean;
@@ -23,20 +8,16 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 
-/*
-* MQ 线程池配置
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/6/8 17:33
-*/
+/**
+ * MQ 线程池配置
+ */
 @Configuration
 @EnableAsync
 public class MqThreadExecutor {
 
     public static final String EXECUTOR_PAYORDER_MCH_NOTIFY = "mqQueue4PayOrderMchNotifyExecutor";
 
-    /*
+    /**
      * 功能描述:
      * 支付结果通知到商户的异步执行器 （由于量大， 单独新建一个线程池处理， 之前的不做变动 ）
      * 20, 300, 10, 60  该配置： 同一时间最大并发量300，（已经验证通过， 商户都可以收到请求消息）

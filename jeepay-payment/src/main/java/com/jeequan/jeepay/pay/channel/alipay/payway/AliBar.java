@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.channel.alipay.payway;
 
 import cn.hutool.core.date.DatePattern;
@@ -25,21 +10,18 @@ import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.pay.channel.alipay.AlipayKit;
 import com.jeequan.jeepay.pay.channel.alipay.AlipayPaymentService;
+import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
+import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliBarOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliBarOrderRS;
-import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
-import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
-import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /*
  * 支付宝 条码支付
- *
- * @author terrfly
- * @site https://www.jeequan.com
  * @date 2021/6/8 17:20
  */
 @Service("alipayPaymentByAliBarService") //Service Name需保持全局唯一性
@@ -49,7 +31,7 @@ public class AliBar extends AlipayPaymentService {
     public String preCheck(UnifiedOrderRQ rq, PayOrder payOrder) {
 
         AliBarOrderRQ bizRQ = (AliBarOrderRQ) rq;
-        if(StringUtils.isEmpty(bizRQ.getAuthCode())){
+        if (StringUtils.isEmpty(bizRQ.getAuthCode())) {
             throw new BizException("用户支付条码[authCode]不可为空");
         }
 
@@ -57,7 +39,7 @@ public class AliBar extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
 
         AliBarOrderRQ bizRQ = (AliBarOrderRQ) rq;
 
@@ -92,16 +74,16 @@ public class AliBar extends AlipayPaymentService {
         // ↓↓↓↓↓↓ 调起接口成功后业务判断务必谨慎！！ 避免因代码编写bug，导致不能正确返回订单状态信息  ↓↓↓↓↓↓
 
         //当条码重复发起时，支付宝返回的code = 10003, subCode = null [等待用户支付], 此时需要特殊判断 = = 。
-        if("10000".equals(alipayResp.getCode()) && alipayResp.isSuccess()){ //支付成功, 更新订单成功 || 等待支付宝的异步回调接口
+        if ("10000".equals(alipayResp.getCode()) && alipayResp.isSuccess()) { //支付成功, 更新订单成功 || 等待支付宝的异步回调接口
 
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
 
 
-        }else if("10003".equals(alipayResp.getCode())){ //10003 表示为 处理中, 例如等待用户输入密码
+        } else if ("10003".equals(alipayResp.getCode())) { //10003 表示为 处理中, 例如等待用户输入密码
 
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
 
-        }else{  //其他状态, 表示下单失败
+        } else {  //其他状态, 表示下单失败
 
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
             channelRetMsg.setChannelErrCode(AlipayKit.appendErrCode(alipayResp.getCode(), alipayResp.getSubCode()));

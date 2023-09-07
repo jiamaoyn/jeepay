@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mgr.ctrl.order;
 
 import com.alibaba.fastjson.JSONObject;
@@ -53,8 +38,6 @@ import java.util.Map;
 /**
  * 支付订单类
  *
- * @author pangxiaoyu
- * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
 @Api(tags = "订单管理（支付类）")
@@ -62,10 +45,14 @@ import java.util.Map;
 @RequestMapping("/api/payOrder")
 public class PayOrderController extends CommonCtrl {
 
-    @Autowired private PayOrderService payOrderService;
-    @Autowired private PayWayService payWayService;
-    @Autowired private SysConfigService sysConfigService;
-    @Autowired private MchAppService mchAppService;
+    @Autowired
+    private PayOrderService payOrderService;
+    @Autowired
+    private PayWayService payWayService;
+    @Autowired
+    private SysConfigService sysConfigService;
+    @Autowired
+    private MchAppService mchAppService;
 
     /**
      * @author: pangxiaoyu
@@ -89,7 +76,7 @@ public class PayOrderController extends CommonCtrl {
             @ApiImplicitParam(name = "divisionState", value = "0-未发生分账, 1-等待分账任务处理, 2-分账处理中, 3-分账任务已结束(不体现状态)")
     })
     @PreAuthorize("hasAuthority('ENT_ORDER_LIST')")
-    @RequestMapping(value="", method = RequestMethod.GET)
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public ApiPageRes<PayOrder> list() {
 
         PayOrder payOrder = getObject(PayOrder.class);
@@ -100,14 +87,14 @@ public class PayOrderController extends CommonCtrl {
         // 得到所有支付方式
         Map<String, String> payWayNameMap = new HashMap<>();
         List<PayWay> payWayList = payWayService.list();
-        for (PayWay payWay:payWayList) {
+        for (PayWay payWay : payWayList) {
             payWayNameMap.put(payWay.getWayCode(), payWay.getWayName());
         }
-        for (PayOrder order:pages.getRecords()) {
+        for (PayOrder order : pages.getRecords()) {
             // 存入支付方式名称
             if (StringUtils.isNotEmpty(payWayNameMap.get(order.getWayCode()))) {
                 order.addExt("wayName", payWayNameMap.get(order.getWayCode()));
-            }else {
+            } else {
                 order.addExt("wayName", order.getWayCode());
             }
         }
@@ -125,7 +112,7 @@ public class PayOrderController extends CommonCtrl {
             @ApiImplicitParam(name = "payOrderId", value = "支付订单号", required = true)
     })
     @PreAuthorize("hasAuthority('ENT_PAY_ORDER_VIEW')")
-    @RequestMapping(value="/{payOrderId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{payOrderId}", method = RequestMethod.GET)
     public ApiRes detail(@PathVariable("payOrderId") String payOrderId) {
         PayOrder payOrder = payOrderService.getById(payOrderId);
         if (payOrder == null) {
@@ -137,6 +124,7 @@ public class PayOrderController extends CommonCtrl {
 
     /**
      * 发起订单退款
+     *
      * @author terrfly
      * @site https://www.jeequan.com
      * @date 2021/6/17 16:38
@@ -161,11 +149,11 @@ public class PayOrderController extends CommonCtrl {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
 
-        if(payOrder.getState() != PayOrder.STATE_SUCCESS){
+        if (payOrder.getState() != PayOrder.STATE_SUCCESS) {
             throw new BizException("订单状态不正确");
         }
 
-        if(payOrder.getRefundAmount() + refundAmount > payOrder.getAmount()){
+        if (payOrder.getRefundAmount() + refundAmount > payOrder.getAmount()) {
             throw new BizException("退款金额超过订单可退款金额！");
         }
 
@@ -188,7 +176,7 @@ public class PayOrderController extends CommonCtrl {
 
         try {
             RefundOrderCreateResponse response = jeepayClient.execute(request);
-            if(response.getCode() != 0){
+            if (response.getCode() != 0) {
                 throw new BizException(response.getMsg());
             }
             return ApiRes.ok(response.get());

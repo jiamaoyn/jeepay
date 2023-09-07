@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -44,6 +29,7 @@ import java.util.List;
 
 /**
  * 业务： 支付订单分账处理逻辑
+ *
  * @author terrfly
  * @site https://www.jeequan.com
  * @date 2021/8/27 9:43
@@ -64,34 +50,34 @@ public class PayOrderDivisionProcessService {
     private ConfigContextQueryService configContextQueryService;
 
     /***
-    * 处理分账，
+     * 处理分账，
      * 1. 向外抛异常： 系统检查没有通过 / 系统级别异常
      * 2 若正常调起接口将返回渠道侧响应结果
-    *
-    * @author terrfly
-    * @site https://www.jeequan.com
-    * @date 2021/8/27 9:44
-    */
+     *
+     * @author terrfly
+     * @site https://www.jeequan.com
+     * @date 2021/8/27 9:44
+     */
     public ChannelRetMsg processPayOrderDivision(String payOrderId, Byte useSysAutoDivisionReceivers, List<PayOrderDivisionMQ.CustomerDivisionReceiver> receiverList, Boolean isResend) {
 
         // 是否重发分账接口（ 当分账失败， 列表允许再次发送请求 ）
-        if(isResend == null){
+        if (isResend == null) {
             isResend = false;
         }
 
 
-        String logPrefix = "订单["+payOrderId+"]执行分账";
+        String logPrefix = "订单[" + payOrderId + "]执行分账";
 
         //查询订单信息
         PayOrder payOrder = payOrderService.getById(payOrderId);
 
-        if(payOrder == null){
+        if (payOrder == null) {
             log.error("{}，订单不存在", logPrefix);
             throw new BizException("订单不存在");
         }
 
         // 分账状态不正确
-        if(payOrder.getDivisionState() != PayOrder.DIVISION_STATE_WAIT_TASK && payOrder.getDivisionState() != PayOrder.DIVISION_STATE_UNHAPPEN){
+        if (payOrder.getDivisionState() != PayOrder.DIVISION_STATE_WAIT_TASK && payOrder.getDivisionState() != PayOrder.DIVISION_STATE_UNHAPPEN) {
             log.error("{}, 分账状态不正确", logPrefix);
             throw new BizException("分账状态不正确");
         }
@@ -101,7 +87,7 @@ public class PayOrderDivisionProcessService {
                 .set(PayOrder::getDivisionState, PayOrder.DIVISION_STATE_ING)
                 .eq(PayOrder::getPayOrderId, payOrderId)
                 .eq(PayOrder::getDivisionState, payOrder.getDivisionState()));
-        if(!updPayOrder){
+        if (!updPayOrder) {
             log.error("{}, 更新支付订单为分账处理中异常！", logPrefix);
             throw new BizException("更新支付订单为分账处理中异常");
         }
@@ -111,11 +97,11 @@ public class PayOrderDivisionProcessService {
         List<PayOrderDivisionRecord> recordList = null;
 
         // 重发通知，可直接查库
-        if(isResend){
+        if (isResend) {
             // 根据payOrderId && 待分账（ 重试时将更新为待分账状态 ）  ， 此处不可查询出分账成功的订单。
             recordList = payOrderDivisionRecordService.list(PayOrderDivisionRecord.gw()
                     .eq(PayOrderDivisionRecord::getPayOrderId, payOrderId).eq(PayOrderDivisionRecord::getState, PayOrderDivisionRecord.STATE_WAIT));
-        }else{
+        } else {
 
             // 查询&过滤 所有的分账接收对象
             List<MchDivisionReceiver> allReceiver = this.queryReceiver(useSysAutoDivisionReceivers, payOrder, receiverList);
@@ -154,31 +140,31 @@ public class PayOrderDivisionProcessService {
 
         ChannelRetMsg channelRetMsg = null;
 
-        try{
+        try {
 
             //调用渠道侧分账接口
             IDivisionService divisionService = SpringBeansUtil.getBean(payOrder.getIfCode() + "DivisionService", IDivisionService.class);
-            if(divisionService == null){
+            if (divisionService == null) {
                 throw new BizException("通道无此分账接口");
             }
 
             channelRetMsg = divisionService.singleDivision(payOrder, recordList, configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId()));
 
             // 确认分账成功 ( 明确分账成功 )
-            if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
+            if (channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
 
                 //分账成功
                 payOrderDivisionRecordService.updateRecordSuccessOrFail(recordList, PayOrderDivisionRecord.STATE_SUCCESS,
                         channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelOriginResponse());
 
-            //分账失败  ( 明确分账成功 )
-            }else if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_FAIL){
+                //分账失败  ( 明确分账成功 )
+            } else if (channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_FAIL) {
 
                 payOrderDivisionRecordService.updateRecordSuccessOrFail(recordList, PayOrderDivisionRecord.STATE_FAIL,
                         channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrMsg());
 
-            // 已受理
-            }else if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.WAITING){
+                // 已受理
+            } else if (channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.WAITING) {
 
                 payOrderDivisionRecordService.updateRecordSuccessOrFail(recordList, PayOrderDivisionRecord.STATE_ACCEPT,
                         channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrMsg());
@@ -205,9 +191,11 @@ public class PayOrderDivisionProcessService {
     }
 
 
-    /** 生成对象信息 **/
+    /**
+     * 生成对象信息
+     **/
     private PayOrderDivisionRecord genRecord(String batchOrderId, PayOrder payOrder, MchDivisionReceiver receiver,
-                                             Long payOrderDivisionAmount, Long subDivisionAmount){
+                                             Long payOrderDivisionAmount, Long subDivisionAmount) {
 
         PayOrderDivisionRecord record = new PayOrderDivisionRecord();
         record.setMchNo(payOrder.getMchNo());
@@ -232,13 +220,13 @@ public class PayOrderDivisionProcessService {
         record.setRelationTypeName(receiver.getRelationTypeName());
         record.setDivisionProfit(receiver.getDivisionProfit());
 
-        if( subDivisionAmount <= 0 ) {
+        if (subDivisionAmount <= 0) {
             record.setCalDivisionAmount(0L);
-        }else{
+        } else {
 
             //计算的分账金额
             record.setCalDivisionAmount(AmountUtil.calPercentageFee(record.getPayOrderDivisionAmount(), record.getDivisionProfit()));
-            if(record.getCalDivisionAmount() > subDivisionAmount){ // 分账金额超过剩余总金额时： 将按照剩余金额进行分账。
+            if (record.getCalDivisionAmount() > subDivisionAmount) { // 分账金额超过剩余总金额时： 将按照剩余金额进行分账。
                 record.setCalDivisionAmount(subDivisionAmount);
             }
         }
@@ -247,7 +235,7 @@ public class PayOrderDivisionProcessService {
     }
 
 
-    private List<MchDivisionReceiver> queryReceiver(Byte useSysAutoDivisionReceivers, PayOrder payOrder, List<PayOrderDivisionMQ.CustomerDivisionReceiver> customerDivisionReceiverList){
+    private List<MchDivisionReceiver> queryReceiver(Byte useSysAutoDivisionReceivers, PayOrder payOrder, List<PayOrderDivisionMQ.CustomerDivisionReceiver> customerDivisionReceiverList) {
 
         // 查询全部分账列表
         LambdaQueryWrapper<MchDivisionReceiver> queryWrapper = MchDivisionReceiver.gw();
@@ -258,13 +246,13 @@ public class PayOrderDivisionProcessService {
         queryWrapper.eq(MchDivisionReceiver::getState, CS.PUB_USABLE); // 可用状态的账号
 
         // 自动分账组的账号
-        if(useSysAutoDivisionReceivers == CS.YES) {
+        if (useSysAutoDivisionReceivers == CS.YES) {
 
             List<MchDivisionReceiverGroup> groups = mchDivisionReceiverGroupService.list(
                     MchDivisionReceiverGroup.gw().eq(MchDivisionReceiverGroup::getMchNo, payOrder.getMchNo())
                             .eq(MchDivisionReceiverGroup::getAutoDivisionFlag, CS.YES));
 
-            if(groups.isEmpty()){
+            if (groups.isEmpty()) {
                 return new ArrayList<>();
             }
 
@@ -273,19 +261,19 @@ public class PayOrderDivisionProcessService {
 
         //全部分账账号
         List<MchDivisionReceiver> allMchReceiver = mchDivisionReceiverService.list(queryWrapper);
-        if(allMchReceiver.isEmpty()){
+        if (allMchReceiver.isEmpty()) {
             return allMchReceiver;
         }
 
         //自动分账组
-        if(useSysAutoDivisionReceivers == CS.YES){
+        if (useSysAutoDivisionReceivers == CS.YES) {
             return allMchReceiver;
         }
 
         //以下为 自定义列表
 
         // 自定义列表未定义
-        if(customerDivisionReceiverList == null || customerDivisionReceiverList.isEmpty()){
+        if (customerDivisionReceiverList == null || customerDivisionReceiverList.isEmpty()) {
             return new ArrayList<>();
         }
 
@@ -296,12 +284,12 @@ public class PayOrderDivisionProcessService {
             for (PayOrderDivisionMQ.CustomerDivisionReceiver customerDivisionReceiver : customerDivisionReceiverList) {
 
                 // 查询匹配相同的项目
-                if( mchDivisionReceiver.getReceiverId().equals(customerDivisionReceiver.getReceiverId()) ||
-                    mchDivisionReceiver.getReceiverGroupId().equals(customerDivisionReceiver.getReceiverGroupId())
-                ){
+                if (mchDivisionReceiver.getReceiverId().equals(customerDivisionReceiver.getReceiverId()) ||
+                        mchDivisionReceiver.getReceiverGroupId().equals(customerDivisionReceiver.getReceiverGroupId())
+                ) {
 
                     // 重新对分账比例赋值
-                    if(customerDivisionReceiver.getDivisionProfit() != null){
+                    if (customerDivisionReceiver.getDivisionProfit() != null) {
                         mchDivisionReceiver.setDivisionProfit(customerDivisionReceiver.getDivisionProfit());
                     }
                     filterMchReceiver.add(mchDivisionReceiver);

@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.channel.ysfpay.payway;
 
 import cn.hutool.core.date.DateUtil;
@@ -20,7 +5,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
-import com.jeequan.jeepay.core.utils.DateKit;
 import com.jeequan.jeepay.pay.channel.ysfpay.YsfpayPaymentService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
@@ -36,9 +20,6 @@ import java.util.Date;
 
 /*
  * 云闪付 支付宝 jsapi
- *
- * @author pangxiaoyu
- * @site https://www.jeequan.com
  * @date 2021/6/8 18:11
  */
 @Service("ysfpayPaymentByAliJsapiService") //Service Name需保持全局唯一性
@@ -48,7 +29,7 @@ public class AliJsapi extends YsfpayPaymentService {
     public String preCheck(UnifiedOrderRQ rq, PayOrder payOrder) {
 
         AliJsapiOrderRQ bizRQ = (AliJsapiOrderRQ) rq;
-        if(StringUtils.isEmpty(bizRQ.getBuyerUserId())){
+        if (StringUtils.isEmpty(bizRQ.getBuyerUserId())) {
             throw new BizException("[buyerUserId]不可为空");
         }
         return null;
@@ -80,18 +61,18 @@ public class AliJsapi extends YsfpayPaymentService {
         try {
 
             //00-交易成功， 02-用户支付中 , 12-交易重复， 需要发起查询处理    其他认为失败
-            if("00".equals(respCode)){
+            if ("00".equals(respCode)) {
                 //付款信息
                 JSONObject payDataJSON = JSON.parseObject(resJSON.getString("payData"));
                 String tradeNo = "";
 
-                if(StringUtils.isNotBlank(payDataJSON.getString("tradeNo"))){
+                if (StringUtils.isNotBlank(payDataJSON.getString("tradeNo"))) {
                     tradeNo = payDataJSON.getString("tradeNo");
-                }else{
+                } else {
                     String prepayId = payDataJSON.getString("prepayId");
-                    if(prepayId != null && prepayId.length() > 2 && !prepayId.startsWith(DateUtil.format(new Date(), "yyyy"))){
+                    if (prepayId != null && prepayId.length() > 2 && !prepayId.startsWith(DateUtil.format(new Date(), "yyyy"))) {
                         tradeNo = prepayId.substring(2);
-                    }else{
+                    } else {
                         tradeNo = prepayId;
                     }
                 }
@@ -99,7 +80,7 @@ public class AliJsapi extends YsfpayPaymentService {
                 res.setPayData(payDataJSON.toJSONString());
                 channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             channelRetMsg.setChannelErrCode(respCode);
             channelRetMsg.setChannelErrMsg(respMsg);
         }

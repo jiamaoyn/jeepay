@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.channel.alipay.ctrl;
 
 import cn.hutool.core.util.URLUtil;
@@ -48,28 +33,32 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 /**
-* 渠道侧自定义业务ctrl
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/7/15 11:49
-*/
+ * 渠道侧自定义业务ctrl
+ *
+ * @date 2021/7/15 11:49
+ */
 @Slf4j
 @Controller
 @RequestMapping("/api/channelbiz/alipay")
 public class AlipayBizController extends AbstractCtrl {
 
-    @Autowired private ConfigContextQueryService configContextQueryService;
-    @Autowired private SysConfigService sysConfigService;
-    @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private MchAppService mchAppService;
-    @Autowired private IMQSender mqSender;
+    @Autowired
+    private ConfigContextQueryService configContextQueryService;
+    @Autowired
+    private SysConfigService sysConfigService;
+    @Autowired
+    private PayInterfaceConfigService payInterfaceConfigService;
+    @Autowired
+    private MchAppService mchAppService;
+    @Autowired
+    private IMQSender mqSender;
 
 
-    /** 跳转到支付宝的授权页面 （统一从pay项目获取到isv配置信息）
+    /**
+     * 跳转到支付宝的授权页面 （统一从pay项目获取到isv配置信息）
      * isvAndMchNo 格式:  ISVNO_MCHAPPID
      * example: https://pay.jeepay.cn/api/channelbiz/alipay/redirectAppToAppAuth/V1623998765_60cc41694ee0e6685f57eb1f
-     * **/
+     **/
     @RequestMapping("/redirectAppToAppAuth/{isvAndMchAppId}")
     public void redirectAppToAppAuth(@PathVariable("isvAndMchAppId") String isvAndMchAppId) throws IOException {
 
@@ -79,7 +68,7 @@ public class AlipayBizController extends AbstractCtrl {
         alipayIsvParams.getSandbox();
 
         String oauthUrl = AlipayConfig.PROD_APP_TO_APP_AUTH_URL;
-        if(alipayIsvParams.getSandbox() != null && alipayIsvParams.getSandbox() == CS.YES){
+        if (alipayIsvParams.getSandbox() != null && alipayIsvParams.getSandbox() == CS.YES) {
             oauthUrl = AlipayConfig.SANDBOX_APP_TO_APP_AUTH_URL;
         }
 
@@ -87,7 +76,9 @@ public class AlipayBizController extends AbstractCtrl {
         response.sendRedirect(String.format(oauthUrl, alipayIsvParams.getAppId(), URLUtil.encodeAll(redirectUrl), isvAndMchAppId));
     }
 
-    /** 支付宝授权回调地址 **/
+    /**
+     * 支付宝授权回调地址
+     **/
     @RequestMapping("/appToAppAuthCallback")
     public String appToAppAuthCallback() {
 
@@ -99,7 +90,7 @@ public class AlipayBizController extends AbstractCtrl {
             String isvAndMchAppId = getValString("state");
             String appAuthCode = getValString("app_auth_code"); // 支付宝授权code
 
-            if(StringUtils.isNotEmpty(isvAndMchAppId) && StringUtils.isNotEmpty(appAuthCode)){
+            if (StringUtils.isNotEmpty(isvAndMchAppId) && StringUtils.isNotEmpty(appAuthCode)) {
                 isAlipaySysAuth = false;
                 String isvNo = isvAndMchAppId.split("_")[0];
                 String mchAppId = isvAndMchAppId.split("_")[1];
@@ -119,20 +110,23 @@ public class AlipayBizController extends AbstractCtrl {
                 // reExpiresIn: 刷新令牌的有效时间（从接口调用时间作为起始时间），单位到秒
                 // DateUtil.offsetSecond(new Date(), Integer.parseInt(resp.getExpiresIn()));
                 AlipayOpenAuthTokenAppResponse resp = alipayClientWrapper.execute(request);
-                if(!resp.isSuccess()){
+                if (!resp.isSuccess()) {
                     throw new BizException(AlipayKit.appendErrMsg(resp.getMsg(), resp.getSubMsg()));
                 }
                 String appAuthToken = resp.getAppAuthToken();
                 JSONObject ifParams = new JSONObject();
-                ifParams.put("appAuthToken", appAuthToken); ifParams.put("refreshToken", resp.getAppRefreshToken()); ifParams.put("expireTimestamp", resp.getExpiresIn());
+                ifParams.put("appAuthToken", appAuthToken);
+                ifParams.put("refreshToken", resp.getAppRefreshToken());
+                ifParams.put("expireTimestamp", resp.getExpiresIn());
 
                 PayInterfaceConfig dbRecord = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_MCH_APP, mchAppId, CS.IF_CODE.ALIPAY);
 
-                if(dbRecord != null){
+                if (dbRecord != null) {
                     PayInterfaceConfig updateRecord = new PayInterfaceConfig();
-                    updateRecord.setId(dbRecord.getId()); updateRecord.setIfParams(ifParams.toJSONString());
+                    updateRecord.setId(dbRecord.getId());
+                    updateRecord.setIfParams(ifParams.toJSONString());
                     payInterfaceConfigService.updateById(updateRecord);
-                }else{
+                } else {
 
                     dbRecord = new PayInterfaceConfig();
                     dbRecord.setInfoType(CS.INFO_TYPE_MCH_APP);
@@ -162,8 +156,7 @@ public class AlipayBizController extends AbstractCtrl {
 
     /**
      * 接收  支付宝 应用 配置中： 【应用网关地址 ： 用于接收支付宝异步通知消息（例如 From蚂蚁消息等），需要传入http(s)公网可访问的网页地址。选填，若不设置，则无法接收相应的异步通知消息。】
-     *
-     * **/
+     **/
     @RequestMapping("/appGatewayMsgReceive")
     public ModelAndView alipayAppGatewayMsgReceive() {
 
@@ -173,7 +166,7 @@ public class AlipayBizController extends AbstractCtrl {
         log.error("支付宝应用网关接收消息参数：{}", reqJSON);
 
         // 分账交易通知
-        if("alipay.trade.order.settle.notify".equals(reqJSON.getString("msg_method"))){
+        if ("alipay.trade.order.settle.notify".equals(reqJSON.getString("msg_method"))) {
 
             // 直接转发到 分账通知的 URL去。
             ModelAndView mv = new ModelAndView();
@@ -181,7 +174,7 @@ public class AlipayBizController extends AbstractCtrl {
             return mv;
         }
 
-        throw new BizException("无此事件["+ reqJSON.getString("msg_method") +"]处理器");
+        throw new BizException("无此事件[" + reqJSON.getString("msg_method") + "]处理器");
 
     }
 

@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mgr.ctrl.isv;
 
 import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
@@ -51,20 +36,22 @@ import java.util.List;
 @RequestMapping("/api/isv/payConfigs")
 public class IsvPayInterfaceConfigController extends CommonCtrl {
 
-    @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private IMQSender mqSender;
+    @Autowired
+    private PayInterfaceConfigService payInterfaceConfigService;
+    @Autowired
+    private IMQSender mqSender;
 
-   /**
-    * @Author: ZhuXiao
-    * @Description: 查询服务商支付接口配置列表
-    * @Date: 16:45 2021/4/27
-   */
-   @ApiOperation("查询服务商支付接口配置列表")
-   @ApiImplicitParams({
-           @ApiImplicitParam(name = CS.ACCESS_TOKEN_NAME, value = "用户身份凭证", required = true, paramType = "header"),
-           @ApiImplicitParam(name = "isvNo", value = "服务商号", required = true)
-   })
-   @PreAuthorize("hasAuthority('ENT_ISV_PAY_CONFIG_LIST')")
+    /**
+     * @Author: ZhuXiao
+     * @Description: 查询服务商支付接口配置列表
+     * @Date: 16:45 2021/4/27
+     */
+    @ApiOperation("查询服务商支付接口配置列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = CS.ACCESS_TOKEN_NAME, value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "isvNo", value = "服务商号", required = true)
+    })
+    @PreAuthorize("hasAuthority('ENT_ISV_PAY_CONFIG_LIST')")
     @GetMapping
     public ApiRes<List<PayInterfaceDefine>> list() {
 
@@ -147,7 +134,7 @@ public class IsvPayInterfaceConfigController extends CommonCtrl {
 
             // 合并支付参数
             payInterfaceConfig.setIfParams(StringKit.marge(dbRecoed.getIfParams(), payInterfaceConfig.getIfParams()));
-        }else {
+        } else {
             payInterfaceConfig.setCreatedUid(userId);
             payInterfaceConfig.setCreatedBy(realName);
         }

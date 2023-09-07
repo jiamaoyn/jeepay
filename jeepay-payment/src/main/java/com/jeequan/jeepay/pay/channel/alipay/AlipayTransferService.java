@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.channel.alipay;
 
 import com.alipay.api.domain.AlipayFundTransCommonQueryModel;
@@ -36,17 +21,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
-* 转账接口： 支付宝官方
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/8/11 14:05
-*/
+ * 转账接口： 支付宝官方
+ *
+ * @date 2021/8/11 14:05
+ */
 @Slf4j
 @Service
 public class AlipayTransferService implements ITransferService {
 
-    @Autowired private ConfigContextQueryService configContextQueryService;
+    @Autowired
+    private ConfigContextQueryService configContextQueryService;
 
     @Override
     public String getIfCode() {
@@ -57,7 +41,7 @@ public class AlipayTransferService implements ITransferService {
     public boolean isSupport(String entryType) {
 
         // 支付宝账户
-        if(TransferOrder.ENTRY_ALIPAY_CASH.equals(entryType)){
+        if (TransferOrder.ENTRY_ALIPAY_CASH.equals(entryType)) {
             return true;
         }
 
@@ -70,7 +54,7 @@ public class AlipayTransferService implements ITransferService {
     }
 
     @Override
-    public ChannelRetMsg transfer(TransferOrderRQ bizRQ, TransferOrder transferOrder, MchAppConfigContext mchAppConfigContext){
+    public ChannelRetMsg transfer(TransferOrderRQ bizRQ, TransferOrder transferOrder, MchAppConfigContext mchAppConfigContext) {
 
         AlipayFundTransUniTransferRequest request = new AlipayFundTransUniTransferRequest();
         AlipayFundTransUniTransferModel model = new AlipayFundTransUniTransferModel();
@@ -100,24 +84,24 @@ public class AlipayTransferService implements ITransferService {
         channelRetMsg.setChannelAttach(response.getBody());
 
         // 调用成功
-        if(response.isSuccess()){
+        if (response.isSuccess()) {
             if ("SUCCESS".equals(response.getStatus())) {
                 channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
                 channelRetMsg.setChannelOrderId(response.getOrderId());
                 return channelRetMsg;
-            }else if ("FAIL".equals(response.getStatus())) {
+            } else if ("FAIL".equals(response.getStatus())) {
                 channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
                 channelRetMsg.setChannelErrCode(AlipayKit.appendErrCode(response.getCode(), response.getSubCode()));
                 channelRetMsg.setChannelErrMsg(AlipayKit.appendErrMsg(response.getMsg(), response.getSubMsg()));
                 return channelRetMsg;
-            }else {
+            } else {
                 return ChannelRetMsg.waiting();
             }
 
-        }else{
+        } else {
 
             //若 系统繁忙， 无法确认结果
-            if("SYSTEM_ERROR".equalsIgnoreCase(response.getSubCode())){
+            if ("SYSTEM_ERROR".equalsIgnoreCase(response.getSubCode())) {
                 return ChannelRetMsg.waiting();
             }
 
@@ -144,18 +128,18 @@ public class AlipayTransferService implements ITransferService {
         AlipayFundTransCommonQueryResponse response = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
         if (response.isSuccess()) {
             // SUCCESS，明确成功
-            if("SUCCESS".equalsIgnoreCase(response.getStatus())){
+            if ("SUCCESS".equalsIgnoreCase(response.getStatus())) {
                 return ChannelRetMsg.confirmSuccess(response.getOrderId());
             }
             // REFUND：退票（适用于"单笔转账到银行卡"）； FAIL：失败（适用于"单笔转账到银行卡"）
-            else if ("REFUND".equalsIgnoreCase(response.getStatus()) || "FAIL".equalsIgnoreCase(response.getStatus())){
+            else if ("REFUND".equalsIgnoreCase(response.getStatus()) || "FAIL".equalsIgnoreCase(response.getStatus())) {
                 return ChannelRetMsg.confirmFail(response.getErrorCode(), response.getFailReason());
-            } else{
+            } else {
                 return ChannelRetMsg.waiting();
             }
         } else {
             // 如果查询单号对应的数据不存在，那么数据不存在的原因可能是：（1）付款还在处理中；（2）付款处理失败导致付款订单没有落地，务必再次查询确认此次付款的结果。
-            if("ORDER_NOT_EXIST".equalsIgnoreCase(response.getSubCode())){
+            if ("ORDER_NOT_EXIST".equalsIgnoreCase(response.getSubCode())) {
                 return ChannelRetMsg.waiting();
             }
             return ChannelRetMsg.confirmFail(AlipayKit.appendErrCode(response.getCode(), response.getSubCode()), AlipayKit.appendErrMsg(response.getMsg(), response.getSubMsg()));

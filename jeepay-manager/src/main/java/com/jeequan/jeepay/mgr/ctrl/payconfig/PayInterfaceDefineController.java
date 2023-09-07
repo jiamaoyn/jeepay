@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mgr.ctrl.payconfig;
 
 import com.alibaba.fastjson.JSONArray;
@@ -50,15 +35,18 @@ import java.util.List;
 @RequestMapping("api/payIfDefines")
 public class PayInterfaceDefineController extends CommonCtrl {
 
-    @Autowired private PayInterfaceDefineService payInterfaceDefineService;
-    @Autowired private PayOrderService payOrderService;
-    @Autowired private PayInterfaceConfigService payInterfaceConfigService;
+    @Autowired
+    private PayInterfaceDefineService payInterfaceDefineService;
+    @Autowired
+    private PayOrderService payOrderService;
+    @Autowired
+    private PayInterfaceConfigService payInterfaceConfigService;
 
     /**
      * @Author: ZhuXiao
      * @Description: list
      * @Date: 15:51 2021/4/27
-    */
+     */
     @ApiOperation("支付接口--列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
@@ -78,7 +66,7 @@ public class PayInterfaceDefineController extends CommonCtrl {
      * @Author: ZhuXiao
      * @Description: detail
      * @Date: 15:51 2021/4/27
-    */
+     */
     @ApiOperation("支付接口--详情")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -94,7 +82,7 @@ public class PayInterfaceDefineController extends CommonCtrl {
      * @Author: ZhuXiao
      * @Description: add
      * @Date: 15:51 2021/4/27
-    */
+     */
     @ApiOperation("支付接口--新增")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -138,7 +126,7 @@ public class PayInterfaceDefineController extends CommonCtrl {
      * @Author: ZhuXiao
      * @Description: update
      * @Date: 15:51 2021/4/27
-    */
+     */
     @ApiOperation("支付接口--更新")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -184,7 +172,7 @@ public class PayInterfaceDefineController extends CommonCtrl {
      * @Author: ZhuXiao
      * @Description: delete
      * @Date: 15:52 2021/4/27
-    */
+     */
     @ApiOperation("支付接口--删除")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),

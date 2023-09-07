@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mgr.bootstrap;
 
 import com.alibaba.fastjson.support.config.FastJsonConfig;
@@ -37,12 +22,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 import java.util.Arrays;
 
 /*
-* spring-boot 主启动程序
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2019/11/7 15:19
-*/
+ * spring-boot 主启动程序
+ * @date 2019/11/7 15:19
+ */
 @SpringBootApplication
 @EnableScheduling
 @EnableSwagger2WebMvc
@@ -51,7 +33,9 @@ import java.util.Arrays;
 @Configuration
 public class JeepayMgrApplication {
 
-    /** main启动函数 **/
+    /**
+     * main启动函数
+     **/
     public static void main(String[] args) {
 
         //启动项目
@@ -60,9 +44,11 @@ public class JeepayMgrApplication {
     }
 
 
-    /** fastJson 配置信息 **/
+    /**
+     * fastJson 配置信息
+     **/
     @Bean
-    public HttpMessageConverters fastJsonConfig(){
+    public HttpMessageConverters fastJsonConfig() {
 
         //新建fast-json转换器
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
@@ -77,7 +63,9 @@ public class JeepayMgrApplication {
         return new HttpMessageConverters(converter);
     }
 
-    /** Mybatis plus 分页插件 **/
+    /**
+     * Mybatis plus 分页插件
+     **/
     @Bean
     public PaginationInterceptor paginationInterceptor() {
         PaginationInterceptor paginationInterceptor = new PaginationInterceptor();
@@ -89,13 +77,8 @@ public class JeepayMgrApplication {
     }
 
 
-
     /**
      * 功能描述:  API访问地址： http://localhost:9217/doc.html
-     *
-     * @Return: springfox.documentation.spring.web.plugins.Docket
-     * @Author: terrfly
-     * @Date: 2023/6/13 15:04
      */
     @Bean(value = "knife4jDockerBean")
     public Docket knife4jDockerBean() {

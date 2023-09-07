@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.service.impl;
 
 import cn.hutool.core.util.IdUtil;
@@ -44,19 +29,26 @@ import java.util.List;
 @Service
 public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
 
-    @Autowired private SysUserService sysUserService;
+    @Autowired
+    private SysUserService sysUserService;
 
-    @Autowired private PayOrderService payOrderService;
+    @Autowired
+    private PayOrderService payOrderService;
 
-    @Autowired private MchPayPassageService mchPayPassageService;
+    @Autowired
+    private MchPayPassageService mchPayPassageService;
 
-    @Autowired private PayInterfaceConfigService payInterfaceConfigService;
+    @Autowired
+    private PayInterfaceConfigService payInterfaceConfigService;
 
-    @Autowired private SysUserAuthService sysUserAuthService;
+    @Autowired
+    private SysUserAuthService sysUserAuthService;
 
-    @Autowired private IsvInfoService isvInfoService;
+    @Autowired
+    private IsvInfoService isvInfoService;
 
-    @Autowired private MchAppService mchAppService;
+    @Autowired
+    private MchAppService mchAppService;
 
     @Transactional(rollbackFor = Exception.class)
     public void addMch(MchInfo mchInfo, String loginUserName) {
@@ -113,7 +105,9 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
 
     }
 
-    /** 删除商户 **/
+    /**
+     * 删除商户
+     **/
     @Transactional(rollbackFor = Exception.class)
     public List<Long> removeByMchNo(String mchNo) {
         try {
@@ -155,7 +149,7 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
             // 返回的用户id
             List<Long> userIdList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(userList)) {
-                for (SysUser user:userList) {
+                for (SysUser user : userList) {
                     userIdList.add(user.getSysUserId());
                 }
                 // 5.删除当前商户用户子用户信息
@@ -174,7 +168,7 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
                 throw new BizException("删除当前商户失败");
             }
             return userIdList;
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new BizException(e.getMessage());
         }
     }

@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mgr.ctrl.merchant;
 
 import cn.hutool.core.util.IdUtil;
@@ -48,15 +33,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/mchApps")
 public class MchAppController extends CommonCtrl {
 
-    @Autowired private MchInfoService mchInfoService;
-    @Autowired private MchAppService mchAppService;
-    @Autowired private IMQSender mqSender;
+    @Autowired
+    private MchInfoService mchInfoService;
+    @Autowired
+    private MchAppService mchAppService;
+    @Autowired
+    private IMQSender mqSender;
 
     /**
      * @Author: ZhuXiao
      * @Description: 应用列表
      * @Date: 9:59 2021/6/16
-    */
+     */
     @ApiOperation("查询应用列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -80,7 +68,7 @@ public class MchAppController extends CommonCtrl {
      * @Author: ZhuXiao
      * @Description: 新建应用
      * @Date: 10:05 2021/6/16
-    */
+     */
     @ApiOperation("新建应用")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -97,7 +85,7 @@ public class MchAppController extends CommonCtrl {
         MchApp mchApp = getObject(MchApp.class);
         mchApp.setAppId(IdUtil.objectId());
 
-        if(mchInfoService.getById(mchApp.getMchNo()) == null) {
+        if (mchInfoService.getById(mchApp.getMchNo()) == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
 
@@ -133,7 +121,7 @@ public class MchAppController extends CommonCtrl {
      * @Author: ZhuXiao
      * @Description: 更新应用信息
      * @Date: 10:11 2021/6/16
-    */
+     */
     @ApiOperation("更新应用信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),

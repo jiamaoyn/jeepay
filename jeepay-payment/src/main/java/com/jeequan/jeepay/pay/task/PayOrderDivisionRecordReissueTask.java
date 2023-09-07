@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.task;
 
 import cn.hutool.core.date.DateUtil;
@@ -38,23 +23,23 @@ import java.util.HashMap;
 import java.util.List;
 
 /*
-* 分账补单定时任务
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2023/3/29 11:35
-*/
+ * 分账补单定时任务
+ * @date 2023/3/29 11:35
+ */
 @Slf4j
 @Component
 public class PayOrderDivisionRecordReissueTask {
 
     private static final int QUERY_PAGE_SIZE = 100; //每次查询数量
 
-    @Autowired private PayOrderDivisionRecordService payOrderDivisionRecordService;
-    @Autowired private ConfigContextQueryService configContextQueryService;
-    @Autowired private PayOrderService payOrderService;
+    @Autowired
+    private PayOrderDivisionRecordService payOrderDivisionRecordService;
+    @Autowired
+    private ConfigContextQueryService configContextQueryService;
+    @Autowired
+    private PayOrderService payOrderService;
 
-    @Scheduled(cron="0 0/1 * * * ?") // 每分钟执行一次
+    @Scheduled(cron = "0 0/1 * * * ?") // 每分钟执行一次
     public void start() {
 
         log.info("处理分账补单任务 开始");
@@ -68,7 +53,7 @@ public class PayOrderDivisionRecordReissueTask {
 
         int currentPageIndex = 1; //当前页码
 
-        while(true){
+        while (true) {
 
             try {
                 IPage<PayOrderDivisionRecord> pageRecordList = payOrderDivisionRecordService.getBaseMapper().distinctBatchOrderIdList(new Page(currentPageIndex, QUERY_PAGE_SIZE), lambdaQueryWrapper);
@@ -76,11 +61,11 @@ public class PayOrderDivisionRecordReissueTask {
                 log.info("处理分账补单任务, 共计{}条", pageRecordList.getTotal());
 
                 //本次查询无结果, 不再继续查询;
-                if(pageRecordList == null || pageRecordList.getRecords() == null || pageRecordList.getRecords().isEmpty()){
+                if (pageRecordList == null || pageRecordList.getRecords() == null || pageRecordList.getRecords().isEmpty()) {
                     break;
                 }
 
-                for(PayOrderDivisionRecord batchRecord: pageRecordList.getRecords()){
+                for (PayOrderDivisionRecord batchRecord : pageRecordList.getRecords()) {
 
                     try {
                         String batchOrderId = batchRecord.getBatchOrderId();
@@ -92,21 +77,21 @@ public class PayOrderDivisionRecordReissueTask {
                                 .orderByAsc(PayOrderDivisionRecord::getRecordId)
                         );
 
-                        if(recordList == null || recordList.isEmpty()){
+                        if (recordList == null || recordList.isEmpty()) {
                             continue;
                         }
 
                         // 查询支付订单信息
                         PayOrder payOrder = payOrderService.getById(batchRecord.getPayOrderId());
                         if (payOrder == null) {
-                            log.error("支付订单记录不存在：{}",  batchRecord.getPayOrderId());
+                            log.error("支付订单记录不存在：{}", batchRecord.getPayOrderId());
                             continue;
                         }
                         // 查询转账接口是否存在
                         IDivisionService divisionService = SpringBeansUtil.getBean(payOrder.getIfCode() + "DivisionService", IDivisionService.class);
 
                         if (divisionService == null) {
-                            log.error("查询分账接口不存在：{}",  payOrder.getIfCode());
+                            log.error("查询分账接口不存在：{}", payOrder.getIfCode());
                             continue;
                         }
                         MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
@@ -132,12 +117,12 @@ public class PayOrderDivisionRecordReissueTask {
                         });
 
                     } catch (Exception e1) {
-                        log.error("处理补单任务单条[{}]异常",  batchRecord.getBatchOrderId(), e1);
+                        log.error("处理补单任务单条[{}]异常", batchRecord.getBatchOrderId(), e1);
                     }
                 }
 
                 //已经到达页码最大量，无需再次查询
-                if(pageRecordList.getPages() <= currentPageIndex){
+                if (pageRecordList.getPages() <= currentPageIndex) {
                     break;
                 }
                 currentPageIndex++;

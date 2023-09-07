@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mch.ctrl.merchant;
 
 import cn.hutool.core.util.IdUtil;
@@ -37,24 +22,17 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 商户应用管理类
- *
- * @author zhuxiao
- * @site https://www.jeequan.com
- * @date 2021-06-16 09:15
  */
 @Api(tags = "商户应用管理")
 @RestController
 @RequestMapping("/api/mchApps")
 public class MchAppController extends CommonCtrl {
 
-    @Autowired private MchAppService mchAppService;
-    @Autowired private IMQSender mqSender;
+    @Autowired
+    private MchAppService mchAppService;
+    @Autowired
+    private IMQSender mqSender;
 
-    /**
-     * @Author: ZhuXiao
-     * @Description: 应用列表
-     * @Date: 9:59 2021/6/16
-    */
     @ApiOperation("查询应用列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -74,11 +52,6 @@ public class MchAppController extends CommonCtrl {
         return ApiPageRes.pages(pages);
     }
 
-    /**
-     * @Author: ZhuXiao
-     * @Description: 新建应用
-     * @Date: 10:05 2021/6/16
-    */
     @ApiOperation("新建应用")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -102,11 +75,6 @@ public class MchAppController extends CommonCtrl {
         return ApiRes.ok();
     }
 
-    /**
-     * @Author: ZhuXiao
-     * @Description: 应用详情
-     * @Date: 10:13 2021/6/16
-     */
     @ApiOperation("应用详情")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -124,11 +92,6 @@ public class MchAppController extends CommonCtrl {
         return ApiRes.ok(mchApp);
     }
 
-    /**
-     * @Author: ZhuXiao
-     * @Description: 更新应用信息
-     * @Date: 10:11 2021/6/16
-    */
     @ApiOperation("更新应用信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -159,11 +122,6 @@ public class MchAppController extends CommonCtrl {
         return ApiRes.ok();
     }
 
-    /**
-     * @Author: ZhuXiao
-     * @Description: 删除应用
-     * @Date: 10:14 2021/6/16
-     */
     @ApiOperation("删除应用")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),

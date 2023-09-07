@@ -1,23 +1,7 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mgr.ctrl.merchant;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.DateUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.components.mq.model.CleanMchLoginAuthCacheMQ;
@@ -46,13 +30,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 商户管理类
  *
- * @author pangxiaoyu
- * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
 @Api(tags = "商户基本信息管理")
@@ -60,10 +45,14 @@ import java.util.*;
 @RequestMapping("/api/mchInfo")
 public class MchInfoController extends CommonCtrl {
 
-    @Autowired private MchInfoService mchInfoService;
-    @Autowired private SysUserService sysUserService;
-    @Autowired private SysUserAuthService sysUserAuthService;
-    @Autowired private IMQSender mqSender;
+    @Autowired
+    private MchInfoService mchInfoService;
+    @Autowired
+    private SysUserService sysUserService;
+    @Autowired
+    private SysUserAuthService sysUserAuthService;
+    @Autowired
+    private IMQSender mqSender;
 
     /**
      * @author: pangxiaoyu
@@ -82,7 +71,7 @@ public class MchInfoController extends CommonCtrl {
             @ApiImplicitParam(name = "type", value = "类型: 1-普通商户, 2-特约商户(服务商模式)", dataType = "Byte")
     })
     @PreAuthorize("hasAuthority('ENT_MCH_LIST')")
-    @RequestMapping(value="", method = RequestMethod.GET)
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public ApiPageRes<MchInfo> list() {
         MchInfo mchInfo = getObject(MchInfo.class);
 
@@ -129,7 +118,7 @@ public class MchInfoController extends CommonCtrl {
     })
     @PreAuthorize("hasAuthority('ENT_MCH_INFO_ADD')")
     @MethodLog(remark = "新增商户")
-    @RequestMapping(value="", method = RequestMethod.POST)
+    @RequestMapping(value = "", method = RequestMethod.POST)
     public ApiRes add() {
         MchInfo mchInfo = getObject(MchInfo.class);
         // 获取传入的商户登录名
@@ -156,7 +145,7 @@ public class MchInfoController extends CommonCtrl {
     })
     @PreAuthorize("hasAuthority('ENT_MCH_INFO_DEL')")
     @MethodLog(remark = "删除商户")
-    @RequestMapping(value="/{mchNo}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{mchNo}", method = RequestMethod.DELETE)
     public ApiRes delete(@PathVariable("mchNo") String mchNo) {
         List<Long> userIdList = mchInfoService.removeByMchNo(mchNo);
 
@@ -190,7 +179,7 @@ public class MchInfoController extends CommonCtrl {
     })
     @PreAuthorize("hasAuthority('ENT_MCH_INFO_EDIT')")
     @MethodLog(remark = "更新商户信息")
-    @RequestMapping(value="/{mchNo}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{mchNo}", method = RequestMethod.PUT)
     public ApiRes update(@PathVariable("mchNo") String mchNo) {
 
         //获取查询条件
@@ -205,14 +194,14 @@ public class MchInfoController extends CommonCtrl {
 
         // 如果商户状态为禁用状态，清除该商户用户登录信息
         if (mchInfo.getState() == CS.NO) {
-            sysUserService.list( SysUser.gw().select(SysUser::getSysUserId).eq(SysUser::getBelongInfoId, mchNo).eq(SysUser::getSysType, CS.SYS_TYPE.MCH) )
-            .stream().forEach(u -> removeCacheUserIdList.add(u.getSysUserId()));
+            sysUserService.list(SysUser.gw().select(SysUser::getSysUserId).eq(SysUser::getBelongInfoId, mchNo).eq(SysUser::getSysType, CS.SYS_TYPE.MCH))
+                    .stream().forEach(u -> removeCacheUserIdList.add(u.getSysUserId()));
         }
 
         //判断是否重置密码
         if (getReqParamJSON().getBooleanValue("resetPass")) {
             // 待更新的密码
-            String updatePwd = getReqParamJSON().getBoolean("defaultPass") ? CS.DEFAULT_PWD : Base64.decodeStr(getValStringRequired("confirmPwd")) ;
+            String updatePwd = getReqParamJSON().getBoolean("defaultPass") ? CS.DEFAULT_PWD : Base64.decodeStr(getValStringRequired("confirmPwd"));
             // 获取商户超管
             Long mchAdminUserId = sysUserService.findMchAdminUserId(mchNo);
 
@@ -250,7 +239,7 @@ public class MchInfoController extends CommonCtrl {
             @ApiImplicitParam(name = "mchNo", value = "商户号", required = true)
     })
     @PreAuthorize("hasAnyAuthority('ENT_MCH_INFO_VIEW', 'ENT_MCH_INFO_EDIT')")
-    @RequestMapping(value="/{mchNo}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{mchNo}", method = RequestMethod.GET)
     public ApiRes detail(@PathVariable("mchNo") String mchNo) {
         MchInfo mchInfo = mchInfoService.getById(mchNo);
         if (mchInfo == null) {

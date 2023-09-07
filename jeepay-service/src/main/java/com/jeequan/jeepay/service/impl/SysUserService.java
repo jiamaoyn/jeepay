@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -21,7 +6,6 @@ import com.jeequan.jeepay.core.entity.SysUser;
 import com.jeequan.jeepay.core.entity.SysUserAuth;
 import com.jeequan.jeepay.core.entity.SysUserRoleRela;
 import com.jeequan.jeepay.core.exception.BizException;
-import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.service.mapper.SysUserMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,13 +25,17 @@ import java.util.List;
 @Service
 public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
 
-    @Autowired private SysUserAuthService sysUserAuthService;
-    @Autowired private SysUserRoleRelaService sysUserRoleRelaService;
+    @Autowired
+    private SysUserAuthService sysUserAuthService;
+    @Autowired
+    private SysUserRoleRelaService sysUserRoleRelaService;
 
 
-    /** 添加系统用户 **/
+    /**
+     * 添加系统用户
+     **/
     @Transactional
-    public void addSysUser(SysUser sysUser, String sysType){
+    public void addSysUser(SysUser sysUser, String sysType) {
 
         //判断获取到选择的角色集合
 //        String roleIdListStr = sysUser.extv().getString("roleIdListStr");
@@ -57,36 +45,36 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
 //        if(roleIdList.isEmpty()) throw new BizException("请选择角色信息！");
 
         // 判断数据来源
-        if( StringUtils.isEmpty(sysUser.getLoginUsername()) ) {
+        if (StringUtils.isEmpty(sysUser.getLoginUsername())) {
             throw new BizException("登录用户名不能为空！");
         }
-        if( StringUtils.isEmpty(sysUser.getRealname()) ) {
+        if (StringUtils.isEmpty(sysUser.getRealname())) {
             throw new BizException("姓名不能为空！");
         }
-        if( StringUtils.isEmpty(sysUser.getTelphone()) ) {
+        if (StringUtils.isEmpty(sysUser.getTelphone())) {
             throw new BizException("手机号不能为空！");
         }
-        if(sysUser.getSex() == null ) {
+        if (sysUser.getSex() == null) {
             throw new BizException("性别不能为空！");
         }
 
         //登录用户名不可重复
-        if( count(SysUser.gw().eq(SysUser::getSysType, sysType).eq(SysUser::getLoginUsername, sysUser.getLoginUsername())) > 0 ){
+        if (count(SysUser.gw().eq(SysUser::getSysType, sysType).eq(SysUser::getLoginUsername, sysUser.getLoginUsername())) > 0) {
             throw new BizException("登录用户名已存在！");
         }
         //手机号不可重复
-        if( count(SysUser.gw().eq(SysUser::getSysType, sysType).eq(SysUser::getTelphone, sysUser.getTelphone())) > 0 ){
+        if (count(SysUser.gw().eq(SysUser::getSysType, sysType).eq(SysUser::getTelphone, sysUser.getTelphone())) > 0) {
             throw new BizException("手机号已存在！");
         }
         //员工号不可重复
-        if( count(SysUser.gw().eq(SysUser::getSysType, sysType).eq(SysUser::getUserNo, sysUser.getUserNo())) > 0 ){
+        if (count(SysUser.gw().eq(SysUser::getSysType, sysType).eq(SysUser::getUserNo, sysUser.getUserNo())) > 0) {
             throw new BizException("员工号已存在！");
         }
 
         //女  默认头像
-        if(sysUser.getSex() != null && CS.SEX_FEMALE == sysUser.getSex()){
+        if (sysUser.getSex() != null && CS.SEX_FEMALE == sysUser.getSex()) {
             sysUser.setAvatarUrl("https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/defava_f.png");
-        }else{
+        } else {
             sysUser.setAvatarUrl("https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/defava_m.png");
         }
 
@@ -108,7 +96,7 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
 
     //修改用户信息
     @Transactional
-    public void updateSysUser(SysUser sysUser){
+    public void updateSysUser(SysUser sysUser) {
 
         Long sysUserId = sysUser.getSysUserId();
         SysUser dbRecord = getById(sysUserId);
@@ -118,9 +106,9 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
         }
 
         //修改了手机号， 需要修改auth表信息
-        if(!dbRecord.getTelphone().equals(sysUser.getTelphone())){
+        if (!dbRecord.getTelphone().equals(sysUser.getTelphone())) {
 
-            if(count(SysUser.gw().eq(SysUser::getSysType, dbRecord.getSysType()).eq(SysUser::getTelphone, sysUser.getTelphone())) > 0){
+            if (count(SysUser.gw().eq(SysUser::getSysType, dbRecord.getSysType()).eq(SysUser::getTelphone, sysUser.getTelphone())) > 0) {
                 throw new BizException("该手机号已关联其他用户！");
             }
 
@@ -128,9 +116,9 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
         }
 
         //修改了手机号， 需要修改auth表信息
-        if(!dbRecord.getLoginUsername().equals(sysUser.getLoginUsername())){
+        if (!dbRecord.getLoginUsername().equals(sysUser.getLoginUsername())) {
 
-            if(count(SysUser.gw().eq(SysUser::getSysType, dbRecord.getSysType()).eq(SysUser::getLoginUsername, sysUser.getLoginUsername())) > 0){
+            if (count(SysUser.gw().eq(SysUser::getSysType, dbRecord.getSysType()).eq(SysUser::getLoginUsername, sysUser.getLoginUsername())) > 0) {
                 throw new BizException("该登录用户名已关联其他用户！");
             }
 
@@ -142,7 +130,9 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
     }
 
 
-    /** 分配用户角色 **/
+    /**
+     * 分配用户角色
+     **/
     @Transactional
     public void saveUserRole(Long userId, List<String> roleIdList) {
 
@@ -150,12 +140,15 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
         sysUserRoleRelaService.remove(SysUserRoleRela.gw().eq(SysUserRoleRela::getUserId, userId));
         for (String roleId : roleIdList) {
             SysUserRoleRela addRecord = new SysUserRoleRela();
-            addRecord.setUserId(userId); addRecord.setRoleId(roleId);
+            addRecord.setUserId(userId);
+            addRecord.setRoleId(roleId);
             sysUserRoleRelaService.save(addRecord);
         }
     }
 
-    /** 删除用户 **/
+    /**
+     * 删除用户
+     **/
     @Transactional
     public void removeUser(SysUser sysUser, String sysType) {
         // 1.删除用户登录信息
@@ -170,8 +163,10 @@ public class SysUserService extends ServiceImpl<SysUserMapper, SysUser> {
     }
 
 
-    /** 获取到商户的超管用户ID  **/
-    public Long findMchAdminUserId(String mchNo){
+    /**
+     * 获取到商户的超管用户ID
+     **/
+    public Long findMchAdminUserId(String mchNo) {
 
         return getOne(SysUser.gw().select(SysUser::getSysUserId)
                 .eq(SysUser::getBelongInfoId, mchNo)

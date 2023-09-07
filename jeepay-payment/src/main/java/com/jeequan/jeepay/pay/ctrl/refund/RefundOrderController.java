@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.ctrl.refund;
 
 import cn.hutool.core.date.DateUtil;
@@ -33,7 +18,6 @@ import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.refund.RefundOrderRS;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
-import com.jeequan.jeepay.pay.service.ConfigContextService;
 import com.jeequan.jeepay.pay.service.PayMchNotifyService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.RefundOrderService;
@@ -46,25 +30,28 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 
 /*
-* 商户发起退款 controller
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/6/16 15:54
-*/
+ * 商户发起退款 controller
+ * @date 2021/6/16 15:54
+ */
 @Slf4j
 @RestController
 public class RefundOrderController extends ApiController {
 
-    @Autowired private PayOrderService payOrderService;
-    @Autowired private RefundOrderService refundOrderService;
-    @Autowired private PayMchNotifyService payMchNotifyService;
-    @Autowired private ConfigContextQueryService configContextQueryService;
+    @Autowired
+    private PayOrderService payOrderService;
+    @Autowired
+    private RefundOrderService refundOrderService;
+    @Autowired
+    private PayMchNotifyService payMchNotifyService;
+    @Autowired
+    private ConfigContextQueryService configContextQueryService;
 
 
-    /** 申请退款 **/
+    /**
+     * 申请退款
+     **/
     @PostMapping("/api/refund/refundOrder")
-    public ApiRes refundOrder(){
+    public ApiRes refundOrder() {
 
 
         RefundOrder refundOrder = null;
@@ -74,42 +61,42 @@ public class RefundOrderController extends ApiController {
 
         try {
 
-            if(StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())){
+            if (StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())) {
                 throw new BizException("mchOrderNo 和 payOrderId不能同时为空");
             }
 
-            if(StringUtils.isNotEmpty(rq.getNotifyUrl()) && !StringKit.isAvailableUrl(rq.getNotifyUrl())){
+            if (StringUtils.isNotEmpty(rq.getNotifyUrl()) && !StringKit.isAvailableUrl(rq.getNotifyUrl())) {
                 throw new BizException("异步通知地址协议仅支持http:// 或 https:// !");
             }
 
             PayOrder payOrder = payOrderService.queryMchOrder(rq.getMchNo(), rq.getPayOrderId(), rq.getMchOrderNo());
-            if(payOrder == null){
+            if (payOrder == null) {
                 throw new BizException("退款订单不存在");
             }
 
-            if(payOrder.getState() != PayOrder.STATE_SUCCESS){
+            if (payOrder.getState() != PayOrder.STATE_SUCCESS) {
                 throw new BizException("订单状态不正确， 无法完成退款");
             }
 
-            if(payOrder.getRefundState() == PayOrder.REFUND_STATE_ALL || payOrder.getRefundAmount() >= payOrder.getAmount()){
+            if (payOrder.getRefundState() == PayOrder.REFUND_STATE_ALL || payOrder.getRefundAmount() >= payOrder.getAmount()) {
                 throw new BizException("订单已全额退款，本次申请失败");
             }
 
-            if(payOrder.getRefundAmount() + rq.getRefundAmount() > payOrder.getAmount()){
+            if (payOrder.getRefundAmount() + rq.getRefundAmount() > payOrder.getAmount()) {
                 throw new BizException("申请金额超出订单可退款余额，请检查退款金额");
             }
 
-            if(refundOrderService.count(RefundOrder.gw().eq(RefundOrder::getPayOrderId, payOrder.getPayOrderId()).eq(RefundOrder::getState, RefundOrder.STATE_ING)) > 0){
+            if (refundOrderService.count(RefundOrder.gw().eq(RefundOrder::getPayOrderId, payOrder.getPayOrderId()).eq(RefundOrder::getState, RefundOrder.STATE_ING)) > 0) {
                 throw new BizException("支付订单具有在途退款申请，请稍后再试");
             }
 
             //全部退款金额 （退款订单表）
             Long sumSuccessRefundAmount = refundOrderService.getBaseMapper().sumSuccessRefundAmount(payOrder.getPayOrderId());
-            if(sumSuccessRefundAmount >= payOrder.getAmount()){
+            if (sumSuccessRefundAmount >= payOrder.getAmount()) {
                 throw new BizException("退款单已完成全部订单退款，本次申请失败");
             }
 
-            if(sumSuccessRefundAmount + rq.getRefundAmount() > payOrder.getAmount()){
+            if (sumSuccessRefundAmount + rq.getRefundAmount() > payOrder.getAmount()) {
                 throw new BizException("申请金额超出订单可退款余额，请检查退款金额");
             }
 
@@ -117,13 +104,13 @@ public class RefundOrderController extends ApiController {
             String appId = rq.getAppId();
 
             // 校验退款单号是否重复
-            if(refundOrderService.count(RefundOrder.gw().eq(RefundOrder::getMchNo, mchNo).eq(RefundOrder::getMchRefundNo, rq.getMchRefundNo())) > 0){
-                throw new BizException("商户退款订单号["+rq.getMchRefundNo()+"]已存在");
+            if (refundOrderService.count(RefundOrder.gw().eq(RefundOrder::getMchNo, mchNo).eq(RefundOrder::getMchRefundNo, rq.getMchRefundNo())) > 0) {
+                throw new BizException("商户退款订单号[" + rq.getMchRefundNo() + "]已存在");
             }
 
             //获取支付参数 (缓存数据) 和 商户信息
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchNo, appId);
-            if(mchAppConfigContext == null){
+            if (mchAppConfigContext == null) {
                 throw new BizException("获取商户应用信息失败");
             }
 
@@ -132,7 +119,7 @@ public class RefundOrderController extends ApiController {
 
             //获取退款接口
             IRefundService refundService = SpringBeansUtil.getBean(payOrder.getIfCode() + "RefundService", IRefundService.class);
-            if(refundService == null){
+            if (refundService == null) {
                 throw new BizException("当前通道不支持退款！");
             }
 
@@ -160,7 +147,7 @@ public class RefundOrderController extends ApiController {
             //处理上游返回数据
             this.processChannelMsg(e.getChannelRetMsg(), refundOrder);
 
-            if(e.getChannelRetMsg().getChannelState() == ChannelRetMsg.ChannelState.SYS_ERROR ){
+            if (e.getChannelRetMsg().getChannelState() == ChannelRetMsg.ChannelState.SYS_ERROR) {
                 return ApiRes.customFail(e.getMessage());
             }
 
@@ -175,7 +162,7 @@ public class RefundOrderController extends ApiController {
 
     }
 
-    private RefundOrder genRefundOrder(RefundOrderRQ rq, PayOrder payOrder, MchInfo mchInfo, MchApp mchApp){
+    private RefundOrder genRefundOrder(RefundOrderRQ rq, PayOrder payOrder, MchInfo mchInfo, MchApp mchApp) {
 
         Date nowTime = new Date();
         RefundOrder refundOrder = new RefundOrder();
@@ -210,40 +197,41 @@ public class RefundOrderController extends ApiController {
     }
 
 
-    /** 处理返回的渠道信息，并更新退款单状态
-     *  payOrder将对部分信息进行 赋值操作。
-     * **/
-    private void processChannelMsg(ChannelRetMsg channelRetMsg, RefundOrder refundOrder){
+    /**
+     * 处理返回的渠道信息，并更新退款单状态
+     * payOrder将对部分信息进行 赋值操作。
+     **/
+    private void processChannelMsg(ChannelRetMsg channelRetMsg, RefundOrder refundOrder) {
 
         //对象为空 || 上游返回状态为空， 则无需操作
-        if(channelRetMsg == null || channelRetMsg.getChannelState() == null){
-            return ;
+        if (channelRetMsg == null || channelRetMsg.getChannelState() == null) {
+            return;
         }
 
         //明确成功
-        if(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == channelRetMsg.getChannelState()) {
+        if (ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == channelRetMsg.getChannelState()) {
 
             this.updateInitOrderStateThrowException(RefundOrder.STATE_SUCCESS, refundOrder, channelRetMsg);
             payMchNotifyService.refundOrderNotify(refundOrder);
 
             //明确失败
-        }else if(ChannelRetMsg.ChannelState.CONFIRM_FAIL == channelRetMsg.getChannelState()) {
+        } else if (ChannelRetMsg.ChannelState.CONFIRM_FAIL == channelRetMsg.getChannelState()) {
 
             this.updateInitOrderStateThrowException(RefundOrder.STATE_FAIL, refundOrder, channelRetMsg);
             payMchNotifyService.refundOrderNotify(refundOrder);
 
             // 上游处理中 || 未知 || 上游接口返回异常  退款单为退款中状态
-        }else if( ChannelRetMsg.ChannelState.WAITING == channelRetMsg.getChannelState() ||
+        } else if (ChannelRetMsg.ChannelState.WAITING == channelRetMsg.getChannelState() ||
                 ChannelRetMsg.ChannelState.UNKNOWN == channelRetMsg.getChannelState() ||
                 ChannelRetMsg.ChannelState.API_RET_ERROR == channelRetMsg.getChannelState()
 
-        ){
+        ) {
             this.updateInitOrderStateThrowException(RefundOrder.STATE_ING, refundOrder, channelRetMsg);
 
             // 系统异常：  退款单不再处理。  为： 生成状态
-        }else if( ChannelRetMsg.ChannelState.SYS_ERROR == channelRetMsg.getChannelState() ){
+        } else if (ChannelRetMsg.ChannelState.SYS_ERROR == channelRetMsg.getChannelState()) {
 
-        }else{
+        } else {
 
             throw new BizException("ChannelState 返回异常！");
         }
@@ -251,8 +239,10 @@ public class RefundOrderController extends ApiController {
     }
 
 
-    /** 更新退款单状态 --》 退款单生成--》 其他状态  (向外抛出异常) **/
-    private void updateInitOrderStateThrowException(byte orderState, RefundOrder refundOrder, ChannelRetMsg channelRetMsg){
+    /**
+     * 更新退款单状态 --》 退款单生成--》 其他状态  (向外抛出异常)
+     **/
+    private void updateInitOrderStateThrowException(byte orderState, RefundOrder refundOrder, ChannelRetMsg channelRetMsg) {
 
         refundOrder.setState(orderState);
         refundOrder.setChannelOrderNo(channelRetMsg.getChannelOrderId());
@@ -261,13 +251,13 @@ public class RefundOrderController extends ApiController {
 
 
         boolean isSuccess = refundOrderService.updateInit2Ing(refundOrder.getRefundOrderId(), channelRetMsg.getChannelOrderId());
-        if(!isSuccess){
+        if (!isSuccess) {
             throw new BizException("更新退款单异常!");
         }
 
         isSuccess = refundOrderService.updateIng2SuccessOrFail(refundOrder.getRefundOrderId(), refundOrder.getState(),
                 channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelErrCode(), channelRetMsg.getChannelErrMsg());
-        if(!isSuccess){
+        if (!isSuccess) {
             throw new BizException("更新退款单异常!");
         }
     }

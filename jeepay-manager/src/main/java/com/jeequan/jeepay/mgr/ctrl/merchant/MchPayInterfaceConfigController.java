@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mgr.ctrl.merchant;
 
 import com.alibaba.fastjson.JSONObject;
@@ -58,17 +43,22 @@ import java.util.List;
 @RequestMapping("/api/mch/payConfigs")
 public class MchPayInterfaceConfigController extends CommonCtrl {
 
-    @Autowired private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired private MchAppService mchAppService;
-    @Autowired private IMQSender mqSender;
-    @Autowired private MchInfoService mchInfoService;
-    @Autowired private SysConfigService sysConfigService;
+    @Autowired
+    private PayInterfaceConfigService payInterfaceConfigService;
+    @Autowired
+    private MchAppService mchAppService;
+    @Autowired
+    private IMQSender mqSender;
+    @Autowired
+    private MchInfoService mchInfoService;
+    @Autowired
+    private SysConfigService sysConfigService;
 
     /**
      * @Author: ZhuXiao
      * @Description: 查询应用支付接口配置列表
      * @Date: 15:50 2021/4/27
-    */
+     */
     @ApiOperation("查询应用支付接口配置列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -86,7 +76,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
      * @Author: ZhuXiao
      * @Description: 根据 appId、接口类型 获取应用参数配置
      * @Date: 17:03 2021/4/27
-    */
+     */
     @ApiOperation("根据应用ID、接口类型 获取应用参数配置")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -124,7 +114,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
      * @Author: ZhuXiao
      * @Description: 应用支付接口配置
      * @Date: 16:13 2021/4/27
-    */
+     */
     @ApiOperation("更新应用支付参数")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -167,7 +157,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
 
             // 合并支付参数
             payInterfaceConfig.setIfParams(StringKit.marge(dbRecoed.getIfParams(), payInterfaceConfig.getIfParams()));
-        }else {
+        } else {
             payInterfaceConfig.setCreatedUid(userId);
             payInterfaceConfig.setCreatedBy(realName);
         }
@@ -184,8 +174,9 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     }
 
 
-
-    /** 查询支付宝商户授权URL **/
+    /**
+     * 查询支付宝商户授权URL
+     **/
     @ApiOperation("查询支付宝商户授权URL")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),

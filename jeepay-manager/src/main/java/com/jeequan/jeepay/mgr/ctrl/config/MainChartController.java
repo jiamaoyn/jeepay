@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mgr.ctrl.config;
 
 import com.alibaba.fastjson.JSONObject;
@@ -37,8 +22,6 @@ import java.util.Map;
 /**
  * 首页统计类
  *
- * @author pangxiaoyu
- * @site https://www.jeequan.com
  * @date 2021-06-07 07:15
  */
 @Api(tags = "主页统计")
@@ -47,7 +30,8 @@ import java.util.Map;
 @RequestMapping("api/mainChart")
 public class MainChartController extends CommonCtrl {
 
-    @Autowired private PayOrderService payOrderService;
+    @Autowired
+    private PayOrderService payOrderService;
 
     /**
      * @author: pangxiaoyu
@@ -59,7 +43,7 @@ public class MainChartController extends CommonCtrl {
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
     })
     @PreAuthorize("hasAuthority('ENT_C_MAIN_PAY_AMOUNT_WEEK')")
-    @RequestMapping(value="/payAmountWeek", method = RequestMethod.GET)
+    @RequestMapping(value = "/payAmountWeek", method = RequestMethod.GET)
     public ApiRes payAmountWeek() {
         return ApiRes.ok(payOrderService.mainPageWeekCount(null));
     }
@@ -74,7 +58,7 @@ public class MainChartController extends CommonCtrl {
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header")
     })
     @PreAuthorize("hasAuthority('ENT_C_MAIN_NUMBER_COUNT')")
-    @RequestMapping(value="/numCount", method = RequestMethod.GET)
+    @RequestMapping(value = "/numCount", method = RequestMethod.GET)
     public ApiRes numCount() {
         JSONObject json = payOrderService.mainPageNumCount(null);
         //返回数据
@@ -93,7 +77,7 @@ public class MainChartController extends CommonCtrl {
             @ApiImplicitParam(name = "createdEnd", value = "日期格式字符串（yyyy-MM-dd），时间范围查询--结束时间，须和开始时间一起使用，否则默认查最近七天（含今天）")
     })
     @PreAuthorize("hasAuthority('ENT_C_MAIN_PAY_COUNT')")
-    @RequestMapping(value="/payCount", method = RequestMethod.GET)
+    @RequestMapping(value = "/payCount", method = RequestMethod.GET)
     public ApiRes<List<Map>> payCount() {
         // 获取传入参数
         JSONObject paramJSON = getReqParamJSON();
@@ -116,7 +100,7 @@ public class MainChartController extends CommonCtrl {
             @ApiImplicitParam(name = "createdEnd", value = "日期格式字符串（yyyy-MM-dd），时间范围查询--结束时间，须和开始时间一起使用，否则默认查最近七天（含今天）")
     })
     @PreAuthorize("hasAuthority('ENT_C_MAIN_PAY_TYPE_COUNT')")
-    @RequestMapping(value="/payTypeCount", method = RequestMethod.GET)
+    @RequestMapping(value = "/payTypeCount", method = RequestMethod.GET)
     public ApiRes<ArrayList> payWayCount() {
         JSONObject paramJSON = getReqParamJSON();
         // 开始、结束时间

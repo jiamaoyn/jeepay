@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.channel.xxpay;
 
 import cn.hutool.http.HttpUtil;
@@ -34,12 +19,12 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /*
-* 退款接口： 小新支付
-*
-* @author jmdhappy
-* @site https://www.jeequan.com
-* @date 2021/9/26 9:38
-*/
+ * 退款接口： 小新支付
+ *
+ * @author jmdhappy
+ * @site https://www.jeequan.com
+ * @date 2021/9/26 9:38
+ */
 @Service
 @Slf4j
 public class XxpayRefundService extends AbstractRefundService {
@@ -57,10 +42,10 @@ public class XxpayRefundService extends AbstractRefundService {
     @Override
     public ChannelRetMsg refund(RefundOrderRQ bizRQ, RefundOrder refundOrder, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
 
-        XxpayNormalMchParams params = (XxpayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
+        XxpayNormalMchParams params = (XxpayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
 
         // 构造支付请求参数
-        Map<String,Object> paramMap = new TreeMap();
+        Map<String, Object> paramMap = new TreeMap();
         paramMap.put("mchId", params.getMchId());  //商户ID
         paramMap.put("mchOrderNo", refundOrder.getPayOrderId());   //支付订单-商户订单号
         paramMap.put("mchRefundNo", refundOrder.getRefundOrderId());   //商户退款单号
@@ -76,7 +61,7 @@ public class XxpayRefundService extends AbstractRefundService {
         String sign = XxpayKit.getSign(paramMap, params.getKey());
         paramMap.put("sign", sign);
         // 退款地址
-        String refundUrl = XxpayKit.getRefundUrl(params.getPayUrl())+ "?" + JeepayKit.genUrlParams(paramMap);
+        String refundUrl = XxpayKit.getRefundUrl(params.getPayUrl()) + "?" + JeepayKit.genUrlParams(paramMap);
         String resStr = "";
         try {
             log.info("发起退款[{}]参数：{}", getIfCode(), refundUrl);
@@ -90,15 +75,15 @@ public class XxpayRefundService extends AbstractRefundService {
         // 默认退款中状态
         channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
 
-        if(StringUtils.isEmpty(resStr)) {
+        if (StringUtils.isEmpty(resStr)) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
             channelRetMsg.setChannelErrCode("");
-            channelRetMsg.setChannelErrMsg("请求"+getIfCode()+"接口异常");
+            channelRetMsg.setChannelErrMsg("请求" + getIfCode() + "接口异常");
             return null;
         }
 
         JSONObject resObj = JSONObject.parseObject(resStr);
-        if(!"0".equals(resObj.getString("retCode"))){
+        if (!"0".equals(resObj.getString("retCode"))) {
             String retMsg = resObj.getString("retMsg");
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
             channelRetMsg.setChannelErrCode("");
@@ -109,16 +94,16 @@ public class XxpayRefundService extends AbstractRefundService {
         // 验证响应数据签名
         String checkSign = resObj.getString("sign");
         resObj.remove("sign");
-        if(!checkSign.equals(XxpayKit.getSign(resObj, params.getKey()))) {
+        if (!checkSign.equals(XxpayKit.getSign(resObj, params.getKey()))) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
             return null;
         }
 
         // 退款状态:0-订单生成,1-退款中,2-退款成功,3-退款失败
         String status = resObj.getString("status");
-        if("2".equals(status)) {
+        if ("2".equals(status)) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
-        }else if("3".equals(status)) {
+        } else if ("3".equals(status)) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
             channelRetMsg.setChannelErrMsg(resObj.getString("retMsg"));
         }
@@ -130,10 +115,10 @@ public class XxpayRefundService extends AbstractRefundService {
     @Override
     public ChannelRetMsg query(RefundOrder refundOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
 
-        XxpayNormalMchParams params = (XxpayNormalMchParams)configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
+        XxpayNormalMchParams params = (XxpayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), getIfCode());
 
         // 构造支付请求参数
-        Map<String,Object> paramMap = new TreeMap();
+        Map<String, Object> paramMap = new TreeMap();
         paramMap.put("mchId", params.getMchId());  //商户ID
         paramMap.put("mchRefundNo", refundOrder.getRefundOrderId());   //商户退款单号
 
@@ -141,7 +126,7 @@ public class XxpayRefundService extends AbstractRefundService {
         String sign = XxpayKit.getSign(paramMap, params.getKey());
         paramMap.put("sign", sign);
         // 退款查询地址
-        String queryRefundOrderUrl = XxpayKit.getQueryRefundOrderUrl(params.getPayUrl())+ "?" + JeepayKit.genUrlParams(paramMap);
+        String queryRefundOrderUrl = XxpayKit.getQueryRefundOrderUrl(params.getPayUrl()) + "?" + JeepayKit.genUrlParams(paramMap);
         String resStr = "";
         try {
             log.info("查询退款[{}]参数：{}", getIfCode(), queryRefundOrderUrl);
@@ -155,28 +140,28 @@ public class XxpayRefundService extends AbstractRefundService {
         // 默认退款中状态
         channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
 
-        if(StringUtils.isEmpty(resStr)) {
+        if (StringUtils.isEmpty(resStr)) {
             return null;
         }
 
         JSONObject resObj = JSONObject.parseObject(resStr);
-        if(!"0".equals(resObj.getString("retCode"))){
+        if (!"0".equals(resObj.getString("retCode"))) {
             return null;
         }
 
         // 验证响应数据签名
         String checkSign = resObj.getString("sign");
         resObj.remove("sign");
-        if(!checkSign.equals(XxpayKit.getSign(resObj, params.getKey()))) {
+        if (!checkSign.equals(XxpayKit.getSign(resObj, params.getKey()))) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
             return null;
         }
 
         // 退款状态:0-订单生成,1-退款中,2-退款成功,3-退款失败
         String status = resObj.getString("status");
-        if("2".equals(status)) {
+        if ("2".equals(status)) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_SUCCESS);
-        }else if("3".equals(status)) {
+        } else if ("3".equals(status)) {
             channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.CONFIRM_FAIL);
             channelRetMsg.setChannelErrMsg(resObj.getString("retMsg"));
         }

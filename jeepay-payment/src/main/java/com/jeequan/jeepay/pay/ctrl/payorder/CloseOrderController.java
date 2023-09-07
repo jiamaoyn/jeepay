@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.ctrl.payorder;
 
 import com.jeequan.jeepay.core.entity.PayOrder;
@@ -44,8 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CloseOrderController extends ApiController {
 
-    @Autowired private PayOrderService payOrderService;
-    @Autowired private ConfigContextQueryService configContextQueryService;
+    @Autowired
+    private PayOrderService payOrderService;
+    @Autowired
+    private ConfigContextQueryService configContextQueryService;
 
     /**
      * @author: xiaoyu
@@ -53,17 +40,17 @@ public class CloseOrderController extends ApiController {
      * @describe: 关闭订单
      */
     @RequestMapping("/api/pay/close")
-    public ApiRes queryOrder(){
+    public ApiRes queryOrder() {
 
         //获取参数 & 验签
         ClosePayOrderRQ rq = getRQByWithMchSign(ClosePayOrderRQ.class);
 
-        if(StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())){
+        if (StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())) {
             throw new BizException("mchOrderNo 和 payOrderId 不能同时为空");
         }
 
         PayOrder payOrder = payOrderService.queryMchOrder(rq.getMchNo(), rq.getPayOrderId(), rq.getMchOrderNo());
-        if(payOrder == null){
+        if (payOrder == null) {
             throw new BizException("订单不存在");
         }
 
@@ -88,7 +75,7 @@ public class CloseOrderController extends ApiController {
             IPayOrderCloseService closeService = SpringBeansUtil.getBean(payOrder.getIfCode() + "PayOrderCloseService", IPayOrderCloseService.class);
 
             // 支付通道接口实现不存在
-            if(closeService == null){
+            if (closeService == null) {
                 log.error("{} interface not exists!", payOrder.getIfCode());
                 return null;
             }
@@ -97,7 +84,7 @@ public class CloseOrderController extends ApiController {
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
 
             ChannelRetMsg channelRetMsg = closeService.close(payOrder, mchAppConfigContext);
-            if(channelRetMsg == null){
+            if (channelRetMsg == null) {
                 log.error("channelRetMsg is null");
                 return null;
             }
@@ -105,9 +92,9 @@ public class CloseOrderController extends ApiController {
             log.info("关闭订单[{}]结果为：{}", payOrderId, channelRetMsg);
 
             // 关闭订单 成功
-            if(channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
+            if (channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
                 payOrderService.updateIng2Close(payOrderId);
-            }else {
+            } else {
                 return ApiRes.customFail(channelRetMsg.getChannelErrMsg());
             }
 

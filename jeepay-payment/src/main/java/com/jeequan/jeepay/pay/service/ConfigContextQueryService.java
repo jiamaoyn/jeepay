@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.pay.service;
 
 import com.jeequan.jeepay.core.constants.CS;
@@ -37,28 +22,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /*
-* 配置信息查询服务 （兼容 缓存 和 直接查询方式）
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/11/18 14:41
-*/
+ * 配置信息查询服务 （兼容 缓存 和 直接查询方式）
+ * @date 2021/11/18 14:41
+ */
 @Slf4j
 @Service
 public class ConfigContextQueryService {
 
-    @Autowired ConfigContextService configContextService;
-    @Autowired private MchInfoService mchInfoService;
-    @Autowired private MchAppService mchAppService;
-    @Autowired private PayInterfaceConfigService payInterfaceConfigService;
+    @Autowired
+    ConfigContextService configContextService;
+    @Autowired
+    private MchInfoService mchInfoService;
+    @Autowired
+    private MchAppService mchAppService;
+    @Autowired
+    private PayInterfaceConfigService payInterfaceConfigService;
 
-    private boolean isCache(){
+    private boolean isCache() {
         return SysConfigService.IS_USE_CACHE;
     }
 
-    public MchApp queryMchApp(String mchNo, String mchAppId){
+    public MchApp queryMchApp(String mchNo, String mchAppId) {
 
-        if(isCache()){
+        if (isCache()) {
             return configContextService.getMchAppConfigContext(mchNo, mchAppId).getMchApp();
         }
 
@@ -69,16 +55,16 @@ public class ConfigContextQueryService {
         return queryMchInfoAndAppInfo(mchAppService.getById(mchAppId).getMchNo(), mchAppId);
     }
 
-    public MchAppConfigContext queryMchInfoAndAppInfo(String mchNo, String mchAppId){
+    public MchAppConfigContext queryMchInfoAndAppInfo(String mchNo, String mchAppId) {
 
-        if(isCache()){
+        if (isCache()) {
             return configContextService.getMchAppConfigContext(mchNo, mchAppId);
         }
 
         MchInfo mchInfo = mchInfoService.getById(mchNo);
         MchApp mchApp = queryMchApp(mchNo, mchAppId);
 
-        if(mchInfo == null || mchApp == null){
+        if (mchInfo == null || mchApp == null) {
             return null;
         }
 
@@ -94,9 +80,9 @@ public class ConfigContextQueryService {
     }
 
 
-    public NormalMchParams queryNormalMchParams(String mchNo, String mchAppId, String ifCode){
+    public NormalMchParams queryNormalMchParams(String mchNo, String mchAppId, String ifCode) {
 
-        if(isCache()){
+        if (isCache()) {
             return configContextService.getMchAppConfigContext(mchNo, mchAppId).getNormalMchParamsByIfCode(ifCode);
         }
 
@@ -109,7 +95,7 @@ public class ConfigContextQueryService {
                 .eq(PayInterfaceConfig::getIfCode, ifCode)
         );
 
-        if(payInterfaceConfig == null){
+        if (payInterfaceConfig == null) {
             return null;
         }
 
@@ -117,9 +103,9 @@ public class ConfigContextQueryService {
     }
 
 
-    public IsvsubMchParams queryIsvsubMchParams(String mchNo, String mchAppId, String ifCode){
+    public IsvsubMchParams queryIsvsubMchParams(String mchNo, String mchAppId, String ifCode) {
 
-        if(isCache()){
+        if (isCache()) {
             return configContextService.getMchAppConfigContext(mchNo, mchAppId).getIsvsubMchParamsByIfCode(ifCode);
         }
 
@@ -132,7 +118,7 @@ public class ConfigContextQueryService {
                 .eq(PayInterfaceConfig::getIfCode, ifCode)
         );
 
-        if(payInterfaceConfig == null){
+        if (payInterfaceConfig == null) {
             return null;
         }
 
@@ -140,10 +126,9 @@ public class ConfigContextQueryService {
     }
 
 
+    public IsvParams queryIsvParams(String isvNo, String ifCode) {
 
-    public IsvParams queryIsvParams(String isvNo, String ifCode){
-
-        if(isCache()){
+        if (isCache()) {
             IsvConfigContext isvConfigContext = configContextService.getIsvConfigContext(isvNo);
             return isvConfigContext == null ? null : isvConfigContext.getIsvParamsByIfCode(ifCode);
         }
@@ -157,7 +142,7 @@ public class ConfigContextQueryService {
                 .eq(PayInterfaceConfig::getIfCode, ifCode)
         );
 
-        if(payInterfaceConfig == null){
+        if (payInterfaceConfig == null) {
             return null;
         }
 
@@ -165,50 +150,51 @@ public class ConfigContextQueryService {
 
     }
 
-    public AlipayClientWrapper getAlipayClientWrapper(MchAppConfigContext mchAppConfigContext){
+    public AlipayClientWrapper getAlipayClientWrapper(MchAppConfigContext mchAppConfigContext) {
 
-        if(isCache()){
+        if (isCache()) {
             return
                     configContextService.getMchAppConfigContext(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId()).getAlipayClientWrapper();
         }
 
-        if(mchAppConfigContext.isIsvsubMch()){
+        if (mchAppConfigContext.isIsvsubMch()) {
 
-            AlipayIsvParams alipayParams = (AlipayIsvParams)queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), CS.IF_CODE.ALIPAY);
+            AlipayIsvParams alipayParams = (AlipayIsvParams) queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), CS.IF_CODE.ALIPAY);
             return AlipayClientWrapper.buildAlipayClientWrapper(alipayParams);
-        }else{
+        } else {
 
-            AlipayNormalMchParams alipayParams = (AlipayNormalMchParams)queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.ALIPAY);
+            AlipayNormalMchParams alipayParams = (AlipayNormalMchParams) queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.ALIPAY);
             return AlipayClientWrapper.buildAlipayClientWrapper(alipayParams);
         }
 
     }
 
-    public WxServiceWrapper getWxServiceWrapper(MchAppConfigContext mchAppConfigContext){
+    public WxServiceWrapper getWxServiceWrapper(MchAppConfigContext mchAppConfigContext) {
 
-        if(isCache()){
+        if (isCache()) {
             return
                     configContextService.getMchAppConfigContext(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId()).getWxServiceWrapper();
         }
 
-        if(mchAppConfigContext.isIsvsubMch()){
+        if (mchAppConfigContext.isIsvsubMch()) {
 
-            WxpayIsvParams wxParams = (WxpayIsvParams)queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), CS.IF_CODE.WXPAY);
+            WxpayIsvParams wxParams = (WxpayIsvParams) queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), CS.IF_CODE.WXPAY);
             return WxServiceWrapper.buildWxServiceWrapper(wxParams);
-        }else{
+        } else {
 
-            WxpayNormalMchParams wxParams = (WxpayNormalMchParams)queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
+            WxpayNormalMchParams wxParams = (WxpayNormalMchParams) queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
             return WxServiceWrapper.buildWxServiceWrapper(wxParams);
         }
 
     }
 
-    public PaypalWrapper getPaypalWrapper(MchAppConfigContext mchAppConfigContext){
-        if(isCache()){
+    public PaypalWrapper getPaypalWrapper(MchAppConfigContext mchAppConfigContext) {
+        if (isCache()) {
             return
                     configContextService.getMchAppConfigContext(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId()).getPaypalWrapper();
         }
-        PpPayNormalMchParams ppPayNormalMchParams = (PpPayNormalMchParams) queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.PPPAY);;
+        PpPayNormalMchParams ppPayNormalMchParams = (PpPayNormalMchParams) queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.PPPAY);
+        ;
         return PaypalWrapper.buildPaypalWrapper(ppPayNormalMchParams);
 
     }

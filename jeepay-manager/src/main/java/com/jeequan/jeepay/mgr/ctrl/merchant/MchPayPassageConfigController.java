@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mgr.ctrl.merchant;
 
 import cn.hutool.core.util.StrUtil;
@@ -23,12 +8,18 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.entity.*;
+import com.jeequan.jeepay.core.entity.MchApp;
+import com.jeequan.jeepay.core.entity.MchInfo;
+import com.jeequan.jeepay.core.entity.MchPayPassage;
+import com.jeequan.jeepay.core.entity.PayWay;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
-import com.jeequan.jeepay.service.impl.*;
+import com.jeequan.jeepay.service.impl.MchAppService;
+import com.jeequan.jeepay.service.impl.MchInfoService;
+import com.jeequan.jeepay.service.impl.MchPayPassageService;
+import com.jeequan.jeepay.service.impl.PayWayService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -53,17 +44,21 @@ import java.util.List;
 @RequestMapping("/api/mch/payPassages")
 public class MchPayPassageConfigController extends CommonCtrl {
 
-    @Autowired private MchPayPassageService mchPayPassageService;
-    @Autowired private PayWayService payWayService;
-    @Autowired private MchInfoService mchInfoService;
-    @Autowired private MchAppService mchAppService;
+    @Autowired
+    private MchPayPassageService mchPayPassageService;
+    @Autowired
+    private PayWayService payWayService;
+    @Autowired
+    private MchInfoService mchInfoService;
+    @Autowired
+    private MchAppService mchAppService;
 
 
     /**
      * @Author: ZhuXiao
      * @Description: 查询支付方式列表，并添加是否配置支付通道状态
      * @Date: 15:31 2021/5/10
-    */
+     */
     @ApiOperation("查询支付方式列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -119,11 +114,11 @@ public class MchPayPassageConfigController extends CommonCtrl {
     }
 
     /**
+     * @return
      * @Author: ZhuXiao
      * @Description: 根据appId、支付方式查询可用的支付接口列表
      * @Date: 17:55 2021/5/8
-     * @return
-    */
+     */
     @ApiOperation("根据[应用ID]、[支付方式代码]查询可用的支付接口列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -154,7 +149,7 @@ public class MchPayPassageConfigController extends CommonCtrl {
      * @Author: ZhuXiao
      * @Description: 应用支付通道配置
      * @Date: 17:36 2021/5/8
-    */
+     */
     @ApiOperation("更新商户支付通道")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -179,7 +174,7 @@ public class MchPayPassageConfigController extends CommonCtrl {
 
             mchPayPassageService.saveOrUpdateBatchSelf(mchPayPassageList, mchApp.getMchNo());
             return ApiRes.ok();
-        }catch (Exception e) {
+        } catch (Exception e) {
             return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR);
         }
     }

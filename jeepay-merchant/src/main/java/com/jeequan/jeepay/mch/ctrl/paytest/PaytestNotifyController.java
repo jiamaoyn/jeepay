@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mch.ctrl.paytest;
 
 import com.alibaba.fastjson.JSONObject;
@@ -32,18 +17,16 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 
 /*
-* 支付测试 - 回调函数
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/6/22 14:22
-*/
+ * 支付测试 - 回调函数
+ * @date 2021/6/22 14:22
+ */
 @Api(tags = "支付测试")
 @RestController
 @RequestMapping("/api/anon/paytestNotify")
 public class PaytestNotifyController extends CommonCtrl {
 
-    @Autowired private MchAppService mchAppService;
+    @Autowired
+    private MchAppService mchAppService;
 
     @ApiOperation("支付回调信息")
     @ApiImplicitParams({
@@ -61,13 +44,13 @@ public class PaytestNotifyController extends CommonCtrl {
         String appId = params.getString("appId");
         String sign = params.getString("sign");
         MchApp mchApp = mchAppService.getById(appId);
-        if(mchApp == null || !mchApp.getMchNo().equals(mchNo)){
+        if (mchApp == null || !mchApp.getMchNo().equals(mchNo)) {
             response.getWriter().print("app is not exists");
             return;
         }
 
         params.remove("sign");
-        if(!JeepayKit.getSign(params, mchApp.getAppSecret()).equalsIgnoreCase(sign)){
+        if (!JeepayKit.getSign(params, mchApp.getAppSecret()).equalsIgnoreCase(sign)) {
             response.getWriter().print("sign fail");
             return;
         }

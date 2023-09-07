@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mch.ctrl.order;
 
 import com.alibaba.fastjson.JSONObject;
@@ -47,13 +32,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/refundOrder")
 public class RefundOrderController extends CommonCtrl {
 
-    @Autowired private RefundOrderService refundOrderService;
+    @Autowired
+    private RefundOrderService refundOrderService;
 
     /**
      * @Author: ZhuXiao
      * @Description: 退款订单信息列表
      * @Date: 10:44 2021/5/13
-    */
+     */
     @ApiOperation("退款订单信息列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -83,7 +69,7 @@ public class RefundOrderController extends CommonCtrl {
      * @Author: ZhuXiao
      * @Description: 退款订单信息
      * @Date: 10:44 2021/5/13
-    */
+     */
     @ApiOperation("退款订单信息详情")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),

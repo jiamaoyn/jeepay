@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2021-2031, 河北计全科技有限公司 (https://www.jeequan.com & jeequan@126.com).
- * <p>
- * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE 3.0;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.gnu.org/licenses/lgpl.html
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.jeequan.jeepay.mch.ctrl.paytest;
 
 import com.alibaba.fastjson.JSONObject;
@@ -44,22 +29,24 @@ import java.util.HashSet;
 import java.util.Set;
 
 /*
-* 支付测试类
-*
-* @author terrfly
-* @site https://www.jeequan.com
-* @date 2021/6/22 9:43
-*/
+ * 支付测试类
+ * @date 2021/6/22 9:43
+ */
 @Api(tags = "支付测试")
 @RestController
 @RequestMapping("/api/paytest")
 public class PaytestController extends CommonCtrl {
 
-    @Autowired private MchAppService mchAppService;
-    @Autowired private MchPayPassageService mchPayPassageService;
-    @Autowired private SysConfigService sysConfigService;
+    @Autowired
+    private MchAppService mchAppService;
+    @Autowired
+    private MchPayPassageService mchPayPassageService;
+    @Autowired
+    private SysConfigService sysConfigService;
 
-    /** 查询商户对应应用下支持的支付方式 **/
+    /**
+     * 查询商户对应应用下支持的支付方式
+     **/
     @ApiOperation("查询商户对应应用下支持的支付方式")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -81,7 +68,9 @@ public class PaytestController extends CommonCtrl {
     }
 
 
-    /** 调起下单接口 **/
+    /**
+     * 调起下单接口
+     **/
     @ApiOperation("调起下单接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
@@ -113,7 +102,7 @@ public class PaytestController extends CommonCtrl {
         Byte divisionMode = getValByteRequired("divisionMode");
         String orderTitle = getValStringRequired("orderTitle");
 
-        if(StringUtils.isEmpty(orderTitle)){
+        if (StringUtils.isEmpty(orderTitle)) {
             throw new BizException("订单标题不能为空");
         }
 
@@ -123,7 +112,7 @@ public class PaytestController extends CommonCtrl {
 
 
         MchApp mchApp = mchAppService.getById(appId);
-        if(mchApp == null || mchApp.getState() != CS.PUB_USABLE || !mchApp.getAppId().equals(appId)){
+        if (mchApp == null || mchApp.getState() != CS.PUB_USABLE || !mchApp.getAppId().equals(appId)) {
             throw new BizException("商户应用不存在或不可用");
         }
 
@@ -137,9 +126,9 @@ public class PaytestController extends CommonCtrl {
         model.setWayCode(wayCode);
         model.setAmount(amount);
         // paypal通道使用USD类型货币
-        if(wayCode.equalsIgnoreCase("pp_pc")) {
+        if (wayCode.equalsIgnoreCase("pp_pc")) {
             model.setCurrency("USD");
-        }else {
+        } else {
             model.setCurrency("CNY");
         }
         model.setClientIp(getClientIp());
@@ -153,10 +142,10 @@ public class PaytestController extends CommonCtrl {
 
         //设置扩展参数
         JSONObject extParams = new JSONObject();
-        if(StringUtils.isNotEmpty(payDataType)) {
+        if (StringUtils.isNotEmpty(payDataType)) {
             extParams.put("payDataType", payDataType.trim());
         }
-        if(StringUtils.isNotEmpty(authCode)) {
+        if (StringUtils.isNotEmpty(authCode)) {
             extParams.put("authCode", authCode.trim());
         }
         model.setChannelExtra(extParams.toString());
@@ -165,7 +154,7 @@ public class PaytestController extends CommonCtrl {
 
         try {
             PayOrderCreateResponse response = jeepayClient.execute(request);
-            if(response.getCode() != 0){
+            if (response.getCode() != 0) {
                 throw new BizException(response.getMsg());
             }
             return ApiRes.ok(response.get());
