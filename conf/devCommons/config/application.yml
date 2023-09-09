@@ -19,9 +19,9 @@ spring:
       number_format: '#' #数字格式进行原样显示，不加格式化字符例如  100,00
   datasource:
     # yml填写url连接串， 无需将&符号进行转义
-    url: jdbc:mysql://127.0.0.1:3306/JayDeBeApi?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
-    username: JayDeBeApi
-    password: JayDeBeApi
+    url: jdbc:mysql://127.0.0.1:3306/jaydebeapi?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true
+    username: jaydebeapi
+    password: kjRnHC4H8Th2y2jY
     druid:
       # 连接池配置项
       initial-size: 5 #初始化时建立物理连接的个数
@@ -52,7 +52,7 @@ spring:
   # #activeMQ配置 ( 注意： activeMQ配置项需在spring的下级 )
   activemq:
     broker-url: failover:(tcp://127.0.0.1:61616?wireFormat.maxInactivityDuration=0)  #连接地址
-    in-memory: false # Jeepay项目不可使用内存模式， 需要连接多个消费者。
+    in-memory: false # Pay项目不可使用内存模式， 需要连接多个消费者。
     user: system # activeMQ默认无需账密认证。 打开认证：activemq.xml添加simpleAuthenticationPlugin标签，账密在credentials.properties文件。
     password: manager
     pool:
