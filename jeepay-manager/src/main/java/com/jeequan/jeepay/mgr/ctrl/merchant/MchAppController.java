@@ -22,10 +22,6 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 商户应用管理类
- *
- * @author zhuxiao
- * @site https://www.jeequan.com
- * @date 2021-06-16 09:15
  */
 
 @Api(tags = "商户应用管理")
@@ -41,9 +37,7 @@ public class MchAppController extends CommonCtrl {
     private IMQSender mqSender;
 
     /**
-     * @Author: ZhuXiao
-     * @Description: 应用列表
-     * @Date: 9:59 2021/6/16
+     * 应用列表
      */
     @ApiOperation("查询应用列表")
     @ApiImplicitParams({
@@ -65,9 +59,7 @@ public class MchAppController extends CommonCtrl {
     }
 
     /**
-     * @Author: ZhuXiao
-     * @Description: 新建应用
-     * @Date: 10:05 2021/6/16
+     * 新建应用
      */
     @ApiOperation("新建应用")
     @ApiImplicitParams({
@@ -97,9 +89,7 @@ public class MchAppController extends CommonCtrl {
     }
 
     /**
-     * @Author: ZhuXiao
-     * @Description: 应用详情
-     * @Date: 10:13 2021/6/16
+     * 应用详情
      */
     @ApiOperation("应用详情")
     @ApiImplicitParams({
@@ -118,9 +108,7 @@ public class MchAppController extends CommonCtrl {
     }
 
     /**
-     * @Author: ZhuXiao
-     * @Description: 更新应用信息
-     * @Date: 10:11 2021/6/16
+     * 更新应用信息
      */
     @ApiOperation("更新应用信息")
     @ApiImplicitParams({
@@ -148,9 +136,7 @@ public class MchAppController extends CommonCtrl {
     }
 
     /**
-     * @Author: ZhuXiao
-     * @Description: 删除应用
-     * @Date: 10:14 2021/6/16
+     * 删除应用
      */
     @ApiOperation("删除应用")
     @ApiImplicitParams({

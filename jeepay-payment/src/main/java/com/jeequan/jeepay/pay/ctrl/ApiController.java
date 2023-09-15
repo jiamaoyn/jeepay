@@ -13,6 +13,9 @@ import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.ValidateService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import java.time.Duration;
 
 /*
  * api 抽象接口， 公共函数
@@ -24,6 +27,8 @@ public abstract class ApiController extends AbstractCtrl {
     private ValidateService validateService;
     @Autowired
     private ConfigContextQueryService configContextQueryService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
 
     /**
@@ -87,7 +92,19 @@ public abstract class ApiController extends AbstractCtrl {
         if (!sign.equalsIgnoreCase(JeepayKit.getSign(bizReqJSON, appSecret))) {
             throw new BizException("验签失败");
         }
-
+        if (mchApp.getSpeed()!=0) {
+            String redisKey = mchNo+appId;
+            String string = stringRedisTemplate.opsForValue().get(redisKey);
+            if (string != null){
+                if (mchApp.getSpeed()<Integer.parseInt(string)+1){
+                    throw new BizException("已超出接口配置速率，请60s后重试或商户后台修改速率");
+                } else {
+                    stringRedisTemplate.opsForValue().set(redisKey, String.valueOf(Integer.parseInt(string)+1));
+                }
+            } else {
+                stringRedisTemplate.opsForValue().set(redisKey, "1", Duration.ofSeconds(60));
+            }
+        }
         return bizRQ;
     }
 }

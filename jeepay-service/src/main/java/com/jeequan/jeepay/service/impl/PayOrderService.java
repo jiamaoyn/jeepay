@@ -16,7 +16,6 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayWay;
 import com.jeequan.jeepay.service.mapper.*;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -32,17 +31,19 @@ import java.util.*;
  */
 @Service
 public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
+    private final PayOrderMapper payOrderMapper;
+    private final MchInfoMapper mchInfoMapper;
+    private final IsvInfoMapper isvInfoMapper;
+    private final PayWayMapper payWayMapper;
+    private final PayOrderDivisionRecordMapper payOrderDivisionRecordMapper;
 
-    @Autowired
-    private PayOrderMapper payOrderMapper;
-    @Autowired
-    private MchInfoMapper mchInfoMapper;
-    @Autowired
-    private IsvInfoMapper isvInfoMapper;
-    @Autowired
-    private PayWayMapper payWayMapper;
-    @Autowired
-    private PayOrderDivisionRecordMapper payOrderDivisionRecordMapper;
+    public PayOrderService(PayOrderMapper payOrderMapper, MchInfoMapper mchInfoMapper, IsvInfoMapper isvInfoMapper, PayWayMapper payWayMapper, PayOrderDivisionRecordMapper payOrderDivisionRecordMapper) {
+        this.payOrderMapper = payOrderMapper;
+        this.mchInfoMapper = mchInfoMapper;
+        this.isvInfoMapper = isvInfoMapper;
+        this.payWayMapper = payWayMapper;
+        this.payOrderDivisionRecordMapper = payOrderDivisionRecordMapper;
+    }
 
     /**
      * 更新订单状态  【订单生成】 --》 【支付中】
@@ -274,6 +275,9 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         json.put("totalIsv", isvCount);
         json.put("totalAmount", payCountMap.get("payAmount"));
         json.put("totalCount", payCountMap.get("payCount"));
+        payCountMap = payCount(mchNo, null, null, null, null);
+        json.put("totalAmountAll", payCountMap.get("payAmount"));
+        json.put("totalCountAll", payCountMap.get("payCount"));
         return json;
     }
 
@@ -299,12 +303,14 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         }
         param.put("createTimeStart", createdStart);
         param.put("createTimeEnd", createdEnd);
-        // 查询收款的记录
+        // 查询实际收款的记录
         List<Map> payOrderList = payOrderMapper.selectOrderCount(param);
+        // 查询总收款的记录（不论成功失败）
+        List<Map> payOrderListAll = payOrderMapper.selectOrderCountAll(param);
         // 查询退款的记录
         List<Map> refundOrderList = payOrderMapper.selectOrderCount(param);
         // 生成前端返回参数类型
-        List<Map> returnList = getReturnList(daySpace, createdEnd, payOrderList, refundOrderList);
+        List<Map> returnList = getReturnList(daySpace, createdEnd, payOrderList, refundOrderList, payOrderListAll);
         return returnList;
     }
 
@@ -349,7 +355,7 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
     /**
      * 生成首页交易统计数据类型
      **/
-    public List<Map> getReturnList(int daySpace, String createdStart, List<Map> payOrderList, List<Map> refundOrderList) {
+    public List<Map> getReturnList(int daySpace, String createdStart, List<Map> payOrderList, List<Map> refundOrderList, List<Map> payOrderListAll) {
         List<Map> dayList = new ArrayList<>();
         DateTime endDay = DateUtil.parseDateTime(createdStart);
         // 先判断间隔天数 根据天数设置空的list
@@ -367,9 +373,12 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
             // 为收款列和退款列赋值默认参数【payAmount字段切记不可为string，否则前端图表解析不出来】
             Map<String, Object> payMap = new HashMap<>();
             payMap.put("date", dayMap.get("date").toString());
-            payMap.put("type", "收款");
+            payMap.put("type", "实际收款");
             payMap.put("payAmount", 0);
-
+            Map<String, Object> payMapAll = new HashMap<>();
+            payMapAll.put("date", dayMap.get("date").toString());
+            payMapAll.put("type", "总收款");
+            payMapAll.put("payAmountAll", 0);
             Map<String, Object> refundMap = new HashMap<>();
             refundMap.put("date", dayMap.get("date").toString());
             refundMap.put("type", "退款");
@@ -380,6 +389,14 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
                 }
             }
             payListMap.add(payMap);
+
+            for (Map payOrderListAllMap : payOrderListAll) {
+                if (dayMap.get("date").equals(payOrderListAllMap.get("groupDate"))) {
+                    payMapAll.put("payAmount", payOrderListAllMap.get("payAmountAll"));
+                }
+            }
+            payListMap.add(payMapAll);
+
             for (Map refundOrderMap : refundOrderList) {
                 if (dayMap.get("date").equals(refundOrderMap.get("groupDate"))) {
                     refundMap.put("payAmount", refundOrderMap.get("refundAmount"));
@@ -395,10 +412,6 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
     /**
      * 计算支付订单商家入账金额
      * 商家订单入账金额 （支付金额 - 手续费 - 退款金额 - 总分账金额）
-     *
-     * @author terrfly
-     * @site https://www.jeequan.com
-     * @date 2021/8/26 16:39
      */
     public Long calMchIncomeAmount(PayOrder dbPayOrder) {
 
@@ -414,12 +427,6 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
 
     /**
      * 通用列表查询条件
-     *
-     * @param iPage
-     * @param payOrder
-     * @param paramJSON
-     * @param wrapper
-     * @return
      */
     public IPage<PayOrder> listByPage(IPage iPage, PayOrder payOrder, JSONObject paramJSON, LambdaQueryWrapper<PayOrder> wrapper) {
         if (StringUtils.isNotEmpty(payOrder.getPayOrderId())) {

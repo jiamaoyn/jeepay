@@ -8,9 +8,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-/*
+/**
  * RedisConfig
- * @date 2021/6/8 17:25
  */
 @Configuration
 public class RedisConfig {

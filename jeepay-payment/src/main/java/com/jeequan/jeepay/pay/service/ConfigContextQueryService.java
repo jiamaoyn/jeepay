@@ -18,7 +18,6 @@ import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /*
@@ -29,14 +28,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConfigContextQueryService {
 
-    @Autowired
-    ConfigContextService configContextService;
-    @Autowired
-    private MchInfoService mchInfoService;
-    @Autowired
-    private MchAppService mchAppService;
-    @Autowired
-    private PayInterfaceConfigService payInterfaceConfigService;
+    public final ConfigContextService configContextService;
+    private final MchInfoService mchInfoService;
+    private final MchAppService mchAppService;
+    private final PayInterfaceConfigService payInterfaceConfigService;
+
+    public ConfigContextQueryService(ConfigContextService configContextService, MchInfoService mchInfoService, MchAppService mchAppService, PayInterfaceConfigService payInterfaceConfigService) {
+        this.configContextService = configContextService;
+        this.mchInfoService = mchInfoService;
+        this.mchAppService = mchAppService;
+        this.payInterfaceConfigService = payInterfaceConfigService;
+    }
 
     private boolean isCache() {
         return SysConfigService.IS_USE_CACHE;

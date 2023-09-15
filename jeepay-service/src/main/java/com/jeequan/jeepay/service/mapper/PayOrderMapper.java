@@ -22,6 +22,7 @@ public interface PayOrderMapper extends BaseMapper<PayOrder> {
     List<Map> payTypeCount(Map param);
 
     List<Map> selectOrderCount(Map param);
+    List<Map> selectOrderCountAll(Map param);
 
     /**
      * 更新订单退款金额和次数

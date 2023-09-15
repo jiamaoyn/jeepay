@@ -81,7 +81,17 @@
         GROUP BY groupDate
         ORDER BY groupDate desc
     </select>
-
+    <!--所有订单统计-->
+    <select id="selectOrderCountAll" resultType="java.util.Map" parameterType="java.util.Map" >
+        SELECT DATE_FORMAT(FLOOR(created_at),'%m-%d') groupDate, ROUND(IFNULL(SUM(amount) - SUM(refund_amount), 0)/100, 2) AS payAmountAll
+        FROM t_pay_order
+        WHERE  1=1
+        <if test="mchNo != null"> AND mch_no = #{mchNo} </if>
+        <if test="createTimeStart != null"> AND created_at &gt;= #{createTimeStart} </if>
+        <if test="createTimeEnd != null"> AND created_at &lt;= #{createTimeEnd} </if>
+        GROUP BY groupDate
+        ORDER BY groupDate desc
+    </select>
     <!-- 更新订单退款金额和次数 -->
     <update id="updateRefundAmountAndCount">
 

@@ -46,6 +46,11 @@ public class MchApp extends BaseModel {
     @ApiModelProperty(value = "应用状态: 0-停用, 1-正常")
     private Byte state;
     /**
+     * 订单速率: 0-不限, 1-每分钟1单
+     */
+    @ApiModelProperty(value = "订单速率: 0-不限, 1-每分钟1单")
+    private Byte speed;
+    /**
      * 应用私钥
      */
     @ApiModelProperty(value = "应用私钥")

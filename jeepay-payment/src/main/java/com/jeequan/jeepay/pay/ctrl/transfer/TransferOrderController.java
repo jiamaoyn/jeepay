@@ -21,29 +21,35 @@ import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import com.jeequan.jeepay.service.impl.TransferOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 转账接口
- *
- * @date 2021/8/11 11:07
  */
 @Slf4j
 @RestController
 public class TransferOrderController extends ApiController {
 
-    @Autowired
-    private ConfigContextQueryService configContextQueryService;
-    @Autowired
-    private TransferOrderService transferOrderService;
-    @Autowired
-    private PayInterfaceConfigService payInterfaceConfigService;
-    @Autowired
-    private PayMchNotifyService payMchNotifyService;
+    private final ConfigContextQueryService configContextQueryService;
+    private final TransferOrderService transferOrderService;
+    private final PayInterfaceConfigService payInterfaceConfigService;
+    private final PayMchNotifyService payMchNotifyService;
+    private final StringRedisTemplate stringRedisTemplate;
+
+    public TransferOrderController(ConfigContextQueryService configContextQueryService, TransferOrderService transferOrderService, PayInterfaceConfigService payInterfaceConfigService, PayMchNotifyService payMchNotifyService, RedisOperations redisOperations, StringRedisTemplate stringRedisTemplate) {
+        this.configContextQueryService = configContextQueryService;
+        this.transferOrderService = transferOrderService;
+        this.payInterfaceConfigService = payInterfaceConfigService;
+        this.payMchNotifyService = payMchNotifyService;
+        this.stringRedisTemplate = stringRedisTemplate;
+    }
 
     /**
      * 转账
@@ -95,7 +101,6 @@ public class TransferOrderController extends ApiController {
             if (!transferService.isSupport(bizRQ.getEntryType())) {
                 throw new BizException("该接口不支持该入账方式");
             }
-
             transferOrder = genTransferOrder(bizRQ, mchInfo, mchApp, ifCode);
 
             //预先校验
