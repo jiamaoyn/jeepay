@@ -16,9 +16,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * 商户应用管理类
@@ -29,12 +31,17 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/mchApps")
 public class MchAppController extends CommonCtrl {
 
-    @Autowired
-    private MchInfoService mchInfoService;
-    @Autowired
-    private MchAppService mchAppService;
-    @Autowired
-    private IMQSender mqSender;
+    private final MchInfoService mchInfoService;
+    private final MchAppService mchAppService;
+    private final IMQSender mqSender;
+    private final StringRedisTemplate stringRedisTemplate;
+
+    public MchAppController(MchInfoService mchInfoService, MchAppService mchAppService, IMQSender mqSender, StringRedisTemplate stringRedisTemplate) {
+        this.mchInfoService = mchInfoService;
+        this.mchAppService = mchAppService;
+        this.mqSender = mqSender;
+        this.stringRedisTemplate = stringRedisTemplate;
+    }
 
     /**
      * 应用列表

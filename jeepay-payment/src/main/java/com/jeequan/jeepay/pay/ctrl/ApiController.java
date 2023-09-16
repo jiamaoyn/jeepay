@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /*
  * api 抽象接口， 公共函数
@@ -85,7 +86,7 @@ public abstract class ApiController extends AbstractCtrl {
 
         // 验签
         String appSecret = mchApp.getAppSecret();
-
+        System.out.println(appSecret);
         // 转换为 JSON
         JSONObject bizReqJSON = (JSONObject) JSONObject.toJSON(bizRQ);
         bizReqJSON.remove("sign");
@@ -99,7 +100,15 @@ public abstract class ApiController extends AbstractCtrl {
                 if (mchApp.getSpeed()<Integer.parseInt(string)+1){
                     throw new BizException("已超出接口配置速率，请60s后重试或商户后台修改速率");
                 } else {
-                    stringRedisTemplate.opsForValue().set(redisKey, String.valueOf(Integer.parseInt(string)+1));
+                    // 获取原始键的剩余过期时间（秒）
+                    Long ttl = stringRedisTemplate.getExpire(redisKey, TimeUnit.SECONDS);
+                    if (ttl != null && ttl > 0) {
+                        stringRedisTemplate.opsForValue().set(redisKey, String.valueOf(Integer.parseInt(string)+1));
+                        // 设置新的过期时间
+                        stringRedisTemplate.expire(redisKey, ttl, TimeUnit.SECONDS);
+                    } else {
+                        stringRedisTemplate.opsForValue().set(redisKey, "1", Duration.ofSeconds(60));
+                    }
                 }
             } else {
                 stringRedisTemplate.opsForValue().set(redisKey, "1", Duration.ofSeconds(60));
