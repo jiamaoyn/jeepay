@@ -55,9 +55,7 @@ public class PayOrderController extends CommonCtrl {
     private MchAppService mchAppService;
 
     /**
-     * @author: pangxiaoyu
-     * @date: 2021/6/7 16:15
-     * @describe: 订单信息列表
+     * 订单信息列表
      */
     @ApiOperation("支付订单信息列表")
     @ApiImplicitParams({

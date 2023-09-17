@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 /**
@@ -313,7 +314,42 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         List<Map> returnList = getReturnList(daySpace, createdEnd, payOrderList, refundOrderList, payOrderListAll);
         return returnList;
     }
+    public Map mainSuccessRate(String appId) {
+        Map param = new HashMap<>(); // 条件参数
+        String today = DateUtil.formatDate(new Date());
+        String createdStart = today + " 00:00:00";
+        String createdEnd = today + " 23:59:59";
 
+        if (StrUtil.isNotBlank(appId)) {
+            param.put("appId", appId);
+        }
+        //总
+        // 查询实际收款的单数
+        Map successCount = payOrderMapper.selectOrderSuccessCountInteger(param);
+        param.put("successCountPayAmount", successCount.get("payAmount"));
+        // 查询总收款的单数（不论成功失败）
+        Map countAll = payOrderMapper.selectOrderCountAllInteger(param);
+        param.put("countAllPayAmount", countAll.get("payAmount").toString());
+        //今天收款
+        param.put("createTimeStart", createdStart);
+        param.put("createTimeEnd", createdEnd);
+        Map successCountToday = payOrderMapper.selectOrderSuccessCountInteger(param);
+        param.put("successCountPayAmountToday", successCountToday.get("payAmount"));
+        Map countAllToday = payOrderMapper.selectOrderCountAllInteger(param);
+        param.put("countAllPayAmountToday", countAllToday.get("payAmount").toString());
+        if (Integer.parseInt(countAll.get("payCount").toString()) == 0){
+            param.put("percentage", "100");
+        }else if (Integer.parseInt(successCount.get("payCount").toString()) == 0){
+            param.put("percentage", "0");
+        } else {
+            BigDecimal num1 = new BigDecimal(successCount.get("payCount").toString());
+            BigDecimal num2 = new BigDecimal(countAll.get("payCount").toString());
+            // 计算百分比
+            BigDecimal percentage = num1.divide(num2, 2, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+            param.put("percentage", percentage.toString());
+        }
+        return param;
+    }
     /**
      * 首页支付类型统计
      **/

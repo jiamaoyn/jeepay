@@ -34,13 +34,11 @@ public class MchAppController extends CommonCtrl {
     private final MchInfoService mchInfoService;
     private final MchAppService mchAppService;
     private final IMQSender mqSender;
-    private final StringRedisTemplate stringRedisTemplate;
 
-    public MchAppController(MchInfoService mchInfoService, MchAppService mchAppService, IMQSender mqSender, StringRedisTemplate stringRedisTemplate) {
+    public MchAppController(MchInfoService mchInfoService, MchAppService mchAppService, IMQSender mqSender) {
         this.mchInfoService = mchInfoService;
         this.mchAppService = mchAppService;
         this.mqSender = mqSender;
-        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     /**

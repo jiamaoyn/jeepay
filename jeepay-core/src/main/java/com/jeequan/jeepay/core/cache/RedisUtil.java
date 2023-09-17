@@ -19,7 +19,7 @@ public class RedisUtil {
     /**
      * 获取RedisTemplate对象, 默认使用 StringRedisTemplate, 客户端可查询
      **/
-    private static final RedisTemplate getStringRedisTemplate() {
+    private static RedisTemplate getStringRedisTemplate() {
 
         if (stringRedisTemplate == null) {
 

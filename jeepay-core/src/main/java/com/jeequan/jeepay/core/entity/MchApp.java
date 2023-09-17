@@ -1,6 +1,7 @@
 package com.jeequan.jeepay.core.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -80,9 +81,24 @@ public class MchApp extends BaseModel {
      */
     @ApiModelProperty(value = "更新时间")
     private Date updatedAt;
+    @ApiModelProperty(value = "成功率（不存入数据库）")
+    @TableField(exist = false)
+    private String successRate;
+    @ApiModelProperty(value = "成功收款")
+    @TableField(exist = false)
+    private String successCountPayAmount;
+    @ApiModelProperty(value = "所有收款")
+    @TableField(exist = false)
+    private String countAllPayAmount;
+    @ApiModelProperty(value = "今日成功收款")
+    @TableField(exist = false)
+    private String successCountPayAmountToday;
+    @ApiModelProperty(value = "今日所有收款")
+    @TableField(exist = false)
+    private String countAllPayAmountToday;
 
     //gw
-    public static final LambdaQueryWrapper<MchApp> gw() {
+    public static LambdaQueryWrapper<MchApp> gw() {
         return new LambdaQueryWrapper<>();
     }
 
