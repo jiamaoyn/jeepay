@@ -80,6 +80,21 @@ public class ConfigContextQueryService {
 
         return result;
     }
+    public MchAppConfigContext queryMchInfoAndAppInfoByMchNo(String mchNo) {
+
+        MchInfo mchInfo = mchInfoService.getById(mchNo);
+
+        if (mchInfo == null) {
+            return null;
+        }
+
+        MchAppConfigContext result = new MchAppConfigContext();
+        result.setMchInfo(mchInfo);
+        result.setMchNo(mchNo);
+        result.setMchType(mchInfo.getType());
+
+        return result;
+    }
 
 
     public NormalMchParams queryNormalMchParams(String mchNo, String mchAppId, String ifCode) {

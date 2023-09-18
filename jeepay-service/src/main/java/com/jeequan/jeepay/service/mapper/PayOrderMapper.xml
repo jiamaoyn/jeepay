@@ -87,6 +87,7 @@
         FROM t_pay_order
         WHERE  1=1
         AND state in (2,5)
+        <if test="mchNo != null"> AND mch_no = #{mchNo} </if>
         <if test="appId != null"> AND app_id = #{appId} </if>
         <if test="createTimeStart != null"> AND created_at &gt;= #{createTimeStart} </if>
         <if test="createTimeEnd != null"> AND created_at &lt;= #{createTimeEnd} </if>
@@ -97,6 +98,7 @@
         ROUND(IFNULL(SUM(amount), 0)/100, 2) AS payAmount
         FROM t_pay_order
         WHERE  1=1
+        <if test="mchNo != null"> AND mch_no = #{mchNo} </if>
         <if test="appId != null"> AND app_id = #{appId} </if>
         <if test="createTimeStart != null"> AND created_at &gt;= #{createTimeStart} </if>
         <if test="createTimeEnd != null"> AND created_at &lt;= #{createTimeEnd} </if>

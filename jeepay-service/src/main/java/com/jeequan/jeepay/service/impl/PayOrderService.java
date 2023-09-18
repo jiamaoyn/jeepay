@@ -350,6 +350,33 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         }
         return param;
     }
+    public Map mainSuccessRateBot(String mchNo) {
+        Map param = new HashMap<>(); // 条件参数
+        String today = DateUtil.formatDate(new Date());
+        String createdStart = today + " 00:00:00";
+        String createdEnd = today + " 23:59:59";
+
+        if (StrUtil.isNotBlank(mchNo)) {
+            param.put("mchNo", mchNo);
+        }
+        //总
+        // 查询实际收款的单数
+        Map successCount = payOrderMapper.selectOrderSuccessCountInteger(param);
+        param.put("successCountPayAmount", successCount.get("payAmount"));
+        // 查询总收款的单数（不论成功失败）
+        Map countAll = payOrderMapper.selectOrderCountAllInteger(param);
+        param.put("countAllPayAmount", countAll.get("payAmount").toString());
+        //今天收款
+        param.put("createTimeStart", createdStart);
+        param.put("createTimeEnd", createdEnd);
+        Map successCountToday = payOrderMapper.selectOrderSuccessCountInteger(param);
+        param.put("successCountPayAmountToday", successCountToday.get("payAmount"));
+        Map countAllToday = payOrderMapper.selectOrderCountAllInteger(param);
+        param.put("countAllPayAmountToday", countAllToday.get("payAmount").toString());
+        param.remove("createTimeStart");
+        param.remove("createTimeEnd");
+        return param;
+    }
     /**
      * 首页支付类型统计
      **/

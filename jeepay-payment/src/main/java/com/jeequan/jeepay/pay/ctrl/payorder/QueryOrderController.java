@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 /*
  * 商户查单controller
  * @date 2021/6/8 17:26
@@ -48,5 +50,40 @@ public class QueryOrderController extends ApiController {
         QueryPayOrderRS bizRes = QueryPayOrderRS.buildByPayOrder(payOrder);
         return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
     }
+
+    @RequestMapping("/api/pay/query_bot")
+    public ApiRes queryOrderBot() {
+
+        //获取参数 & 验签
+        QueryPayOrderRQ rq = getRQByWithMchSignBot(QueryPayOrderRQ.class);
+
+        if (StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())) {
+            throw new BizException("mchOrderNo 和 payOrderId不能同时为空");
+        }
+
+        PayOrder payOrder = payOrderService.queryMchOrder(rq.getMchNo(), rq.getPayOrderId(), rq.getMchOrderNo());
+        if (payOrder == null) {
+            throw new BizException("订单不存在");
+        }
+
+        QueryPayOrderRS bizRes = QueryPayOrderRS.buildByPayOrder(payOrder);
+        return ApiRes.ok(bizRes);
+    }
+
+    @RequestMapping("/api/pay/main_success_rate")
+    public ApiRes mainSuccessRate() {
+
+        //获取参数 & 验签
+        QueryPayOrderRQ rq = getRQByWithMchSignBot(QueryPayOrderRQ.class);
+        if (StringUtils.isEmpty(rq.getMchNo())) {
+            throw new BizException("mchNo不能为空");
+        }
+        Map payOrder = payOrderService.mainSuccessRateBot(rq.getMchNo());
+        if (payOrder == null) {
+            throw new BizException("订单不存在");
+        }
+        return ApiRes.ok(payOrder);
+    }
+
 
 }

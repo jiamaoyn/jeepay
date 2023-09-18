@@ -116,4 +116,38 @@ public abstract class ApiController extends AbstractCtrl {
         }
         return bizRQ;
     }
+    protected <T extends AbstractRQ> T getRQByWithMchSignBot(Class<T> cls) {
+        //获取请求RQ, and 通用验证
+        T bizRQ = getRQ(cls);
+
+        AbstractMchAppRQ abstractMchAppRQ = (AbstractMchAppRQ) bizRQ;
+
+        //业务校验， 包括： 验签， 商户状态是否可用， 是否支持该支付方式下单等。
+        String mchNo = abstractMchAppRQ.getMchNo();
+        String sign = bizRQ.getSign();
+
+        if (StringUtils.isAnyBlank(mchNo, sign)) {
+            throw new BizException("参数有误！");
+        }
+
+        MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfoByMchNo(mchNo);
+
+        if (mchAppConfigContext == null) {
+            throw new BizException("商户或商户应用不存在");
+        }
+
+        if (mchAppConfigContext.getMchInfo() == null || mchAppConfigContext.getMchInfo().getState() != CS.YES) {
+            throw new BizException("商户信息不存在或商户状态不可用");
+        }
+
+        // 验签
+        String appSecret = "tdjzfs0tsjcuj2qwu2lle88slfhj3jtxu5t5ut9sdb2tds9ajg7gy37rsajm05fkqaxa2rvjoqkso8wwh3guv5o1fedjacndfclvnya2f8rz57rff7gpup0eepvg0zsp";
+        // 转换为 JSON
+        JSONObject bizReqJSON = (JSONObject) JSONObject.toJSON(bizRQ);
+        bizReqJSON.remove("sign");
+        if (!sign.equalsIgnoreCase(JeepayKit.getSign(bizReqJSON, appSecret))) {
+            throw new BizException("验签失败");
+        }
+        return bizRQ;
+    }
 }
