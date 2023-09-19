@@ -111,7 +111,6 @@ public class ConfigContextQueryService {
                 .eq(PayInterfaceConfig::getInfoId, mchAppId)
                 .eq(PayInterfaceConfig::getIfCode, ifCode)
         );
-        System.out.println(payInterfaceConfig);
         if (payInterfaceConfig == null) {
             return null;
         }
@@ -181,6 +180,9 @@ public class ConfigContextQueryService {
         } else {
 
             AlipayNormalMchParams alipayParams = (AlipayNormalMchParams) queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.ALIPAY);
+            System.out.println(alipayParams.getAppId());
+            System.out.println(alipayParams.getAlipayPublicKey());
+            System.out.println(alipayParams.getPrivateKey());
             return AlipayClientWrapper.buildAlipayClientWrapper(alipayParams);
         }
 

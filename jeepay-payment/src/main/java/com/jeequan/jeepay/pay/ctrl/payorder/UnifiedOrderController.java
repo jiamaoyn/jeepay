@@ -91,3 +91,7 @@ public class UnifiedOrderController extends AbstractPayOrderController {
 
 
 }
+//amount=1&appId=64fc13cce4b0f7ca7a278b49&body=秒杀商品，请尽快付款&buyerUserId=2088712385360214&currency=cny&mchNo=M1694241740&mchOrderNo=22202020200339393939&reqTime=1695143222785&signType=MD5&subject=秒杀商品7&version=1.0&wayCode=ALI_JSAPI&key=swh96Ij6AYGwgM8B2VGv7jmn3OnIpapYDMcxrtOOeucCCxserFySs8NEW5zeT2g4nlxkCqtQSeOX4dEGQLAROI9FLlKFTwuyNrZ4CJnxRy6bOHVsoMmtMez7kUg5fjEU
+//amount=1&appId=64fc13cce4b0f7ca7a278b49&body=秒杀商品，请尽快付款&buyerUserId=2088712385360214&channelUserId=2088712385360214&currency=cny&mchNo=M1694241740&mchOrderNo=22202020200339393939&reqTime=1695143222785&signType=MD5&subject=秒杀商品7&version=1.0&wayCode=ALI_JSAPI&key=swh96Ij6AYGwgM8B2VGv7jmn3OnIpapYDMcxrtOOeucCCxserFySs8NEW5zeT2g4nlxkCqtQSeOX4dEGQLAROI9FLlKFTwuyNrZ4CJnxRy6bOHVsoMmtMez7kUg5fjEU
+
+
