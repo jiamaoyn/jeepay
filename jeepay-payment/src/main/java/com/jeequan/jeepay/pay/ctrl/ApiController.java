@@ -9,6 +9,7 @@ import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
 import com.jeequan.jeepay.pay.rqrs.AbstractRQ;
+import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliJsapiUserIDRQ;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.ValidateService;
 import org.apache.commons.lang3.StringUtils;
@@ -115,6 +116,37 @@ public abstract class ApiController extends AbstractCtrl {
             }
         }
         return bizRQ;
+    }
+    protected <T extends AbstractRQ> MchAppConfigContext getRQByWithMchSignAliJsapiUserId(AliJsapiUserIDRQ abstractMchAppRQ) {
+
+        //业务校验， 包括： 验签， 商户状态是否可用， 是否支持该支付方式下单等。
+        String mchNo = abstractMchAppRQ.getMchNo();
+        String appId = abstractMchAppRQ.getAppId();
+        String sign = abstractMchAppRQ.getSign();
+
+        if (StringUtils.isAnyBlank(mchNo, appId, sign)) {
+            throw new BizException("参数有误！");
+        }
+
+        MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchNo, appId);
+
+        if (mchAppConfigContext == null) {
+            throw new BizException("商户或商户应用不存在");
+        }
+
+        if (mchAppConfigContext.getMchInfo() == null || mchAppConfigContext.getMchInfo().getState() != CS.YES) {
+            throw new BizException("商户信息不存在或商户状态不可用");
+        }
+
+        MchApp mchApp = mchAppConfigContext.getMchApp();
+        if (mchApp == null || mchApp.getState() != CS.YES) {
+            throw new BizException("商户应用不存在或应用状态不可用");
+        }
+
+        if (!mchApp.getMchNo().equals(mchNo)) {
+            throw new BizException("参数appId与商户号不匹配");
+        }
+        return mchAppConfigContext;
     }
     protected <T extends AbstractRQ> T getRQByWithMchSignBot(Class<T> cls) {
         //获取请求RQ, and 通用验证

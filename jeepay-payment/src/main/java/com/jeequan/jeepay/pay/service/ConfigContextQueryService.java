@@ -111,7 +111,7 @@ public class ConfigContextQueryService {
                 .eq(PayInterfaceConfig::getInfoId, mchAppId)
                 .eq(PayInterfaceConfig::getIfCode, ifCode)
         );
-
+        System.out.println(payInterfaceConfig);
         if (payInterfaceConfig == null) {
             return null;
         }
