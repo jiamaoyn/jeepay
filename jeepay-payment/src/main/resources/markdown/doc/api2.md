@@ -105,44 +105,24 @@
 > 支付方式
 
 WayCode | 支付方式 
-------- | ------- 
-QR_CASHIER | 聚合扫码(用户扫商家) 
-AUTO_BAR | 聚合条码(商家扫用户) 
+------- | -------
 ALI_BAR | 支付宝条码 
 ALI_JSAPI | 支付宝生活号
 ALI_APP | 支付宝APP 
 ALI_WAP | 支付宝WAP 
 ALI_PC | 支付宝PC网站 
 ALI_QR | 支付宝二维码 
-WX_BAR | 微信条码
-WX_JSAPI | 微信公众号 
-WX_LITE | 微信小程序 
-WX_APP | 微信APP 
-WX_H5 | 微信H5 
-WX_NATIVE | 微信扫码
-YSF_BAR | 云闪付条码 
-YSF_JSAPI | 云闪付jsapi 
 
 > channelExtra参数说明
 
-当 `wayCode=AUTO_BAR` 或 `wayCode=ALI_BAR` 或  `wayCode=WX_BAR` 或  `wayCode=YSF_BAR` 时，channelExtra必须传auth_code，为用户的付款码值，channelExtra示例数据如：
+当 `wayCode=ALI_JSAPI` 时，channelExtra必须传buyerOpenId，为支付宝用户ID，channelExtra示例数据如：
 ```json
-{"auth_code": "13920933111042"}
-```
-
-当 `wayCode=ALI_JSAPI` 时，channelExtra必须传buyerUserId，为支付宝用户ID，channelExtra示例数据如：
-```json
-{"buyerUserId": "2088702585070844"}
+{"buyerOpenId": "2088702585070844"}
 ```
 
 当 `wayCode=WX_JSAPI` 或 `wayCode=WX_LITE` 时，channelExtra必须传openid，channelExtra示例数据如：
 ```json
 {"openid": "o6BcIwvSiRpfS8e_UyfQNrYuk2LI"}
-```
-
-当 `wayCode=QR_CASHIER` 或 `wayCode=ALI_QR` 或  `wayCode=WX_NATIVE` 时，channelExtra可以传payDataType设置返回支付数据支付类型。此时payDataType可以为：codeUrl-二维码地址,codeImgUrl-二维码图片地址，不传payDataType默认返回codeUrl类型, channelExtra示例数据如：
-```json
-{"payDataType": "codeImgUrl"}
 ```
 
 当 `wayCode=ALI_WAP` 时，channelExtra可以传payDataType设置返回支付数据支付类型。此时payDataType可以为：form-返回自动跳转的支付表单,codeImgUrl-返回一个二维码图片URL,payUrl-返回支付链接，不传payDataType默认返回payUrl类型, channelExtra示例数据如：

@@ -17,7 +17,7 @@ public class AliLiteOrderRQ extends UnifiedOrderRQ {
      * 支付宝用户ID
      **/
     @NotBlank(message = "用户ID不能为空")
-    private String buyerUserId;
+    private String buyerOpenId;
 
     /**
      * 构造函数
@@ -28,7 +28,7 @@ public class AliLiteOrderRQ extends UnifiedOrderRQ {
 
     @Override
     public String getChannelUserId() {
-        return this.buyerUserId;
+        return this.buyerOpenId;
     }
 
 }

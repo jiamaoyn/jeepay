@@ -127,7 +127,7 @@ public class QrCashierController extends AbstractPayOrderController {
 
         String channelUserId = getValStringRequired("channelUserId");
         AliJsapiOrderRQ rq = new AliJsapiOrderRQ();
-        rq.setBuyerUserId(channelUserId);
+        rq.setBuyerOpenId(channelUserId);
         return this.unifiedOrder(getWayCode(), rq, payOrder);
     }
 

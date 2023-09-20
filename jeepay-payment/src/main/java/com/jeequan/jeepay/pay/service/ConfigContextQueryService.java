@@ -174,11 +174,9 @@ public class ConfigContextQueryService {
         }
 
         if (mchAppConfigContext.isIsvsubMch()) {
-
             AlipayIsvParams alipayParams = (AlipayIsvParams) queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), CS.IF_CODE.ALIPAY);
             return AlipayClientWrapper.buildAlipayClientWrapper(alipayParams);
         } else {
-
             AlipayNormalMchParams alipayParams = (AlipayNormalMchParams) queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.ALIPAY);
             System.out.println(alipayParams.getAppId());
             System.out.println(alipayParams.getAlipayPublicKey());

@@ -5,10 +5,8 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayWay;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
-import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRS;
-import com.jeequan.jeepay.pay.rqrs.payorder.payway.AutoBarOrderRQ;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.service.impl.PayWayService;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +38,6 @@ public class UnifiedOrderController extends AbstractPayOrderController {
         UnifiedOrderRQ rq = getRQByWithMchSign(UnifiedOrderRQ.class);
 
         UnifiedOrderRQ bizRQ = buildBizRQ(rq);
-
         //实现子类的res
         ApiRes apiRes = unifiedOrder(bizRQ.getWayCode(), bizRQ);
         if (apiRes.getData() == null) {
@@ -68,19 +65,6 @@ public class UnifiedOrderController extends AbstractPayOrderController {
         //支付方式  比如： ali_bar
         String wayCode = rq.getWayCode();
 
-        //jsapi 收银台聚合支付场景 (不校验是否存在payWayCode)
-        if (CS.PAY_WAY_CODE.QR_CASHIER.equals(wayCode)) {
-            return rq.buildBizRQ();
-        }
-
-        //如果是自动分类条码
-        if (CS.PAY_WAY_CODE.AUTO_BAR.equals(wayCode)) {
-
-            AutoBarOrderRQ bizRQ = (AutoBarOrderRQ) rq.buildBizRQ();
-            wayCode = JeepayKit.getPayWayCodeByBarCode(bizRQ.getAuthCode());
-            rq.setWayCode(wayCode.trim());
-        }
-
         if (payWayService.count(PayWay.gw().eq(PayWay::getWayCode, wayCode)) <= 0) {
             throw new BizException("不支持的支付方式");
         }
@@ -91,7 +75,4 @@ public class UnifiedOrderController extends AbstractPayOrderController {
 
 
 }
-//amount=1&appId=64fc13cce4b0f7ca7a278b49&body=秒杀商品，请尽快付款&buyerUserId=2088712385360214&currency=cny&mchNo=M1694241740&mchOrderNo=22202020200339393939&reqTime=1695143222785&signType=MD5&subject=秒杀商品7&version=1.0&wayCode=ALI_JSAPI&key=swh96Ij6AYGwgM8B2VGv7jmn3OnIpapYDMcxrtOOeucCCxserFySs8NEW5zeT2g4nlxkCqtQSeOX4dEGQLAROI9FLlKFTwuyNrZ4CJnxRy6bOHVsoMmtMez7kUg5fjEU
-//amount=1&appId=64fc13cce4b0f7ca7a278b49&body=秒杀商品，请尽快付款&buyerUserId=2088712385360214&channelUserId=2088712385360214&currency=cny&mchNo=M1694241740&mchOrderNo=22202020200339393939&reqTime=1695143222785&signType=MD5&subject=秒杀商品7&version=1.0&wayCode=ALI_JSAPI&key=swh96Ij6AYGwgM8B2VGv7jmn3OnIpapYDMcxrtOOeucCCxserFySs8NEW5zeT2g4nlxkCqtQSeOX4dEGQLAROI9FLlKFTwuyNrZ4CJnxRy6bOHVsoMmtMez7kUg5fjEU
-
 
