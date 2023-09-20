@@ -54,3 +54,4 @@ unpackage/
 # [mac]
 .DS_Store
 /docs/ilianPay收银台/.hbuilderx/
+/docs/ilianPay收银台/package-lock.json
