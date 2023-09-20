@@ -136,18 +136,6 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
             WxH5OrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), WxH5OrderRQ.class);
             BeanUtils.copyProperties(this, bizRQ);
             return bizRQ;
-        } else if (CS.PAY_WAY_CODE.YSF_BAR.equals(wayCode)) {
-            YsfBarOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), YsfBarOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.YSF_JSAPI.equals(wayCode)) {
-            YsfJsapiOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), YsfJsapiOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.AUTO_BAR.equals(wayCode)) {
-            AutoBarOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AutoBarOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
         } else if (CS.PAY_WAY_CODE.ALI_APP.equals(wayCode)) {
             AliAppOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AliAppOrderRQ.class);
             BeanUtils.copyProperties(this, bizRQ);
@@ -162,10 +150,6 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
             return bizRQ;
         } else if (CS.PAY_WAY_CODE.ALI_QR.equals(wayCode)) {
             AliQrOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AliQrOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.PP_PC.equals(wayCode)) {
-            PPPcOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), PPPcOrderRQ.class);
             BeanUtils.copyProperties(this, bizRQ);
             return bizRQ;
         }

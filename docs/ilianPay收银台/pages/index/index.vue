@@ -52,7 +52,7 @@
 				],
 				PayWay: 0,
 				amountSpan: 0,
-				PayPirce: `支付宝支付￥1.11`,
+				PayPirce: '支付宝支付',
 				isTest: true,
 				appId: undefined,
 				mchNo: undefined,
@@ -62,10 +62,12 @@
 				wayCode: 'ALI_JSAPI',
 				subject: undefined,
 				body: undefined,
-				userId: undefined,
+				userId: '2088722004845989',
 				amount: undefined,
-				appKey: "swh96Ij6AYGwgM8B2VGv7jmn3OnIpapYDMcxrtOOeucCCxserFySs8NEW5zeT2g4nlxkCqtQSeOX4dEGQLAROI9FLlKFTwuyNrZ4CJnxRy6bOHVsoMmtMez7kUg5fjEU",
-				sign: undefined
+				appKey: "DmsMlIa7KXp6RkiYVlUcjGAGvUVK28WH4ICY9NBlucB2ThWqegnIoPh65YUJzNlMAMpYkS3Pjn1xVwQq7OeVr6I4E9WltN4NtYc6zr7MMbsznbKwDAAmPgrnMYab0wuL",
+				sign: undefined,
+				notifyUrl: undefined,
+				returnUrl: 'https://render.alipay.com/p/404',
 			};
 		},
 		onLoad() {
@@ -73,24 +75,25 @@
 			const that = this
 			if (onLoadData.query !== undefined &&
 				typeof onLoadData.query.appId !== 'undefined' &&
+				typeof onLoadData.query.notifyUrl !== 'notifyUrl' &&
 				typeof onLoadData.query.mchNo !== 'undefined' &&
 				typeof onLoadData.query.mchOrderNo !== 'undefined' &&
 				typeof onLoadData.query.amount !== 'undefined' &&
 				typeof onLoadData.query.reqTime !== 'undefined'
 			) {
-				console.log(Math.ceil(onLoadData.query.amount) === parseInt(onLoadData.query.amount))
-				console.log(Math.ceil(onLoadData.query.amount))
-				console.log(parseInt(onLoadData.query.amount))
 				if (Math.ceil(onLoadData.query.amount) !== parseInt(onLoadData.query.amount) || Math.ceil(onLoadData.query
 						.amount) <
 					0) {
 					that.openAlipayApp("订单金额错误")
-				} else if (typeof that.appKey === 'undefined' && typeof onLoadData.query.appKey === 'undefined') {
-					console.log("appKey")
+				} else if (typeof that.appKey === undefined && typeof onLoadData.query.appKey === 'undefined') {
 					that.openAlipayApp("appKey参数错误")
 				} else {
+					//mchOrderNo=20230920093801&appId=64fc13cce4b0f7ca7a278b49&mchNo=M1694241740&amount=1&reqTime=123132
 					if (typeof onLoadData.query.appKey !== 'undefined') {
 						that.appKey = onLoadData.query.appKey
+					}
+					if (typeof onLoadData.query.returnUrl !== 'undefined') {
+						that.returnUrl = onLoadData.query.returnUrl
 					}
 					this.isTest = false
 					that.appId = onLoadData.query.appId
@@ -98,6 +101,7 @@
 					that.mchOrderNo = onLoadData.query.mchOrderNo
 					that.amount = parseInt(onLoadData.query.amount)
 					that.amountSpan = parseInt(onLoadData.query.amount) / 100
+					that.PayPirce = '支付宝支付￥'+that.amountSpan
 					that.reqTime = onLoadData.query.reqTime
 					if (typeof onLoadData.query.subject !== 'undefined') {
 						that.subject = onLoadData.query.subject
@@ -112,6 +116,7 @@
 					my.getAuthCode({
 						scopes: 'auth_base',
 						success: res => {
+							console.log(res.authCode)
 							const authCode = res.authCode;
 							uni.request({
 								url: 'http://127.0.0.1:9216/api/pay/aliJsapiOrderToUserId', //仅为示例，并非真实接口地址。
@@ -141,6 +146,9 @@
 				if (typeof onLoadData.query === 'undefined') {
 					console.log("tradeNO")
 					that.openAlipayApp("query参数错误")
+				} else if (typeof onLoadData.query.notifyUrl === 'undefined') {
+					console.log("notifyUrl")
+					that.openAlipayApp("notifyUrl参数错误")
 				} else if (typeof onLoadData.query.appId === 'undefined') {
 					console.log("appId")
 					that.openAlipayApp("appId参数错误")
@@ -165,19 +173,14 @@
 		},
 		methods: {
 			openAlipayApp(msg) {
+				const that = this
 				my.showLoading({
-					content: msg + '，重新发起支付',
+					content: msg,
 					success: function(res) {
 						setTimeout(() => {
 							my.hideLoading();
-							my.ap.openAlipayApp({
-								appCode: 'alipayScan',
-								success: res => {
-									console.log('openAlipayApp success', res);
-								},
-								fail: err => {
-									console.log('openAlipayApp fail', err);
-								}
+							my.ap.openURL({
+								url: that.returnUrl
 							});
 						}, 3000);
 					},
@@ -185,6 +188,14 @@
 						console.log(err);
 					}
 				});
+			},
+			openShowLoading(msg) {
+				my.showLoading({
+					content: msg,
+				})
+			},
+			openHideLoading() {
+				my.hideLoading();
 			},
 			/**
 			 * 支付方式切换点击
@@ -198,6 +209,7 @@
 			 */
 			onSubmit() {
 				const that = this
+				that.openShowLoading("拼命支付中....")
 				const sendData = {
 					appId: that.appId,
 					mchNo: that.mchNo,
@@ -207,22 +219,40 @@
 					reqTime: Date.now(),
 					currency: that.currency,
 					version: that.version,
+					notifyUrl: that.notifyUrl,
+					returnUrl: that.returnUrl,
 					signType: that.signType,
-					channelUserId: that.userId,
-					buyerUserId: that.userId,
+					channelExtra: "{\"buyerOpenId\":\""+that.userId+"\"}",
 					wayCode: that.wayCode,
 					amount: that.amount,
 					subject: that.subject,
 					body: that.body,
 				}
+				console.log(sendData)
 				sendData.sign = that.paramArraySign(sendData, that.appKey)
+				console.log(sendData)
 				uni.request({
-					url: 'http://127.0.0.1:9216/api/pay/aliJsapiOrder', //仅为示例，并非真实接口地址。
+					url: 'http://127.0.0.1:9216/api/pay/unifiedOrder', //仅为示例，并非真实接口地址。
 					data: sendData,
 					method: 'POST',
 					success: (res) => {
 						if (res.data.code == 0) {
-							that.userId = res.data.data
+							that.openHideLoading()
+							my.tradePay ({
+							  // 调用统一收单交易创建接口（alipay.trade.create），获得返回字段支付宝交易号 trade_no
+							  tradeNO: res.data.data.mchOrderNo,
+							  success: res => {
+								  if (res.resultCode === "9000") {
+									that.openAlipayApp("订单处理成功，即将跳转")
+								  } else {
+									that.openAlipayApp(JSON.stringify (res))
+								  }
+							    
+							  },
+							  fail: res => {
+							    that.openAlipayApp("请返回后重新拉起支付")
+							  },
+							});
 						} else {
 							that.openAlipayApp(res.data.msg)
 						}
@@ -235,7 +265,9 @@
 				let md5str = "";
 
 				paramArraySorted.forEach(([key, val]) => {
-					md5str += key + "=" + val + "&";
+					if (key && val) {
+						md5str += key + "=" + val + "&";
+					}
 				});
 				console.log(md5str);
 				md5str += "key=" + appKey;
@@ -243,7 +275,7 @@
 				const hash = CryptoJS.MD5(md5str);
 				return hash.toString().toUpperCase(); // 签名
 			}
-		}
+		},
 	}
 </script>
 

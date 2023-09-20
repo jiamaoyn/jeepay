@@ -31,8 +31,8 @@ public class AliJsapi extends AlipayPaymentService {
     public String preCheck(UnifiedOrderRQ rq, PayOrder payOrder) {
 
         AliJsapiOrderRQ bizRQ = (AliJsapiOrderRQ) rq;
-        if (StringUtils.isEmpty(bizRQ.getBuyerUserId())) {
-            throw new BizException("[buyerUserId]不可为空");
+        if (StringUtils.isEmpty(bizRQ.getBuyerOpenId())) {
+            throw new BizException("[buyerOpenId]不可为空");
         }
 
         return null;
@@ -51,10 +51,10 @@ public class AliJsapi extends AlipayPaymentService {
         model.setTotalAmount(AmountUtil.convertCent2Dollar(payOrder.getAmount().toString()));  //支付金额
         model.setTimeExpire(DateUtil.format(payOrder.getExpiredTime(), DatePattern.NORM_DATETIME_FORMAT));  // 订单超时时间
         model.setProductCode("JSAPI_PAY");  // 订单超时时间
-        model.setBuyerId(bizRQ.getBuyerUserId());
+        model.setBuyerOpenId(bizRQ.getBuyerOpenId());
         req.setNotifyUrl(getNotifyUrl()); // 设置异步通知地址
         req.setBizModel(model);
-        System.out.println(model.getBody());
+        System.out.println(req.getBizModel());
         //统一放置 isv接口必传信息
         AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
 

@@ -60,11 +60,9 @@ public class AliJsapiOrderController extends AbstractPayOrderController {
         //获取参数 & 验证
         MchAppConfigContext mchAppConfigContext = getRQByWithMchSignAliJsapiUserId(bizRQ);
         AlipayNormalMchParams alipayParams = (AlipayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), "alipay");
-        System.out.println(bizRQ);
         apiRes.setCode(10000);
         try {
             AlipayConfig alipayConfig = new AlipayConfig();
-            alipayConfig.setServerUrl("https://openapi-sandbox.dl.alipaydev.com/gateway.do");
             alipayConfig.setAppId(alipayParams.getAppId());
             alipayConfig.setPrivateKey(alipayParams.getPrivateKey());
             alipayConfig.setFormat("json");
@@ -79,9 +77,9 @@ public class AliJsapiOrderController extends AbstractPayOrderController {
             if(response.isSuccess()){
                 apiRes.setCode(0);
                 apiRes.setMsg("调用成功");
-                apiRes.setData(response.getUserId());
+                apiRes.setData(response.getOpenId());
             } else {
-                apiRes.setMsg(response.getSubMsg());
+                apiRes.setMsg(response.getMsg()+response.getSubMsg());
             }
         } catch (AlipayApiException e) {
             apiRes.setMsg(e.getMessage()+e.getErrMsg());
