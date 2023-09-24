@@ -224,7 +224,7 @@ public class PayOrder extends BaseModel implements Serializable {
     @ApiModelProperty(value = "更新时间")
     private Date updatedAt;
 
-    public static final LambdaQueryWrapper<PayOrder> gw() {
+    public static LambdaQueryWrapper<PayOrder> gw() {
         return new LambdaQueryWrapper<>();
     }
 
