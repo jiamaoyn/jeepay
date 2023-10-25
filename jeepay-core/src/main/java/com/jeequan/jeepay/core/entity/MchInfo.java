@@ -79,6 +79,11 @@ public class MchInfo extends BaseModel implements Serializable {
     @ApiModelProperty(value = "商户备注")
     private String remark;
     /**
+     * 商户备注
+     */
+    @ApiModelProperty(value = "商户密钥")
+    private String secret;
+    /**
      * 初始用户ID（创建商户时，允许商户登录的用户）
      */
     @ApiModelProperty(value = "初始用户ID（创建商户时，允许商户登录的用户）")

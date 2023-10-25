@@ -249,7 +249,6 @@ public class ConfigContextService {
         mchAppConfigContextMap.put(appId, mchAppConfigContext);
     }
 
-
     /**
      * 初始化 [ISV支付参数配置信息]
      **/

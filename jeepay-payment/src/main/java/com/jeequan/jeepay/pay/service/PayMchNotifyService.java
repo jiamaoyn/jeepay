@@ -86,11 +86,115 @@ public class PayMchNotifyService {
             log.error("推送失败！", e);
         }
     }
+    /**
+     * 商户通知信息， 只有订单是终态，才会发送通知， 如明确成功和明确失败
+     **/
+    public void payOrderNotifyPolling(PayOrder dbPayOrder) {
+
+        try {
+            // 通知地址为空
+            if (StringUtils.isEmpty(dbPayOrder.getNotifyUrl())) {
+                return;
+            }
+
+            //获取到通知对象
+            MchNotifyRecord mchNotifyRecord = mchNotifyRecordService.findByPayOrder(dbPayOrder.getPayOrderId());
+
+            if (mchNotifyRecord != null) {
+
+                log.info("当前已存在通知消息， 不再发送。");
+                return;
+            }
+
+            //商户app私钥
+            String appSecret = configContextQueryService.queryMchInfo(dbPayOrder.getMchNo()).getSecret();
+
+            // 封装通知url
+            String notifyUrl = createNotifyUrl(dbPayOrder, appSecret);
+            mchNotifyRecord = new MchNotifyRecord();
+            mchNotifyRecord.setOrderId(dbPayOrder.getPayOrderId());
+            mchNotifyRecord.setOrderType(MchNotifyRecord.TYPE_PAY_ORDER);
+            mchNotifyRecord.setMchNo(dbPayOrder.getMchNo());
+            mchNotifyRecord.setMchOrderNo(dbPayOrder.getMchOrderNo()); //商户订单号
+            mchNotifyRecord.setIsvNo(dbPayOrder.getIsvNo());
+            mchNotifyRecord.setAppId(dbPayOrder.getAppId());
+            mchNotifyRecord.setNotifyUrl(notifyUrl);
+            mchNotifyRecord.setResResult("");
+            mchNotifyRecord.setNotifyCount(0);
+            mchNotifyRecord.setState(MchNotifyRecord.STATE_ING); // 通知中
+
+            try {
+                mchNotifyRecordService.save(mchNotifyRecord);
+            } catch (Exception e) {
+                log.info("数据库已存在[{}]消息，本次不再推送。", mchNotifyRecord.getOrderId());
+                return;
+            }
+
+            //推送到MQ
+            Long notifyId = mchNotifyRecord.getNotifyId();
+            mqSender.send(PayOrderMchNotifyMQ.build(notifyId));
+
+        } catch (Exception e) {
+            log.error("推送失败！", e);
+        }
+    }
 
     /**
      * 商户通知信息，退款成功的发送通知
      **/
     public void refundOrderNotify(RefundOrder dbRefundOrder) {
+
+        try {
+            // 通知地址为空
+            if (StringUtils.isEmpty(dbRefundOrder.getNotifyUrl())) {
+                return;
+            }
+
+            //获取到通知对象
+            MchNotifyRecord mchNotifyRecord = mchNotifyRecordService.findByRefundOrder(dbRefundOrder.getRefundOrderId());
+
+            if (mchNotifyRecord != null) {
+
+                log.info("当前已存在通知消息， 不再发送。");
+                return;
+            }
+
+            //商户app私钥
+            String appSecret = configContextQueryService.queryMchApp(dbRefundOrder.getMchNo(), dbRefundOrder.getAppId()).getAppSecret();
+
+            // 封装通知url
+            String notifyUrl = createNotifyUrl(dbRefundOrder, appSecret);
+            mchNotifyRecord = new MchNotifyRecord();
+            mchNotifyRecord.setOrderId(dbRefundOrder.getRefundOrderId());
+            mchNotifyRecord.setOrderType(MchNotifyRecord.TYPE_REFUND_ORDER);
+            mchNotifyRecord.setMchNo(dbRefundOrder.getMchNo());
+            mchNotifyRecord.setMchOrderNo(dbRefundOrder.getMchRefundNo()); //商户订单号
+            mchNotifyRecord.setIsvNo(dbRefundOrder.getIsvNo());
+            mchNotifyRecord.setAppId(dbRefundOrder.getAppId());
+            mchNotifyRecord.setNotifyUrl(notifyUrl);
+            mchNotifyRecord.setResResult("");
+            mchNotifyRecord.setNotifyCount(0);
+            mchNotifyRecord.setState(MchNotifyRecord.STATE_ING); // 通知中
+
+            try {
+                mchNotifyRecordService.save(mchNotifyRecord);
+            } catch (Exception e) {
+                log.info("数据库已存在[{}]消息，本次不再推送。", mchNotifyRecord.getOrderId());
+                return;
+            }
+
+            //推送到MQ
+            Long notifyId = mchNotifyRecord.getNotifyId();
+            mqSender.send(PayOrderMchNotifyMQ.build(notifyId));
+
+        } catch (Exception e) {
+            log.error("推送失败！", e);
+        }
+    }
+    /**
+     * 商户通知信息，退款成功的发送通知
+     **/
+    public void refundOrderNotifyPolling(RefundOrder dbRefundOrder) {
 
         try {
             // 通知地址为空

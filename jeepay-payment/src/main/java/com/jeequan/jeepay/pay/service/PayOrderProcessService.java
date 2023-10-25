@@ -45,6 +45,21 @@ public class PayOrderProcessService {
 
     }
 
+    /**
+     * 明确成功的处理逻辑（除更新订单其他业务）
+     **/
+    public void confirmSuccessPolling(PayOrder payOrder) {
+
+        // 查询查询订单详情
+        payOrder = payOrderService.getById(payOrder.getPayOrderId());
+
+        //设置订单状态
+        payOrder.setState(PayOrder.STATE_SUCCESS);
+
+        //发送商户通知
+        payMchNotifyService.payOrderNotifyPolling(payOrder);
+
+    }
 
     /**
      * 更新订单自动分账业务

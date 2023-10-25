@@ -4,6 +4,7 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.PayInterfaceConfig;
+import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.params.IsvParams;
 import com.jeequan.jeepay.core.model.params.IsvsubMchParams;
 import com.jeequan.jeepay.core.model.params.NormalMchParams;
@@ -18,7 +19,13 @@ import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /*
  * 配置信息查询服务 （兼容 缓存 和 直接查询方式）
@@ -32,12 +39,14 @@ public class ConfigContextQueryService {
     private final MchInfoService mchInfoService;
     private final MchAppService mchAppService;
     private final PayInterfaceConfigService payInterfaceConfigService;
+    private final StringRedisTemplate stringRedisTemplate;
 
-    public ConfigContextQueryService(ConfigContextService configContextService, MchInfoService mchInfoService, MchAppService mchAppService, PayInterfaceConfigService payInterfaceConfigService) {
+    public ConfigContextQueryService(ConfigContextService configContextService, MchInfoService mchInfoService, MchAppService mchAppService, PayInterfaceConfigService payInterfaceConfigService, StringRedisTemplate stringRedisTemplate) {
         this.configContextService = configContextService;
         this.mchInfoService = mchInfoService;
         this.mchAppService = mchAppService;
         this.payInterfaceConfigService = payInterfaceConfigService;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     private boolean isCache() {
@@ -51,6 +60,10 @@ public class ConfigContextQueryService {
         }
 
         return mchAppService.getOneByMch(mchNo, mchAppId);
+    }
+    public MchInfo queryMchInfo(String mchNo) {
+
+        return mchInfoService.getOneByMch(mchNo);
     }
 
     public MchAppConfigContext queryMchInfoAndAppInfo(String mchAppId) {
@@ -80,6 +93,38 @@ public class ConfigContextQueryService {
 
         return result;
     }
+
+    public MchAppConfigContext queryMchInfoAndAppInfoByPayCode(String mchNo, String wayCode) {
+        List<MchApp> mchAppList = new ArrayList<>();
+        mchAppService.list(MchApp.gw().eq(MchApp::getMchNo, mchNo)).forEach(mchApp -> {
+            PayInterfaceConfig payInterfaceConfig = payInterfaceConfigService.getOne(PayInterfaceConfig.gw()
+                    .select(PayInterfaceConfig::getIfCode, PayInterfaceConfig::getIfParams)
+                    .eq(PayInterfaceConfig::getState, CS.YES)
+                    .eq(PayInterfaceConfig::getInfoType, CS.INFO_TYPE_MCH_APP)
+                    .eq(PayInterfaceConfig::getInfoId, mchNo)
+                    .eq(PayInterfaceConfig::getIfCode, wayCode)
+            );
+            if (payInterfaceConfig != null) {
+                mchAppList.add(mchApp);
+            }
+
+        });
+
+        if (mchAppList.isEmpty()) {
+            return null;
+        }
+        String string = stringRedisTemplate.opsForValue().get(mchNo+wayCode);
+        int stringKey = 0;
+        if (string != null){
+            stringKey = Integer.parseInt(string);
+            if (mchAppList.size()<stringKey+1){
+                stringKey = 0;
+            }
+            stringRedisTemplate.opsForValue().set(mchNo, String.valueOf(stringKey+1), Duration.ofSeconds(60));
+        }
+        return queryMchInfoAndAppInfo(mchNo, mchAppList.get(stringKey).getAppId());
+    }
+
     public MchAppConfigContext queryMchInfoAndAppInfoByMchNo(String mchNo) {
 
         MchInfo mchInfo = mchInfoService.getById(mchNo);

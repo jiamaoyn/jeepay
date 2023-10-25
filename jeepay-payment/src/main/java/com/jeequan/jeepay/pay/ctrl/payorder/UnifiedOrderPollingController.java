@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
-public class UnifiedOrderController extends AbstractPayOrderController {
+public class UnifiedOrderPollingController extends AbstractPayOrderController {
 
     @Autowired
     private PayWayService payWayService;
@@ -29,15 +29,15 @@ public class UnifiedOrderController extends AbstractPayOrderController {
     /**
      * 统一下单接口
      **/
-    @PostMapping("/api/pay/unifiedOrder")
-    public ApiRes unifiedOrder() {
+    @PostMapping("/api/pay/unifiedOrderPolling")
+    public ApiRes unifiedOrderPolling() {
 
         //获取参数 & 验签
-        UnifiedOrderRQ rq = getRQByWithMchSign(UnifiedOrderRQ.class);
+        UnifiedOrderRQ rq = getRQByWithMchSignPolling(UnifiedOrderRQ.class);
 
         UnifiedOrderRQ bizRQ = buildBizRQ(rq);
         //实现子类的res
-        ApiRes apiRes = unifiedOrder(bizRQ.getWayCode(), bizRQ);
+        ApiRes apiRes = unifiedOrderPolling(bizRQ.getWayCode(), bizRQ);
         if (apiRes.getData() == null) {
             return apiRes;
         }

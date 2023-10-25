@@ -172,4 +172,8 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
             throw new BizException(e.getMessage());
         }
     }
+
+    public MchInfo getOneByMch(String mchNo){
+        return getOne(MchInfo.gw().eq(MchInfo::getMchNo, mchNo));
+    }
 }
