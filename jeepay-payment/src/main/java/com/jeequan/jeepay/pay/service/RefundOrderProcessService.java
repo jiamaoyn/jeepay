@@ -10,10 +10,6 @@ import org.springframework.stereotype.Service;
 
 /***
  * 退款处理通用逻辑
- *
- * @author jmdhappy
- * @site https://www.jeequan.com
- * @date 2021/9/25 23:50
  */
 @Service
 @Slf4j
