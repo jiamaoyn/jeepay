@@ -204,7 +204,7 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
         IPage<MchInfo> pages = this.page(iPage, wrapper);
 
         pages.getRecords().forEach(item -> {
-            item.setSecret(StringKit.str2Star(item.getSecret(), 6, 6, 6));
+            if (item.getSecret() != null)item.setSecret(StringKit.str2Star(item.getSecret(), 6, 6, 6));
             // 添加其他字段的修改操作...
         });
         return pages;

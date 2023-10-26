@@ -19,9 +19,9 @@ spring:
       number_format: '#' #数字格式进行原样显示，不加格式化字符例如  100,00
   datasource:
     # yml填写url连接串， 无需将&符号进行转义
-    url: jdbc:mysql://127.0.0.1:3306/jaydebeapi?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true
-    username: jaydebeapi
-    password: kjRnHC4H8Th2y2jY
+    url: jdbc:mysql://127.0.0.1:3306/fuwuqimysql?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&autoReconnect=true
+    username: fuwuqimysql
+    password: fuwuqimysql
     druid:
       # 连接池配置项
       initial-size: 5 #初始化时建立物理连接的个数
@@ -109,5 +109,5 @@ isys:
       access-key-secret: SECRET_SECRET_SECRET  #AccessKeySecret
 
   mq:
-    vender: activeMQ  #  切换MQ厂商， 支持：【 activeMQ  rabbitMQ  rocketMQ  aliYunRocketMQ 】， 需正确配置 【对应的yml参数】 和 【jeepay-components-mq项目下pom.xml中的依赖包】。
+    vender: rabbitMQ  #  切换MQ厂商， 支持：【 activeMQ  rabbitMQ  rocketMQ  aliYunRocketMQ 】， 需正确配置 【对应的yml参数】 和 【jeepay-components-mq项目下pom.xml中的依赖包】。
 
