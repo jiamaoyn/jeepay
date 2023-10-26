@@ -116,8 +116,8 @@ public class ConfigContextQueryService {
             if (mchAppList.size()<stringKey+1){
                 stringKey = 0;
             }
-            stringRedisTemplate.opsForValue().set(mchNo, String.valueOf(stringKey+1), Duration.ofSeconds(60));
         }
+        stringRedisTemplate.opsForValue().set(mchNo, String.valueOf(stringKey+1), Duration.ofHours(3));
         return queryMchInfoAndAppInfo(mchNo, mchAppList.get(stringKey).getAppId());
     }
 
