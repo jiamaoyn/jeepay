@@ -109,14 +109,14 @@ public class ConfigContextQueryService {
         if (mchAppList.isEmpty()) {
             return null;
         }
-        String string = stringRedisTemplate.opsForValue().get(mchNo+wayCode);
+        String string = stringRedisTemplate.opsForValue().get(mchNo);
         int stringKey = 0;
         if (string != null){
             stringKey = Integer.parseInt(string);
             if (mchAppList.size()<stringKey+1){
                 stringKey = 0;
             }
-            stringRedisTemplate.opsForValue().set(mchNo+wayCode, String.valueOf(stringKey+1), Duration.ofSeconds(60));
+            stringRedisTemplate.opsForValue().set(mchNo, String.valueOf(stringKey+1), Duration.ofSeconds(60));
         }
         return queryMchInfoAndAppInfo(mchNo, mchAppList.get(stringKey).getAppId());
     }
