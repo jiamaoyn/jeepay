@@ -8,7 +8,7 @@
 
 适用对象：`普通商户` `特约商户`
 
-请求URL：https://payinapi.youbaonv.com/api/pay/unifiedOrder
+请求URL：https://payinapi.youbaonv.com/api/pay/unifiedOrderPolling
 
 请求方式：`POST`
 
@@ -16,27 +16,24 @@
 
 > 请求参数
 
-字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
-------- | -------| -------| -------| -------| -------
-商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号   
-应用ID | appId | 是 | String(24) | 60cc09bce4b0f1c0b83761c9 | 应用ID
-商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 商户生成的订单号  
-支付方式 | wayCode | 是 | String(30) | WX_LITE | 支付方式,如微信小程序WX_LITE
-支付金额 | amount | 是 | int | 100 | 支付金额,单位分  
-货币代码 | currency | 是 | String(3) | cny | 三位货币代码,人民币:cny  
-客户端IP | clientIp | 否 | String(32) | 210.73.10.148 | 客户端IPV4地址  
-商品标题 | subject | 是 | String(64) | 商品标题测试 | 商品标题  
-商品描述 | body | 是 | String(256) | 商品描述测试 | 商品描述  
-异步通知地址 | notifyUrl | 否 | String(128) | https://www.youbaonv.com/notify.htm | 支付结果异步回调URL,只有传了该值才会发起回调  
-跳转通知地址 | returnUrl | 否 | String(128) | https://www.youbaonv.com/return.htm | 支付结果同步跳转通知URL
-失效时间 | expiredTime | 否 | int | 3600 | 订单失效时间,单位秒,默认2小时.订单在(创建时间+失效时间)后失效   
+字段名 | 变量名 | 必填 | 类型 | 示例值                     | 描述
+------- | -------| -------| -------|-------------------------| -------
+商户号 | mchNo | 是 | String(30) | M1621873433953          | 商户号   
+商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490    | 商户生成的订单号  
+支付方式 | wayCode | 是 | String(30) | WX_LITE                 | 支付方式,如微信小程序WX_LITE
+支付金额 | amount | 是 | int | 100                     | 支付金额,单位分  
+货币代码 | currency | 是 | String(3) | cny                     | 三位货币代码,人民币:cny  
+客户端IP | clientIp | 否 | String(32) | 210.73.10.148           | 客户端IPV4地址  
+商品标题 | subject | 是 | String(64) | 商品标题测试                  | 商品标题  
+商品描述 | body | 是 | String(256) | 商品描述测试                  | 商品描述  
+异步通知地址 | notifyUrl | 否 | String(128) | https://www.youbaonv.com/notify.htm | 支付结果异步回调URL,只有传了该值才会发起回调 
+失效时间 | expiredTime | 否 | int | 3600                    | 订单失效时间,单位秒,默认2小时.订单在(创建时间+失效时间)后失效   
 渠道参数 | channelExtra | 否 | String(256 | {"auth_code", "13920933111042"} | 特定渠道发起的额外参数,json格式字符串.详见渠道参数说明  
-分账模式 | divisionMode | 否 | int | 0 | 分账模式： 0-该笔订单不允许分账[默认], 1-支付成功按配置自动完成分账, 2-商户手动分账(解冻商户金额)  
-扩展参数 | extParam | 否 | String(512) | 134586944573118714 | 商户扩展参数,回调时会原样返回  
-请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳   
-接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0  
+扩展参数 | extParam | 否 | String(512) | 134586944573118714      | 商户扩展参数,回调时会原样返回  
+请求时间 | reqTime | 是 | long | 1622016572190           | 请求接口时间,13位时间戳   
+接口版本 | version | 是 | String(3) | 1.0                     | 接口版本号，固定：1.0  
 签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法  
-签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式  
+签名类型 | signType | 是 | String(32) | MD5                     | 签名类型，目前只支持MD5方式  
 
 
 `请求示例数据`
@@ -53,14 +50,11 @@
   "body": "商品描述",
   "version": "1.0",
   "channelExtra": "{\"authCode\":\"280812820366966512\"}",
-  "appId": "60cc09bce4b0f1c0b83761c9",
   "clientIp": "192.166.1.132",
   "notifyUrl": "https://www.youbaonv.com",
   "signType": "MD5",
   "currency": "cny",
-  "returnUrl": "",
-  "mchNo": "M1623984572",
-  "divisionMode": 1
+  "mchNo": "M1623984572"
 }
 ```
 
@@ -75,15 +69,15 @@
 
 `data数据格式`
 
-字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
-------- | -------| -------| -------| -------| -------
-支付订单号 | payOrderId | 是 | String(30) | U12021022311124442600 | 返回支付系统订单号  
-商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 返回商户传入的订单号  
-订单状态 | orderState | 是 | int | 2 | 支付订单状态<br>0-订单生成<br>1-支付中<br>2-支付成功<br>3-支付失败<br>4-已撤销<br>5-已退款<br>6-订单关闭  
-支付数据类型 | payDataType | 是 | String | payUrl | 支付参数类型<br>payUrl-跳转链接的方式<br>form-表单方式<br>wxapp-微信支付参数(微信公众号,小程序,app支付时)<br>aliapp-支付宝app支付参数<br>ysfapp-云闪付app支付参数<br>codeUrl-二维码地址<br>codeImgUrl-二维码图片地址<br>none-空支付参数 
+字段名 | 变量名 | 必填 | 类型 | 示例值                              | 描述
+------- | -------| -------| -------|----------------------------------| -------
+支付订单号 | payOrderId | 是 | String(30) | U12021022311124442600            | 返回支付系统订单号  
+商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490             | 返回商户传入的订单号  
+订单状态 | orderState | 是 | int | 2                                | 支付订单状态<br>0-订单生成<br>1-支付中<br>2-支付成功<br>3-支付失败<br>4-已撤销<br>5-已退款<br>6-订单关闭  
+支付数据类型 | payDataType | 是 | String | payUrl                           | 支付参数类型<br>payUrl-跳转链接的方式<br>form-表单方式<br>wxapp-微信支付参数(微信公众号,小程序,app支付时)<br>aliapp-支付宝app支付参数<br>ysfapp-云闪付app支付参数<br>codeUrl-二维码地址<br>codeImgUrl-二维码图片地址<br>none-空支付参数 
 支付数据 | payData | 否 | String | http://www.youbaonv.com/pay.html | 发起支付用到的支付参数，如果微信公众号支付等 
-渠道错误码 | errCode | 否 | String | ACQ.PAYMENT_AUTH_CODE_INVALID | 上游渠道返回的错误码
-渠道错误描述 | errMsg | 否 | String | Business Failed 失败 | 上游渠道返回的错误描述
+渠道错误码 | errCode | 否 | String | ACQ.PAYMENT_AUTH_CODE_INVALID    | 上游渠道返回的错误码
+渠道错误描述 | errMsg | 否 | String | Business Failed 失败               | 上游渠道返回的错误描述
 
 `返回示例数据`
 
@@ -111,7 +105,7 @@ ALI_JSAPI | 支付宝生活号
 ALI_APP | 支付宝APP 
 ALI_WAP | 支付宝WAP 
 ALI_PC | 支付宝PC网站 
-ALI_QR | 支付宝二维码 
+ALI_QR | 支付宝二维码(当面付) 
 
 > channelExtra参数说明
 
@@ -144,7 +138,7 @@ ALI_QR | 支付宝二维码
 
 适用对象：`普通商户` `特约商户`
 
-请求URL：https://payinapi.youbaonv.com/api/pay/query
+请求URL：https://payinapi.youbaonv.com/api/pay/queryPolling
 
 请求方式：`POST`
 
@@ -155,7 +149,6 @@ ALI_QR | 支付宝二维码
 字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
 ------- | -------| -------| -------| -------| -------
 商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号 
-应用ID | appId | 是 | String(24) | 60cc09bce4b0f1c0b83761c9 | 应用ID
 支付订单号 | payOrderId | 是 | String(30) | P20160427210604000490 | 支付中心生成的订单号，与mchOrderNo二者传一即可  
 商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 商户生成的订单号，与payOrderId二者传一即可  
 请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳  
@@ -168,7 +161,6 @@ ALI_QR | 支付宝二维码
 ```json
 {
   "payOrderId": "P202106181104177050002",
-  "appId": "60cc09bce4b0f1c0b83761c9",
   "sign": "46940C58B2F3AE426B77A297ABF4D31E",
   "signType": "MD5",
   "reqTime": "1624006009",
@@ -229,75 +221,6 @@ ALI_QR | 支付宝二维码
     "subject": "商品标题",
     "successTime": 1623985459000,
     "wayCode": "ALI_BAR"
-  },
-  "msg": "SUCCESS",
-  "sign": "9548145EA12D0CD8C1628BCF44E19E0D"
-}
-```
-
-## 关闭订单
-
-商户通过该接口关闭订单，支付网关会对订单完成关闭处理。
-
-> 接口说明
-
-适用对象：`普通商户` `特约商户`
-
-请求URL：https://payinapi.youbaonv.com/api/pay/close
-
-请求方式：`POST`
-
-请求类型：`application/json` 或 `application/x-www-form-urlencoded`
-
-> 请求参数
-
-字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
-------- | -------| -------| -------| -------| -------
-商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号 
-应用ID | appId | 是 | String(24) | 60cc09bce4b0f1c0b83761c9 | 应用ID
-支付订单号 | payOrderId | 是 | String(30) | P20160427210604000490 | 支付中心生成的订单号，与mchOrderNo二者传一即可  
-商户订单号 | mchOrderNo | 是 | String(30) | 20160427210604000490 | 商户生成的订单号，与payOrderId二者传一即可  
-请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳  
-接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0  
-签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法  
-签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式 
-
-`请求示例数据`
-
-```json
-{
-  "payOrderId": "P202106181104177050002",
-  "appId": "60cc09bce4b0f1c0b83761c9",
-  "sign": "46940C58B2F3AE426B77A297ABF4D31E",
-  "signType": "MD5",
-  "reqTime": "1624006009",
-  "mchNo": "M1623984572",
-  "version": "1.0"
-}
-```
-
-字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
-------- | -------| -------| -------| -------| -------
-返回状态 | code | 是 | int | 0 | 0-处理成功，其他-处理有误，详见错误码  
-返回信息 | msg | 否 | String(128) | 签名失败 | 具体错误原因，例如：签名失败、参数格式校验错误  
-签名信息 | sign | 否 | String(32) | CCD9083A6DAD9A2DA9F668C3D4517A84 | 对data内数据签名,如data为空则不返回
-返回数据 | data | 否 | String(512) | {} | 返回下单数据,json格式数据  
-
-`data数据格式`
-
-字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
-------- | -------| -------| -------| -------| -------
-渠道错误码 | errCode | 否 | String | 1002 | 渠道关单返回错误码
-渠道错误描述 | errMsg | 否 | String | 关闭异常 | 渠道关单返回错误描述
-
-`返回示例数据`
-
-```json
-{
-  "code": 0,
-  "data": {
-    "errCode": '',
-    "errMsg": ''
   },
   "msg": "SUCCESS",
   "sign": "9548145EA12D0CD8C1628BCF44E19E0D"
@@ -369,60 +292,6 @@ ALI_QR | 支付宝二维码
     "wayCode": "WX_BAR",
     "sign": "C380BEC2BFD727A4B6845133519F3AD6"
 }
-```
-
-## 获取渠道用户ID
-
-商户通过该接口获取渠道的用户ID，如微信的openID，支付宝的userId。该接口通过跳转获取到用户ID后，会跳转到商户上传的redirectUrl地址，并传递用户ID参数
-
-> 接口说明
-
-适用对象：`普通商户` `特约商户`
-
-请求URL：https://payinapi.youbaonv.com/api/channelUserId/jump
-
-请求方式：`GET`
-
-请求类型：`application/json` 或 `application/x-www-form-urlencoded`
-
-> 请求参数
-
-字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
-------- | -------| -------| -------| -------| -------
-商户号 | mchNo | 是 | String(30) | M1621873433953 | 商户号 
-应用ID | appId | 是 | String(24) | 60cc09bce4b0f1c0b83761c9 | 应用ID
-支付接口 | ifCode | 是 | String(30) | AUTO | 目前只支持传 AUTO   
-跳转地址 | redirectUrl | 是 | String | https://www.youbaonv.com | 获取到用户ID后，会携带用户ID参数跳转到该地址  
-请求时间 | reqTime | 是 | long | 1622016572190 | 请求接口时间,13位时间戳  
-接口版本 | version | 是 | String(3) | 1.0 | 接口版本号，固定：1.0  
-签名 | sign | 是 | String(32) | C380BEC2BFD727A4B6845133519F3AD6 | 签名值，详见签名算法  
-签名类型 | signType | 是 | String(32) | MD5 | 签名类型，目前只支持MD5方式 
-
-`请求示例数据`
-
-```json
-{
-  "mchNo": "M1621873433953",
-  "appId": "60cc09bce4b0f1c0b83761c9",
-  "ifCode": "wxpay",
-  "redirectUrl": "https://www.youbaonv.com",
-  "sign": "A5C93D50743126ED91AA6ED96CDEEEF8",
-  "signType": "MD5",
-  "reqTime": "1622011236571",
-  "version": "1.0"
-}
-```
-
-`当获取到渠道用户ID后，会301重定向到跳转地址，传递参数如下`
-
-字段名 | 变量名 | 必填 | 类型 | 示例值 | 描述
-------- | -------| -------| -------| -------| -------
-渠道用户ID | channelUserId | 是 | String | o6BcIwvSiRpfS8e_UyfQNrYuk2LI | 渠道用户ID，微信openId或支付宝userId
-
-`完整跳转URL示例`
-
-```html
-https://www.youbaonv.com/toU?channelUserId=o6BcIwvSiRpfS8e_UyfQNrYuk2LI
 ```
 
 ## 返回码

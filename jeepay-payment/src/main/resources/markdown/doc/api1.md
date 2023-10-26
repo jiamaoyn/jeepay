@@ -45,4 +45,4 @@ amount=10000&amp;clientIp=192.168.0.111&amp;mchOrderNo=P0123456789101&amp;notify
 
 &gt; 运营管理平台可以管理商户的私钥
 
-`提示：`签名以及接口调用，请使用jeepay官方提供的sdk：https://gitee.com/jeequan/jeepay-sdk-java
+`提示：`签名以及接口调用，请使用官方提供的sdk
