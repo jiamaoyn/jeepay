@@ -50,12 +50,11 @@ public class QueryOrderController extends ApiController {
         QueryPayOrderRS bizRes = QueryPayOrderRS.buildByPayOrder(payOrder);
         return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
     }
-
-    @RequestMapping("/api/pay/query_bot")
-    public ApiRes queryOrderBot() {
+    @RequestMapping("/api/pay/queryPolling")
+    public ApiRes queryOrderPolling() {
 
         //获取参数 & 验签
-        QueryPayOrderRQ rq = getRQByWithMchSignBot(QueryPayOrderRQ.class);
+        QueryPayOrderRQ rq = getRQByWithMchSignPolling(QueryPayOrderRQ.class);
 
         if (StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())) {
             throw new BizException("mchOrderNo 和 payOrderId不能同时为空");
@@ -67,23 +66,7 @@ public class QueryOrderController extends ApiController {
         }
 
         QueryPayOrderRS bizRes = QueryPayOrderRS.buildByPayOrder(payOrder);
-        return ApiRes.ok(bizRes);
+        return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchInfo(rq.getMchNo()).getSecret());
     }
-
-    @RequestMapping("/api/pay/main_success_rate")
-    public ApiRes mainSuccessRate() {
-
-        //获取参数 & 验签
-        QueryPayOrderRQ rq = getRQByWithMchSignBot(QueryPayOrderRQ.class);
-        if (StringUtils.isEmpty(rq.getMchNo())) {
-            throw new BizException("mchNo不能为空");
-        }
-        Map payOrder = payOrderService.mainSuccessRateBot(rq.getMchNo());
-        if (payOrder == null) {
-            throw new BizException("订单不存在");
-        }
-        return ApiRes.ok(payOrder);
-    }
-
 
 }

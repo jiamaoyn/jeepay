@@ -2,12 +2,15 @@ package com.jeequan.jeepay.service.impl;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.*;
 import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.service.mapper.MchInfoMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -175,5 +179,44 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
 
     public MchInfo getOneByMch(String mchNo){
         return getOne(MchInfo.gw().eq(MchInfo::getMchNo, mchNo));
+    }
+
+    public IPage<MchInfo> selectPage(IPage iPage, MchInfo mchInfo) {
+
+
+        LambdaQueryWrapper<MchInfo> wrapper = MchInfo.gw();
+        if (StringUtils.isNotEmpty(mchInfo.getMchNo())) {
+            wrapper.eq(MchInfo::getMchNo, mchInfo.getMchNo());
+        }
+        if (StringUtils.isNotEmpty(mchInfo.getIsvNo())) {
+            wrapper.eq(MchInfo::getIsvNo, mchInfo.getIsvNo());
+        }
+        if (StringUtils.isNotEmpty(mchInfo.getMchName())) {
+            wrapper.eq(MchInfo::getMchName, mchInfo.getMchName());
+        }
+        if (mchInfo.getType() != null) {
+            wrapper.eq(MchInfo::getType, mchInfo.getType());
+        }
+        if (mchInfo.getState() != null) {
+            wrapper.eq(MchInfo::getState, mchInfo.getState());
+        }
+        wrapper.orderByDesc(MchInfo::getCreatedAt);
+        IPage<MchInfo> pages = this.page(iPage, wrapper);
+
+        pages.getRecords().forEach(item -> {
+            item.setSecret(StringKit.str2Star(item.getSecret(), 6, 6, 6));
+            // 添加其他字段的修改操作...
+        });
+        return pages;
+    }
+
+    public MchInfo selectById(String mchNo) {
+        MchInfo mchInfo = this.getById(mchNo);
+        if (mchInfo == null) {
+            return null;
+        }
+        mchInfo.setSecret(StringKit.str2Star(mchInfo.getSecret(), 6, 6, 6));
+
+        return mchInfo;
     }
 }

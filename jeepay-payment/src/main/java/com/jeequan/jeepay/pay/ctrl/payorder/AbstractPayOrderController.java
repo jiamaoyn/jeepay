@@ -33,8 +33,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.Date;
 
 /*
@@ -46,6 +48,8 @@ public abstract class AbstractPayOrderController extends ApiController {
 
     @Autowired
     private MchPayPassageService mchPayPassageService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private PayOrderService payOrderService;
     @Autowired
@@ -344,6 +348,7 @@ public abstract class AbstractPayOrderController extends ApiController {
                 }
                 //订单入库 订单状态： 生成状态  此时没有和任何上游渠道产生交互。
                 payOrderService.save(payOrder);
+                stringRedisTemplate.opsForValue().set(payOrder.getPayOrderId()+payOrder.getMchOrderNo(), "666", Duration.ofHours(24));
             }
 
             //调起上游支付接口

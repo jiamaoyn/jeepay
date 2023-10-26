@@ -4,15 +4,21 @@ import cn.hutool.core.codec.Base64;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
+import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.cache.ITokenService;
+import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.SysEntitlement;
 import com.jeequan.jeepay.core.entity.SysUser;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.security.JeeUserDetails;
+import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.core.utils.TreeDataBuilder;
+import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.SysEntitlementService;
 import com.jeequan.jeepay.service.impl.SysUserAuthService;
 import com.jeequan.jeepay.service.impl.SysUserService;
@@ -41,9 +47,13 @@ public class CurrentUserController extends CommonCtrl {
     @Autowired
     private SysEntitlementService sysEntitlementService;
     @Autowired
+    private MchInfoService mchInfoService;
+    @Autowired
     private SysUserService sysUserService;
     @Autowired
     private SysUserAuthService sysUserAuthService;
+    @Autowired
+    private IMQSender mqSender;
 
     @ApiOperation("查询当前登录者的用户信息")
     @ApiImplicitParams({
@@ -80,7 +90,11 @@ public class CurrentUserController extends CommonCtrl {
         //1. 所有权限ID集合
         user.addExt("entIdList", entIdList);
         user.addExt("allMenuRouteTree", allMenuRouteTree);
-
+        MchInfo mchInfo = mchInfoService.selectById(user.getBelongInfoId());
+        if (mchInfo == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+        user.addExt("secret",StringKit.str2Star(mchInfo.getSecret(), 6, 6, 6));
         return ApiRes.ok(getCurrentUser().getSysUser());
     }
 
@@ -158,6 +172,36 @@ public class CurrentUserController extends CommonCtrl {
         sysUserAuthService.resetAuthInfo(opSysUserId, null, null, opUserPwd, CS.SYS_TYPE.MCH);
         //调用登出接口
         return logout();
+    }
+
+    /**
+     * 修改商家密钥
+     */
+    @ApiOperation("修改商家密钥")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "secret", value = "商家密钥---新")
+    })
+    @MethodLog(remark = "修改商家密钥")
+    @RequestMapping(value = "/userSecret", method = RequestMethod.PUT)
+    public ApiRes modifyCurrentUserInfoSecret() {
+
+        //修改头像
+        String secret = getValString("secret");
+        String mchNo = getCurrentUser().getSysUser().getBelongInfoId();
+        MchInfo mchInfo = new MchInfo();
+        mchInfo.setMchNo(mchNo);
+        if (StringUtils.isNotEmpty(secret)) {
+            mchInfo.setSecret(secret);
+        }
+        //更新商户信息
+        if (!mchInfoService.updateById(mchInfo)) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
+        }
+        // 推送mq到目前节点进行更新数据
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_INFO, null, mchNo, null));
+
+        return ApiRes.ok();
     }
 
     /**

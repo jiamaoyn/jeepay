@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +37,8 @@ public class ChannelNoticeController extends AbstractCtrl {
 
     @Autowired
     private PayOrderService payOrderService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private ConfigContextQueryService configContextQueryService;
     @Autowired
@@ -124,7 +127,12 @@ public class ChannelNoticeController extends AbstractCtrl {
             //包含通知地址时
             if (hasReturnUrl) {
                 // 重定向
-                response.sendRedirect(payMchNotifyService.createReturnUrl(payOrder, mchAppConfigContext.getMchApp().getAppSecret()));
+                String string = stringRedisTemplate.opsForValue().get(payOrder.getPayOrderId()+payOrder.getMchOrderNo());
+                if (string != null){
+                    response.sendRedirect(payMchNotifyService.createReturnUrl(payOrder, mchAppConfigContext.getMchInfo().getSecret()));
+                } else {
+                    response.sendRedirect(payMchNotifyService.createReturnUrl(payOrder, mchAppConfigContext.getMchApp().getAppSecret()));
+                }
                 return null;
             } else {
 
@@ -235,7 +243,12 @@ public class ChannelNoticeController extends AbstractCtrl {
 
             //订单支付成功 其他业务逻辑
             if (notifyResult.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
-                payOrderProcessService.confirmSuccess(payOrder);
+                String string = stringRedisTemplate.opsForValue().get(payOrder.getPayOrderId()+payOrder.getMchOrderNo());
+                if (string != null){
+                    payOrderProcessService.confirmSuccessPolling(payOrder);
+                } else {
+                    payOrderProcessService.confirmSuccess(payOrder);
+                }
             }
 
             log.info("===== {}, 订单通知完成。 payOrderId={}, parseState = {} =====", logPrefix, payOrderId, notifyResult.getChannelState());

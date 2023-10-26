@@ -74,26 +74,7 @@ public class MchInfoController extends CommonCtrl {
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ApiPageRes<MchInfo> list() {
         MchInfo mchInfo = getObject(MchInfo.class);
-
-        LambdaQueryWrapper<MchInfo> wrapper = MchInfo.gw();
-        if (StringUtils.isNotEmpty(mchInfo.getMchNo())) {
-            wrapper.eq(MchInfo::getMchNo, mchInfo.getMchNo());
-        }
-        if (StringUtils.isNotEmpty(mchInfo.getIsvNo())) {
-            wrapper.eq(MchInfo::getIsvNo, mchInfo.getIsvNo());
-        }
-        if (StringUtils.isNotEmpty(mchInfo.getMchName())) {
-            wrapper.eq(MchInfo::getMchName, mchInfo.getMchName());
-        }
-        if (mchInfo.getType() != null) {
-            wrapper.eq(MchInfo::getType, mchInfo.getType());
-        }
-        if (mchInfo.getState() != null) {
-            wrapper.eq(MchInfo::getState, mchInfo.getState());
-        }
-        wrapper.orderByDesc(MchInfo::getCreatedAt);
-
-        IPage<MchInfo> pages = mchInfoService.page(getIPage(), wrapper);
+        IPage<MchInfo> pages = mchInfoService.selectPage(getIPage(), mchInfo);
         return ApiPageRes.pages(pages);
     }
 
@@ -241,7 +222,7 @@ public class MchInfoController extends CommonCtrl {
     @PreAuthorize("hasAnyAuthority('ENT_MCH_INFO_VIEW', 'ENT_MCH_INFO_EDIT')")
     @RequestMapping(value = "/{mchNo}", method = RequestMethod.GET)
     public ApiRes detail(@PathVariable("mchNo") String mchNo) {
-        MchInfo mchInfo = mchInfoService.getById(mchNo);
+        MchInfo mchInfo = mchInfoService.selectById(mchNo);
         if (mchInfo == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
