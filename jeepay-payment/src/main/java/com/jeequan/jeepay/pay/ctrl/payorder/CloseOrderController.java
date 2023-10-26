@@ -18,12 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/*
+/**
  * 关闭订单 controller
- *
- * @author xiaoyu
- * @site https://www.jeequan.com
- * @date 2022/1/25 9:19
  */
 @Slf4j
 @RestController
@@ -35,9 +31,7 @@ public class CloseOrderController extends ApiController {
     private ConfigContextQueryService configContextQueryService;
 
     /**
-     * @author: xiaoyu
-     * @date: 2022/1/25 9:19
-     * @describe: 关闭订单
+     * 关闭订单
      */
     @RequestMapping("/api/pay/close")
     public ApiRes queryOrder() {
@@ -105,6 +99,74 @@ public class CloseOrderController extends ApiController {
         }
 
         return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchApp(rq.getMchNo(), rq.getAppId()).getAppSecret());
+    }
+
+    @RequestMapping("/api/pay/closePolling")
+    public ApiRes queryOrderPolling() {
+
+        //获取参数 & 验签
+        ClosePayOrderRQ rq = getRQByWithMchSignPolling(ClosePayOrderRQ.class);
+
+        if (StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())) {
+            throw new BizException("mchOrderNo 和 payOrderId 不能同时为空");
+        }
+
+        PayOrder payOrder = payOrderService.queryMchOrder(rq.getMchNo(), rq.getPayOrderId(), rq.getMchOrderNo());
+        if (payOrder == null) {
+            throw new BizException("订单不存在");
+        }
+
+        if (payOrder.getState() != PayOrder.STATE_INIT && payOrder.getState() != PayOrder.STATE_ING) {
+            throw new BizException("当前订单不可关闭");
+        }
+
+        ClosePayOrderRS bizRes = new ClosePayOrderRS();
+
+        // 订单生成状态  直接修改订单状态
+        if (payOrder.getState() == PayOrder.STATE_INIT) {
+            payOrderService.updateInit2Close(payOrder.getPayOrderId());
+            bizRes.setChannelRetMsg(ChannelRetMsg.confirmSuccess(null));
+            return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchInfo(rq.getMchNo()).getSecret());
+        }
+
+        try {
+
+            String payOrderId = payOrder.getPayOrderId();
+
+            //查询支付接口是否存在
+            IPayOrderCloseService closeService = SpringBeansUtil.getBean(payOrder.getIfCode() + "PayOrderCloseService", IPayOrderCloseService.class);
+
+            // 支付通道接口实现不存在
+            if (closeService == null) {
+                log.error("{} interface not exists!", payOrder.getIfCode());
+                return null;
+            }
+
+            //查询出商户应用的配置信息
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
+
+            ChannelRetMsg channelRetMsg = closeService.close(payOrder, mchAppConfigContext);
+            if (channelRetMsg == null) {
+                log.error("channelRetMsg is null");
+                return null;
+            }
+
+            log.info("关闭订单[{}]结果为：{}", payOrderId, channelRetMsg);
+
+            // 关闭订单 成功
+            if (channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
+                payOrderService.updateIng2Close(payOrderId);
+            } else {
+                return ApiRes.customFail(channelRetMsg.getChannelErrMsg());
+            }
+
+            bizRes.setChannelRetMsg(channelRetMsg);
+        } catch (Exception e) {  // 关闭订单异常
+            log.error("error payOrderId = {}", payOrder.getPayOrderId(), e);
+            return null;
+        }
+
+        return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchInfo(rq.getMchNo()).getSecret());
     }
 
 }

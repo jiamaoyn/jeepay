@@ -161,6 +161,118 @@ public class RefundOrderController extends ApiController {
 
     }
 
+    @PostMapping("/api/refund/refundOrderPolling")
+    public ApiRes refundOrderPolling() {
+
+
+        RefundOrder refundOrder = null;
+
+        //获取参数 & 验签
+        RefundOrderRQ rq = getRQByWithMchSignPolling(RefundOrderRQ.class);
+
+        try {
+
+            if (StringUtils.isAllEmpty(rq.getMchOrderNo(), rq.getPayOrderId())) {
+                throw new BizException("mchOrderNo 和 payOrderId不能同时为空");
+            }
+
+            if (StringUtils.isNotEmpty(rq.getNotifyUrl()) && !StringKit.isAvailableUrl(rq.getNotifyUrl())) {
+                throw new BizException("异步通知地址协议仅支持http:// 或 https:// !");
+            }
+
+            PayOrder payOrder = payOrderService.queryMchOrder(rq.getMchNo(), rq.getPayOrderId(), rq.getMchOrderNo());
+            if (payOrder == null) {
+                throw new BizException("退款订单不存在");
+            }
+
+            if (payOrder.getState() != PayOrder.STATE_SUCCESS) {
+                throw new BizException("订单状态不正确， 无法完成退款");
+            }
+
+            if (payOrder.getRefundState() == PayOrder.REFUND_STATE_ALL || payOrder.getRefundAmount() >= payOrder.getAmount()) {
+                throw new BizException("订单已全额退款，本次申请失败");
+            }
+
+            if (payOrder.getRefundAmount() + rq.getRefundAmount() > payOrder.getAmount()) {
+                throw new BizException("申请金额超出订单可退款余额，请检查退款金额");
+            }
+
+            if (refundOrderService.count(RefundOrder.gw().eq(RefundOrder::getPayOrderId, payOrder.getPayOrderId()).eq(RefundOrder::getState, RefundOrder.STATE_ING)) > 0) {
+                throw new BizException("支付订单具有在途退款申请，请稍后再试");
+            }
+
+            //全部退款金额 （退款订单表）
+            Long sumSuccessRefundAmount = refundOrderService.getBaseMapper().sumSuccessRefundAmount(payOrder.getPayOrderId());
+            if (sumSuccessRefundAmount >= payOrder.getAmount()) {
+                throw new BizException("退款单已完成全部订单退款，本次申请失败");
+            }
+
+            if (sumSuccessRefundAmount + rq.getRefundAmount() > payOrder.getAmount()) {
+                throw new BizException("申请金额超出订单可退款余额，请检查退款金额");
+            }
+
+            String mchNo = rq.getMchNo();
+            String appId = rq.getAppId();
+
+            // 校验退款单号是否重复
+            if (refundOrderService.count(RefundOrder.gw().eq(RefundOrder::getMchNo, mchNo).eq(RefundOrder::getMchRefundNo, rq.getMchRefundNo())) > 0) {
+                throw new BizException("商户退款订单号[" + rq.getMchRefundNo() + "]已存在");
+            }
+
+            //获取支付参数 (缓存数据) 和 商户信息
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchNo, appId);
+            if (mchAppConfigContext == null) {
+                throw new BizException("获取商户应用信息失败");
+            }
+
+            MchInfo mchInfo = mchAppConfigContext.getMchInfo();
+            MchApp mchApp = mchAppConfigContext.getMchApp();
+
+            //获取退款接口
+            IRefundService refundService = SpringBeansUtil.getBean(payOrder.getIfCode() + "RefundService", IRefundService.class);
+            if (refundService == null) {
+                throw new BizException("当前通道不支持退款！");
+            }
+
+            refundOrder = genRefundOrder(rq, payOrder, mchInfo, mchApp);
+
+            //退款单入库 退款单状态：生成状态  此时没有和任何上游渠道产生交互。
+            refundOrderService.save(refundOrder);
+
+            // 调起退款接口
+            ChannelRetMsg channelRetMsg = refundService.refund(rq, refundOrder, payOrder, mchAppConfigContext);
+
+
+            //处理退款单状态
+            this.processChannelMsgPolling(channelRetMsg, refundOrder);
+
+            RefundOrderRS bizRes = RefundOrderRS.buildByRefundOrder(refundOrder);
+            return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchInfo(rq.getMchNo()).getSecret());
+
+
+        } catch (BizException e) {
+            return ApiRes.customFail(e.getMessage());
+
+        } catch (ChannelException e) {
+
+            //处理上游返回数据
+            this.processChannelMsgPolling(e.getChannelRetMsg(), refundOrder);
+
+            if (e.getChannelRetMsg().getChannelState() == ChannelRetMsg.ChannelState.SYS_ERROR) {
+                return ApiRes.customFail(e.getMessage());
+            }
+
+            RefundOrderRS bizRes = RefundOrderRS.buildByRefundOrder(refundOrder);
+            return ApiRes.okWithSign(bizRes, configContextQueryService.queryMchInfo(rq.getMchNo()).getSecret());
+
+
+        } catch (Exception e) {
+            log.error("系统异常：{}", e);
+            return ApiRes.customFail("系统异常");
+        }
+
+    }
+
     private RefundOrder genRefundOrder(RefundOrderRQ rq, PayOrder payOrder, MchInfo mchInfo, MchApp mchApp) {
 
         Date nowTime = new Date();
@@ -218,6 +330,42 @@ public class RefundOrderController extends ApiController {
 
             this.updateInitOrderStateThrowException(RefundOrder.STATE_FAIL, refundOrder, channelRetMsg);
             payMchNotifyService.refundOrderNotify(refundOrder);
+
+            // 上游处理中 || 未知 || 上游接口返回异常  退款单为退款中状态
+        } else if (ChannelRetMsg.ChannelState.WAITING == channelRetMsg.getChannelState() ||
+                ChannelRetMsg.ChannelState.UNKNOWN == channelRetMsg.getChannelState() ||
+                ChannelRetMsg.ChannelState.API_RET_ERROR == channelRetMsg.getChannelState()
+
+        ) {
+            this.updateInitOrderStateThrowException(RefundOrder.STATE_ING, refundOrder, channelRetMsg);
+
+            // 系统异常：  退款单不再处理。  为： 生成状态
+        } else if (ChannelRetMsg.ChannelState.SYS_ERROR == channelRetMsg.getChannelState()) {
+
+        } else {
+
+            throw new BizException("ChannelState 返回异常！");
+        }
+
+    }
+    private void processChannelMsgPolling(ChannelRetMsg channelRetMsg, RefundOrder refundOrder) {
+
+        //对象为空 || 上游返回状态为空， 则无需操作
+        if (channelRetMsg == null || channelRetMsg.getChannelState() == null) {
+            return;
+        }
+
+        //明确成功
+        if (ChannelRetMsg.ChannelState.CONFIRM_SUCCESS == channelRetMsg.getChannelState()) {
+
+            this.updateInitOrderStateThrowException(RefundOrder.STATE_SUCCESS, refundOrder, channelRetMsg);
+            payMchNotifyService.refundOrderNotifyPolling(refundOrder);
+
+            //明确失败
+        } else if (ChannelRetMsg.ChannelState.CONFIRM_FAIL == channelRetMsg.getChannelState()) {
+
+            this.updateInitOrderStateThrowException(RefundOrder.STATE_FAIL, refundOrder, channelRetMsg);
+            payMchNotifyService.refundOrderNotifyPolling(refundOrder);
 
             // 上游处理中 || 未知 || 上游接口返回异常  退款单为退款中状态
         } else if (ChannelRetMsg.ChannelState.WAITING == channelRetMsg.getChannelState() ||
