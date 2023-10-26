@@ -277,7 +277,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfoByPayCode(mchNo, wayCode);
 
             if (mchAppConfigContext == null) {
-                throw new BizException("获取商户应用信息失败");
+                throw new BizException("获取商户应用信息失败280");
             }
 
             MchInfo mchInfo = mchAppConfigContext.getMchInfo();
