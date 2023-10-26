@@ -59,7 +59,13 @@ spring:
       enabled: true
       max-connections: 10
       idle-timeout: 30000  # 空闲的连接过期时间，默认为30秒
-
+  #  #rabbitmq配置  ( 注意： rabbitmq配置项需在spring的下级 )
+  rabbitmq:
+    addresses: 127.0.0.1:5672
+    username: jeepay
+    password: jeepay
+    dynamic: true
+    virtual-host: jeepay_vh
   #日志配置参数。
   # 当存在logback-spring.xml文件时： 该配置将引进到logback配置，  springboot配置不生效。
   # 不存在logback-spring.xml 文件时， 使用springboot的配置， 同样可用。
