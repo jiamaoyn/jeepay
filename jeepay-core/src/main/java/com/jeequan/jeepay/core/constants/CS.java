@@ -152,6 +152,7 @@ public class CS {
         String ALI_APP = "ALI_APP";  //支付宝 app支付
         String ALI_PC = "ALI_PC";  //支付宝 电脑网站支付
         String ALI_WAP = "ALI_WAP";  //支付宝 wap支付
+        String ALI_BILL = "ALI_BILL";  //支付宝 wap支付
         String ALI_QR = "ALI_QR";  //支付宝 二维码付款
 
         String YSF_BAR = "YSF_BAR";  //云闪付条码支付

@@ -23,6 +23,10 @@ public class AlipayNormalMchParams extends NormalMchParams {
      * appId
      */
     private String appId;
+    /**
+     * pid
+     */
+    private String pid;
 
     /**
      * privateKey
