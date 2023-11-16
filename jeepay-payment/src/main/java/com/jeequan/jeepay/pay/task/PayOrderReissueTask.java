@@ -74,7 +74,7 @@ public class PayOrderReissueTask {
     public void start_bill() {
 
         //当前时间 减去10分钟。
-        Date offsetDate = DateUtil.offsetMinute(new Date(), -3);
+        Date offsetDate = DateUtil.offsetMinute(new Date(), -20);
 
         //查询条件： 支付中的订单 & （ 订单创建时间 + 10分钟 <= 当前时间 ）
         LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).ge(PayOrder::getCreatedAt, offsetDate);
@@ -90,7 +90,7 @@ public class PayOrderReissueTask {
                 }
 
                 for (PayOrder payOrder : payOrderIPage.getRecords()) {
-                    channelOrderReissueService.processPayOrder(payOrder);
+                    channelOrderReissueService.processPayOrderBill(payOrder);
                 }
 
                 //已经到达页码最大量，无需再次查询

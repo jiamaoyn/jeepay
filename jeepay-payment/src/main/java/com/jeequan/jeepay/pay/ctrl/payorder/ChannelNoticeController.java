@@ -245,8 +245,10 @@ public class ChannelNoticeController extends AbstractCtrl {
             if (notifyResult.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
                 String string = stringRedisTemplate.opsForValue().get(payOrder.getPayOrderId()+payOrder.getMchOrderNo());
                 if (string != null){
+                    log.info("轮训方式");
                     payOrderProcessService.confirmSuccessPolling(payOrder);
                 } else {
+                    log.info("appid方式");
                     payOrderProcessService.confirmSuccess(payOrder);
                 }
             }
@@ -268,7 +270,6 @@ public class ChannelNoticeController extends AbstractCtrl {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 
     /*  跳转到支付成功页面 **/
     private String toReturnPage(String errInfo) {

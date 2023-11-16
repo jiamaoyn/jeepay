@@ -82,7 +82,54 @@ public class ChannelOrderReissueService {
         }
 
     }
+    public ChannelRetMsg processPayOrderBill(PayOrder payOrder) {
 
+        try {
+
+            String payOrderId = payOrder.getPayOrderId();
+
+            //查询支付接口是否存在
+            IPayOrderQueryService queryService = SpringBeansUtil.getBean(payOrder.getIfCode() + "PayOrderQueryService", IPayOrderQueryService.class);
+
+            // 支付通道接口实现不存在
+            if (queryService == null) {
+                log.error("{} interface not exists!", payOrder.getIfCode());
+                return null;
+            }
+
+            //查询出商户应用的配置信息
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
+
+            ChannelRetMsg channelRetMsg = queryService.query(payOrder, mchAppConfigContext);
+            if (channelRetMsg == null) {
+                log.error("channelRetMsg is null");
+                return null;
+            }
+
+            log.info("补单[{}]查询结果为：{}", payOrderId, channelRetMsg);
+
+            // 查询成功
+            if (channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
+                if (payOrderService.updateIng2Success(payOrderId, channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelUserId())) {
+
+                    //订单支付成功，其他业务逻辑
+                    payOrderProcessService.confirmSuccessPolling(payOrder);
+                }
+            } else if (channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_FAIL) {  //确认失败
+
+                //1. 更新支付订单表为失败状态
+                payOrderService.updateIng2Fail(payOrderId, channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelUserId(), channelRetMsg.getChannelErrCode(), channelRetMsg.getChannelErrMsg());
+
+            }
+
+            return channelRetMsg;
+
+        } catch (Exception e) {  //继续下一次迭代查询
+            log.error("error payOrderId = {}", payOrder.getPayOrderId(), e);
+            return null;
+        }
+
+    }
     /**
      * 处理退款订单
      **/

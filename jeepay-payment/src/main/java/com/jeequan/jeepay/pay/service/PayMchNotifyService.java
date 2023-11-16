@@ -56,7 +56,7 @@ public class PayMchNotifyService {
 
             //商户app私钥
             String appSecret = configContextQueryService.queryMchApp(dbPayOrder.getMchNo(), dbPayOrder.getAppId()).getAppSecret();
-
+            log.info("dbPayOrder.getPayOrderId():"+dbPayOrder.getPayOrderId()+"appSecret:"+appSecret);
             // 封装通知url
             String notifyUrl = createNotifyUrl(dbPayOrder, appSecret);
             mchNotifyRecord = new MchNotifyRecord();
@@ -108,7 +108,7 @@ public class PayMchNotifyService {
 
             //商户app私钥
             String appSecret = configContextQueryService.queryMchInfo(dbPayOrder.getMchNo()).getSecret();
-
+            log.info("appSecret:"+appSecret);
             // 封装通知url
             String notifyUrl = createNotifyUrl(dbPayOrder, appSecret);
             mchNotifyRecord = new MchNotifyRecord();
@@ -306,7 +306,7 @@ public class PayMchNotifyService {
         QueryPayOrderRS queryPayOrderRS = QueryPayOrderRS.buildByPayOrder(payOrder);
         JSONObject jsonObject = (JSONObject) JSONObject.toJSON(queryPayOrderRS);
         jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
-
+        log.info("回调参数加密前："+jsonObject);
         // 报文签名
         jsonObject.put("sign", JeepayKit.getSign(jsonObject, appSecret));
 
