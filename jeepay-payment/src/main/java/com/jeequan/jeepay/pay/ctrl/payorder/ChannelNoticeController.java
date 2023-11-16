@@ -270,6 +270,17 @@ public class ChannelNoticeController extends AbstractCtrl {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @ResponseBody
+    @RequestMapping(value = {"/api/pay/notify2/{payOrderId}"})
+    public ResponseEntity doNotifySend(@PathVariable(value = "payOrderId") String payOrderId) {
+            //获取订单号 和 订单数据
+            PayOrder payOrder = payOrderService.getById(payOrderId);
+
+            payOrderProcessService.confirmSuccessPolling(payOrder);
+
+            return ResponseEntity.ok("通知好了");
+
+    }
 
     /*  跳转到支付成功页面 **/
     private String toReturnPage(String errInfo) {
