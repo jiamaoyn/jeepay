@@ -39,7 +39,7 @@ public class PayOrderReissueTask {
         Date offsetDate = DateUtil.offsetMinute(new Date(), -10);
 
         //查询条件： 支付中的订单 & （ 订单创建时间 + 10分钟 >= 当前时间 ）
-        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).le(PayOrder::getCreatedAt, offsetDate);
+        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).notIn(PayOrder::getIfCode, "ALI_BILL").le(PayOrder::getCreatedAt, offsetDate);
 
         int currentPageIndex = 1; //当前页码
         while (true) {
@@ -77,7 +77,7 @@ public class PayOrderReissueTask {
         Date offsetDate = DateUtil.offsetMinute(new Date(), -20);
 
         //查询条件： 支付中的订单 & （ 订单创建时间 + 10分钟 <= 当前时间 ）
-        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).ge(PayOrder::getCreatedAt, offsetDate);
+        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).in(PayOrder::getIfCode, "ALI_BILL").ge(PayOrder::getCreatedAt, offsetDate);
 
         int currentPageIndex = 1; //当前页码
         while (true) {
