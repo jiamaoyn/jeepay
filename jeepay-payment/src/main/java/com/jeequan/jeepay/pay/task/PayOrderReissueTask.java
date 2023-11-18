@@ -39,7 +39,7 @@ public class PayOrderReissueTask {
         Date offsetDate = DateUtil.offsetMinute(new Date(), -10);
 
         //查询条件： 支付中的订单 & （ 订单创建时间 + 10分钟 >= 当前时间 ）
-        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).notIn(PayOrder::getIfCode, "ALI_BILL").le(PayOrder::getCreatedAt, offsetDate);
+        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).notIn(PayOrder::getWayCode, "ALI_BILL").le(PayOrder::getCreatedAt, offsetDate);
 
         int currentPageIndex = 1; //当前页码
         while (true) {
@@ -70,36 +70,26 @@ public class PayOrderReissueTask {
         }
     }
 
-    @Scheduled(cron = "*/2 * * * * ?") // 每分钟执行一次
+    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
     public void start_bill() {
-
-        //当前时间 减去10分钟。
-        Date offsetDate = DateUtil.offsetMinute(new Date(), -20);
-
-        //查询条件： 支付中的订单 & （ 订单创建时间 + 10分钟 <= 当前时间 ）
-        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).in(PayOrder::getIfCode, "ALI_BILL").ge(PayOrder::getCreatedAt, offsetDate);
-
+        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).in(PayOrder::getWayCode, "ALI_BILL");
         int currentPageIndex = 1; //当前页码
         while (true) {
-
             try {
                 IPage<PayOrder> payOrderIPage = payOrderService.page(new Page(currentPageIndex, QUERY_PAGE_SIZE), lambdaQueryWrapper);
-
                 if (payOrderIPage == null || payOrderIPage.getRecords().isEmpty()) { //本次查询无结果, 不再继续查询;
+                    log.info("本次查询无结果, 不再继续查询");
                     break;
                 }
-
                 for (PayOrder payOrder : payOrderIPage.getRecords()) {
+                    log.info("本次查询payOrder, 不再继续查询"+payOrder);
                     channelOrderReissueService.processPayOrderBill(payOrder);
                 }
-
                 //已经到达页码最大量，无需再次查询
                 if (payOrderIPage.getPages() <= currentPageIndex) {
                     break;
                 }
                 currentPageIndex++;
-
-
             } catch (Exception e) { //出现异常，直接退出，避免死循环。
                 log.error("error", e);
                 break;

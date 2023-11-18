@@ -41,7 +41,7 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
             AlipayDataBillAccountlogQueryModel model = new AlipayDataBillAccountlogQueryModel();
             // 获取当前时间
             LocalDateTime now = LocalDateTime.now();
-            LocalDateTime threeMinutesAgo = now.minusMinutes(30);
+            LocalDateTime threeMinutesAgo = now.minusMinutes(100);
             model.setStartTime(threeMinutesAgo.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             model.setEndTime(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             request.setBizModel(model);
@@ -61,6 +61,8 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
                         System.out.println("trans_memo:" + accountLogItemResult.getTransMemo());
                     }
                 }
+            } else {
+                System.out.println(resp.getBody()+resp.getMsg()+resp.getSubCode());
             }
             return ChannelRetMsg.waiting(); //支付中
         }

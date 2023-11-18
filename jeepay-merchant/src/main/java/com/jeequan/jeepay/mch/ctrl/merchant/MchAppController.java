@@ -17,6 +17,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,8 @@ public class MchAppController extends CommonCtrl {
 
     @Autowired
     private MchAppService mchAppService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private IMQSender mqSender;
 
@@ -72,6 +75,7 @@ public class MchAppController extends CommonCtrl {
         if (!result) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
         }
+        stringRedisTemplate.delete(mchApp.getMchNo());
         return ApiRes.ok();
     }
 
@@ -117,6 +121,7 @@ public class MchAppController extends CommonCtrl {
         if (!result) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
         }
+        stringRedisTemplate.delete(mchApp.getMchNo());
         // 推送修改应用消息
         mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, mchApp.getMchNo(), appId));
         return ApiRes.ok();
@@ -138,7 +143,7 @@ public class MchAppController extends CommonCtrl {
         }
 
         mchAppService.removeByAppId(appId);
-
+        stringRedisTemplate.delete(mchApp.getMchNo());
         // 推送mq到目前节点进行更新数据
         mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, mchApp.getMchNo(), appId));
         return ApiRes.ok();

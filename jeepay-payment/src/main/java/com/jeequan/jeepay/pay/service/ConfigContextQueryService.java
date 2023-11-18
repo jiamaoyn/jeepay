@@ -94,7 +94,7 @@ public class ConfigContextQueryService {
 
     public MchAppConfigContext queryMchInfoAndAppInfoByPayCode(String mchNo, String wayCode) {
         List<MchApp> mchAppList = new ArrayList<>();
-        mchAppService.list(MchApp.gw().eq(MchApp::getMchNo, mchNo)).forEach(mchApp -> {
+        mchAppService.list(MchApp.gw().eq(MchApp::getMchNo, mchNo).eq(MchApp::getState, CS.PUB_USABLE)).forEach(mchApp -> {
             MchPayPassage payInterfaceConfig = mchPayPassageService.getOne(MchPayPassage.gw()
                     .select(MchPayPassage::getIfCode, MchPayPassage::getAppId)
                     .eq(MchPayPassage::getState, CS.PUB_USABLE)

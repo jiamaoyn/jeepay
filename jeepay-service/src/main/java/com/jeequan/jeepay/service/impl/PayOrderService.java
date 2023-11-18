@@ -80,6 +80,15 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
                 .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_ING));
     }
+    public boolean updateIng2SuccessDiy(String payOrderId) {
+
+        PayOrder updateRecord = new PayOrder();
+        updateRecord.setState(PayOrder.STATE_SUCCESS);
+        updateRecord.setSuccessTime(new Date());
+
+        return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
+                .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_ING));
+    }
 
     /**
      * 更新订单状态  【支付中】 --》 【订单关闭】
@@ -540,11 +549,9 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         }
         // 三合一订单
         if (paramJSON != null && StringUtils.isNotEmpty(paramJSON.getString("unionOrderId"))) {
-            wrapper.and(wr -> {
-                wr.eq(PayOrder::getPayOrderId, paramJSON.getString("unionOrderId"))
-                        .or().eq(PayOrder::getMchOrderNo, paramJSON.getString("unionOrderId"))
-                        .or().eq(PayOrder::getChannelOrderNo, paramJSON.getString("unionOrderId"));
-            });
+            wrapper.and(wr -> wr.like(PayOrder::getPayOrderId, "%" + paramJSON.getString("unionOrderId") + "%")
+                    .or().like(PayOrder::getMchOrderNo, "%" + paramJSON.getString("unionOrderId") + "%")
+                    .or().like(PayOrder::getChannelOrderNo, "%" + paramJSON.getString("unionOrderId") + "%"));
         }
 
         wrapper.orderByDesc(PayOrder::getCreatedAt);

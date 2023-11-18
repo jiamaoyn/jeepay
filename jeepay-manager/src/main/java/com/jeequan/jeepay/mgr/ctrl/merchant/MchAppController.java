@@ -20,8 +20,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * 商户应用管理类
  */
@@ -32,11 +30,13 @@ import java.util.concurrent.TimeUnit;
 public class MchAppController extends CommonCtrl {
 
     private final MchInfoService mchInfoService;
+    private final StringRedisTemplate stringRedisTemplate;
     private final MchAppService mchAppService;
     private final IMQSender mqSender;
 
-    public MchAppController(MchInfoService mchInfoService, MchAppService mchAppService, IMQSender mqSender) {
+    public MchAppController(MchInfoService mchInfoService, StringRedisTemplate stringRedisTemplate, MchAppService mchAppService, IMQSender mqSender) {
         this.mchInfoService = mchInfoService;
+        this.stringRedisTemplate = stringRedisTemplate;
         this.mchAppService = mchAppService;
         this.mqSender = mqSender;
     }
@@ -90,6 +90,7 @@ public class MchAppController extends CommonCtrl {
         if (!result) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
         }
+        stringRedisTemplate.delete(mchApp.getMchNo());
         return ApiRes.ok();
     }
 
@@ -135,6 +136,7 @@ public class MchAppController extends CommonCtrl {
         if (!result) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
         }
+        stringRedisTemplate.delete(mchApp.getMchNo());
         // 推送修改应用消息
         mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, mchApp.getMchNo(), appId));
         return ApiRes.ok();
@@ -155,7 +157,7 @@ public class MchAppController extends CommonCtrl {
 
         MchApp mchApp = mchAppService.getById(appId);
         mchAppService.removeByAppId(appId);
-
+        stringRedisTemplate.delete(mchApp.getMchNo());
         // 推送mq到目前节点进行更新数据
         mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, mchApp.getMchNo(), appId));
         return ApiRes.ok();
