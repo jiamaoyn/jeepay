@@ -142,14 +142,7 @@ public class PayOrderController extends CommonCtrl {
         payOrderService.updateIng2SuccessDiy(payOrderId);
         payOrder = payOrderService.getById(payOrder.getPayOrderId());
         payOrder.setState(PayOrder.STATE_SUCCESS);
-        String string = stringRedisTemplate.opsForValue().get(payOrder.getPayOrderId()+payOrder.getMchOrderNo());
-        if (string != null){
-            //发送商户通知
-            payOrderNotifyPolling(payOrder);
-        } else {
-            //发送商户通知
-            payOrderNotify(payOrder);
-        }
+        payOrderNotifyPolling(payOrder);
         return ApiRes.ok();
     }
 
