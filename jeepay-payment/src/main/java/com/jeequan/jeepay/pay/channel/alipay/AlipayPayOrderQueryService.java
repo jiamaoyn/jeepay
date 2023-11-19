@@ -8,6 +8,7 @@ import com.alipay.api.response.AlipayDataBillAccountlogQueryResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.pay.channel.IPayOrderQueryService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
@@ -50,15 +51,15 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
                 List<AccountLogItemResult> transferDetailResults = resp.getDetailList();
                 if (transferDetailResults!=null){
                     for (AccountLogItemResult accountLogItemResult : transferDetailResults) {
-                        if (accountLogItemResult.getTransMemo().equals(payOrder.getPayOrderId())) {
+                        if (accountLogItemResult.getTransMemo().equals(payOrder.getPayOrderId()) && Long.parseLong(AmountUtil.convertDollar2Cent(accountLogItemResult.getTransAmount())) == payOrder.getAmount()) {
+                            System.out.println("alipay_order_no:" + accountLogItemResult.getAlipayOrderNo());
+                            System.out.println("balance:" + accountLogItemResult.getBalance());
+                            System.out.println("trans_amount:" + accountLogItemResult.getTransAmount());
+                            System.out.println("direction:" + accountLogItemResult.getDirection());
+                            System.out.println("trans_dt:" + accountLogItemResult.getTransDt());
+                            System.out.println("trans_memo:" + accountLogItemResult.getTransMemo());
                             return ChannelRetMsg.confirmSuccess(accountLogItemResult.getAlipayOrderNo());  //支付成功
                         }
-                        System.out.println("alipay_order_no:" + accountLogItemResult.getAlipayOrderNo());
-                        System.out.println("balance:" + accountLogItemResult.getBalance());
-                        System.out.println("trans_amount:" + accountLogItemResult.getTransAmount());
-                        System.out.println("direction:" + accountLogItemResult.getDirection());
-                        System.out.println("trans_dt:" + accountLogItemResult.getTransDt());
-                        System.out.println("trans_memo:" + accountLogItemResult.getTransMemo());
                     }
                 }
             } else {
