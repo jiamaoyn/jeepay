@@ -18,12 +18,14 @@ import java.util.concurrent.atomic.AtomicLong;
 public class SeqKit {
 
     private static final AtomicLong PAY_ORDER_SEQ = new AtomicLong(0L);
+    private static final AtomicLong PAY_ORDER_ACTIVE_SEQ = new AtomicLong(0L);
     private static final AtomicLong REFUND_ORDER_SEQ = new AtomicLong(0L);
     private static final AtomicLong MHO_ORDER_SEQ = new AtomicLong(0L);
     private static final AtomicLong TRANSFER_ID_SEQ = new AtomicLong(0L);
     private static final AtomicLong DIVISION_BATCH_ID_SEQ = new AtomicLong(0L);
 
     private static final String PAY_ORDER_SEQ_PREFIX = "P";
+    private static final String PAY_ORDER_ACTIVE_SEQ_PREFIX = "active";
     private static final String REFUND_ORDER_SEQ_PREFIX = "R";
     private static final String MHO_ORDER_SEQ_PREFIX = "M";
     private static final String TRANSFER_ID_SEQ_PREFIX = "T";
@@ -44,6 +46,17 @@ public class SeqKit {
         return String.format("%s%s%04d", PAY_ORDER_SEQ_PREFIX,
                 DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
                 (int) PAY_ORDER_SEQ.getAndIncrement() % 10000);
+    }
+    /**
+     * 手动回调生成支付订单号
+     **/
+    public static String genPayOrderACTIVEId() {
+        if (IS_USE_MP_ID) {
+            return PAY_ORDER_ACTIVE_SEQ_PREFIX + IdWorker.getIdStr();
+        }
+        return String.format("%s%s%04d", PAY_ORDER_ACTIVE_SEQ_PREFIX,
+                DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN),
+                (int) PAY_ORDER_ACTIVE_SEQ.getAndIncrement() % 10000);
     }
 
     /**

@@ -127,7 +127,7 @@ public class PayOrderController extends CommonCtrl {
         }
         return ApiRes.ok(payOrder);
     }
-    @ApiOperation("支付订单信息详情")
+    @ApiOperation("手动回调支付订单")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
             @ApiImplicitParam(name = "payOrderId", value = "支付订单号", required = true)
@@ -136,6 +136,7 @@ public class PayOrderController extends CommonCtrl {
     @RequestMapping(value = "detailNotify/{payOrderId}", method = RequestMethod.GET)
     public ApiRes detailNotify(@PathVariable("payOrderId") String payOrderId) {
         PayOrder payOrder = payOrderService.getById(payOrderId);
+        System.out.println("手动回调订单:"+payOrderId);
         if (payOrder == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
@@ -217,7 +218,6 @@ public class PayOrderController extends CommonCtrl {
 
             //获取到通知对象
             MchNotifyRecord mchNotifyRecord = mchNotifyRecordService.findByPayOrder(dbPayOrder.getPayOrderId());
-
             if (mchNotifyRecord != null) {
                 return;
             }

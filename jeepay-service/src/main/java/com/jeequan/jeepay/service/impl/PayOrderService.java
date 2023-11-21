@@ -14,6 +14,7 @@ import com.jeequan.jeepay.core.entity.IsvInfo;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayWay;
+import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.service.mapper.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -83,11 +84,12 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
     public boolean updateIng2SuccessDiy(String payOrderId) {
 
         PayOrder updateRecord = new PayOrder();
+        updateRecord.setChannelOrderNo(SeqKit.genPayOrderACTIVEId());
         updateRecord.setState(PayOrder.STATE_SUCCESS);
         updateRecord.setSuccessTime(new Date());
 
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
-                .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_ING));
+                .eq(PayOrder::getPayOrderId, payOrderId));
     }
 
     /**

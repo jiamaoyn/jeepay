@@ -51,13 +51,15 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
                 List<AccountLogItemResult> transferDetailResults = resp.getDetailList();
                 if (transferDetailResults!=null){
                     for (AccountLogItemResult accountLogItemResult : transferDetailResults) {
+//                        System.out.println("accountLogItemResult-------------start");
+//                        System.out.println("alipay_order_no:" + accountLogItemResult.getAlipayOrderNo());
+//                        System.out.println("balance:" + accountLogItemResult.getBalance());
+//                        System.out.println("trans_amount:" + accountLogItemResult.getTransAmount());
+//                        System.out.println("direction:" + accountLogItemResult.getDirection());
+//                        System.out.println("trans_dt:" + accountLogItemResult.getTransDt());
+//                        System.out.println("trans_memo:" + accountLogItemResult.getTransMemo());
+//                        System.out.println("accountLogItemResult-------------end");
                         if (accountLogItemResult.getTransMemo().equals(payOrder.getPayOrderId()) && Long.parseLong(AmountUtil.convertDollar2Cent(accountLogItemResult.getTransAmount())) == payOrder.getAmount()) {
-                            System.out.println("alipay_order_no:" + accountLogItemResult.getAlipayOrderNo());
-                            System.out.println("balance:" + accountLogItemResult.getBalance());
-                            System.out.println("trans_amount:" + accountLogItemResult.getTransAmount());
-                            System.out.println("direction:" + accountLogItemResult.getDirection());
-                            System.out.println("trans_dt:" + accountLogItemResult.getTransDt());
-                            System.out.println("trans_memo:" + accountLogItemResult.getTransMemo());
                             return ChannelRetMsg.confirmSuccess(accountLogItemResult.getAlipayOrderNo());  //支付成功
                         }
                     }
