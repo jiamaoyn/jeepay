@@ -90,7 +90,6 @@ public abstract class ApiController extends AbstractCtrl {
 
         // 验签
         String appSecret = mchApp.getAppSecret();
-        System.out.println(appSecret);
         // 转换为 JSON
         JSONObject bizReqJSON = (JSONObject) JSONObject.toJSON(bizRQ);
         bizReqJSON.remove("sign");
@@ -146,7 +145,6 @@ public abstract class ApiController extends AbstractCtrl {
 
         // 验签
         String appSecret = mchAppConfigContext.getMchInfo().getSecret();
-        System.out.println(appSecret);
         // 转换为 JSON
         JSONObject bizReqJSON = (JSONObject) JSONObject.toJSON(bizRQ);
         bizReqJSON.remove("sign");

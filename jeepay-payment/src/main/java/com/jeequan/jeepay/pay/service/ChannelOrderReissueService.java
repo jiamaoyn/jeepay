@@ -99,16 +99,13 @@ public class ChannelOrderReissueService {
                 log.error("channelRetMsg is null");
                 return null;
             }
-            log.info("补单[{}]查询结果为：{}", payOrderId, channelRetMsg);
+            log.info("补单[{}]查询结果为：{}", payOrderId, channelRetMsg.getChannelState());
             // 查询成功
             if (channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
                 if (payOrderService.updateIng2Success(payOrderId, channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelUserId())) {
                     //订单支付成功，其他业务逻辑
                     payOrderProcessService.confirmSuccessPolling(payOrder);
                 }
-            } else if (channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_FAIL) {  //确认失败
-                //1. 更新支付订单表为失败状态
-                payOrderService.updateIng2Fail(payOrderId, channelRetMsg.getChannelOrderId(), channelRetMsg.getChannelUserId(), channelRetMsg.getChannelErrCode(), channelRetMsg.getChannelErrMsg());
             }
             return channelRetMsg;
         } catch (Exception e) {  //继续下一次迭代查询

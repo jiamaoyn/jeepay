@@ -54,7 +54,6 @@ public class AliJsapi extends AlipayPaymentService {
         model.setBuyerOpenId(bizRQ.getBuyerOpenId());
         req.setNotifyUrl(getNotifyUrl()); // 设置异步通知地址
         req.setBizModel(model);
-        System.out.println(req.getBizModel());
         //统一放置 isv接口必传信息
         AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
 

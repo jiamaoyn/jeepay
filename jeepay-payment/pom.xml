@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion> <!-- POM模型版本 -->
-    <artifactId>payment</artifactId>  <!-- 项目名称 -->
+    <artifactId>jeepay-payment</artifactId>  <!-- 项目名称 -->
     <packaging>jar</packaging> <!-- 项目的最终打包类型/发布形式, 可选[jar, war, pom, maven-plugin]等 -->
     <version>2.2.1</version> <!-- 项目当前版本号 -->
     <description>Jeepay计全支付系统 [统一支付网关]</description> <!-- 项目描述 -->
