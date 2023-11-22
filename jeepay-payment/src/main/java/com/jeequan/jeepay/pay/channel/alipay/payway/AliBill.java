@@ -25,6 +25,9 @@ public class AliBill extends AlipayPaymentService {
         // 构造函数响应数据
         AliBillOrderRS res = new AliBillOrderRS();
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
+        String scheme = request.getScheme(); // "http" 或 "https"
+        String serverName = request.getServerName(); // "localhost" 或其他域名
+        System.out.println(scheme + "://" + serverName);
         String url = sysConfigService.getDBApplicationConfig().getPaySiteUrl() + "/api/pay/bill/" + payOrder.getPayOrderId();
         // ↓↓↓↓↓↓ 调起接口成功后业务判断务必谨慎！！ 避免因代码编写bug，导致不能正确返回订单状态信息  ↓↓↓↓↓↓
         res.setCodeUrl(url);
