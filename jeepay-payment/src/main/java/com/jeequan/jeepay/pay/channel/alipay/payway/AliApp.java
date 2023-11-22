@@ -18,6 +18,8 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliAppOrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+
 /*
  * 支付宝 APP支付
  */
@@ -30,7 +32,7 @@ public class AliApp extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) {
 
         AlipayTradeAppPayRequest req = new AlipayTradeAppPayRequest();
         AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();

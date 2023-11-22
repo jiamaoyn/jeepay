@@ -20,6 +20,8 @@ import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+
 /*
  * 支付宝 jsapi支付
  * @date 2021/6/8 17:20
@@ -39,7 +41,7 @@ public class AliJsapi extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) throws Exception {
 
         AliJsapiOrderRQ bizRQ = (AliJsapiOrderRQ) rq;
 

@@ -11,6 +11,8 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliBillOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliBillOrderRS;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Service("alipayPaymentByAliBillService") //Service Name需保持全局唯一性
 public class AliBill extends AlipayPaymentService {
     @Override
@@ -19,7 +21,7 @@ public class AliBill extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) {
         // 构造函数响应数据
         AliBillOrderRS res = new AliBillOrderRS();
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();

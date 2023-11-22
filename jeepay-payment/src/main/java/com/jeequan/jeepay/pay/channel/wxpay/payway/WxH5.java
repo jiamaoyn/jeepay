@@ -21,6 +21,8 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxH5OrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+
 /*
  * 微信 H5 支付
  *
@@ -37,7 +39,7 @@ public class WxH5 extends WxpayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) {
 
         WxH5OrderRQ bizRQ = (WxH5OrderRQ) rq;
 

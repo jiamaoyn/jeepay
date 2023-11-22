@@ -19,6 +19,8 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxAppOrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+
 /*
  * 微信 app支付
  *
@@ -35,7 +37,7 @@ public class WxApp extends WxpayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) throws Exception {
 
         WxPayUnifiedOrderRequest req = buildUnifiedOrderRequest(payOrder, mchAppConfigContext);
         req.setTradeType(WxPayConstants.TradeType.APP);

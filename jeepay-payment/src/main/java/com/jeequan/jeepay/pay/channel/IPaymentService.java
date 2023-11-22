@@ -5,6 +5,8 @@ import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
 import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 
+import javax.servlet.http.HttpServletRequest;
+
 /*
  * 调起上游渠道侧支付接口
  * @date 2021/5/8 15:13
@@ -35,6 +37,6 @@ public interface IPaymentService {
     /**
      * 调起支付接口，并响应数据；  内部处理普通商户和服务商模式
      **/
-    AbstractRS pay(UnifiedOrderRQ bizRQ, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
+    AbstractRS pay(UnifiedOrderRQ bizRQ, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) throws Exception;
 
 }

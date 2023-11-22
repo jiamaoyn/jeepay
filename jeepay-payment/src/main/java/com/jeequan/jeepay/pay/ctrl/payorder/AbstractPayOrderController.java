@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Date;
@@ -193,7 +194,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             }
 
             //调起上游支付接口
-            bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext);
+            bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext, null);
 
             //处理上游返回数据
             this.processChannelMsg(bizRS.getChannelRetMsg(), payOrder);
@@ -223,14 +224,14 @@ public abstract class AbstractPayOrderController extends ApiController {
     /**
      * 统一下单 (新建订单模式)
      **/
-    protected ApiRes unifiedOrderPolling(String wayCode, UnifiedOrderRQ bizRQ) {
-        return unifiedOrderPolling(wayCode, bizRQ, null);
+    protected ApiRes unifiedOrderPolling(String wayCode, UnifiedOrderRQ bizRQ, HttpServletRequest request) {
+        return unifiedOrderPolling(wayCode, bizRQ, null, request);
     }
 
     /**
      * 统一下单
      **/
-    protected ApiRes unifiedOrderPolling(String wayCode, UnifiedOrderRQ bizRQ, PayOrder payOrder) {
+    protected ApiRes unifiedOrderPolling(String wayCode, UnifiedOrderRQ bizRQ, PayOrder payOrder, HttpServletRequest request) {
 
         // 响应数据
         UnifiedOrderRS bizRS = null;
@@ -352,7 +353,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             }
 
             //调起上游支付接口
-            bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext);
+            bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext, request);
 
             //处理上游返回数据
             this.processChannelMsgPolling(bizRS.getChannelRetMsg(), payOrder);

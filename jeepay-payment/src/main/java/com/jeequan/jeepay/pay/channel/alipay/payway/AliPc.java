@@ -20,6 +20,8 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliPcOrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+
 /*
  * 支付宝 PC支付
  * @date 2021/6/8 17:21
@@ -33,7 +35,7 @@ public class AliPc extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) {
 
         AliPcOrderRQ bizRQ = (AliPcOrderRQ) rq;
 

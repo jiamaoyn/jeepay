@@ -20,6 +20,8 @@ import com.jeequan.jeepay.pay.rqrs.payorder.payway.WxNativeOrderRS;
 import com.jeequan.jeepay.pay.util.ApiResBuilder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+
 /*
  * 微信 native支付
  *
@@ -36,7 +38,7 @@ public class WxNative extends WxpayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) {
 
         WxNativeOrderRQ bizRQ = (WxNativeOrderRQ) rq;
 

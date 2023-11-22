@@ -9,6 +9,8 @@ import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+
 /*
  * 微信 条码支付
  *
@@ -28,7 +30,7 @@ public class WxBar extends WxpayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
-        return wxBar.pay(rq, payOrder, mchAppConfigContext);
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) throws Exception {
+        return wxBar.pay(rq, payOrder, mchAppConfigContext, request);
     }
 }

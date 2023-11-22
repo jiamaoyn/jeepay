@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 统一下单 controller
  */
@@ -30,14 +32,14 @@ public class UnifiedOrderPollingController extends AbstractPayOrderController {
      * 统一下单接口
      **/
     @PostMapping("/api/pay/unifiedOrderPolling")
-    public ApiRes unifiedOrderPolling() {
+    public ApiRes unifiedOrderPolling(HttpServletRequest request) {
 
         //获取参数 & 验签
         UnifiedOrderRQ rq = getRQByWithMchSignPolling(UnifiedOrderRQ.class);
 
         UnifiedOrderRQ bizRQ = buildBizRQ(rq);
         //实现子类的res
-        ApiRes apiRes = unifiedOrderPolling(bizRQ.getWayCode(), bizRQ);
+        ApiRes apiRes = unifiedOrderPolling(bizRQ.getWayCode(), bizRQ, request);
         if (apiRes.getData() == null) {
             return apiRes;
         }
