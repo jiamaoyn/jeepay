@@ -21,4 +21,5 @@ public interface IPayOrderQueryService {
      **/
     ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
 
+    ChannelRetMsg queryTelegramBot(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
 }

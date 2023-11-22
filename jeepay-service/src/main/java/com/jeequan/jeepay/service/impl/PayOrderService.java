@@ -81,6 +81,16 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
                 .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_ING));
     }
+    public boolean updateIng2Success(String payOrderId, String channelOrderNo) {
+
+        PayOrder updateRecord = new PayOrder();
+        updateRecord.setState(PayOrder.STATE_SUCCESS);
+        updateRecord.setChannelOrderNo(channelOrderNo);
+        updateRecord.setSuccessTime(new Date());
+
+        return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
+                .eq(PayOrder::getPayOrderId, payOrderId));
+    }
     public boolean updateIng2SuccessDiy(String payOrderId) {
 
         PayOrder updateRecord = new PayOrder();
@@ -166,6 +176,15 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
 
         if (StringUtils.isNotEmpty(payOrderId)) {
             return getOne(PayOrder.gw().eq(PayOrder::getPayOrderId, payOrderId));
+        }else {
+            return null;
+        }
+    }
+
+    public PayOrder queryMchOrderNo(String mchOrderNo) {
+
+        if (StringUtils.isNotEmpty(mchOrderNo)) {
+            return getOne(PayOrder.gw().eq(PayOrder::getMchOrderNo, mchOrderNo));
         }else {
             return null;
         }

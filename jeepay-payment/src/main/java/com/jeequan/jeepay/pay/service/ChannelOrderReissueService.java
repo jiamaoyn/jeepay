@@ -113,6 +113,37 @@ public class ChannelOrderReissueService {
             return null;
         }
     }
+    public ChannelRetMsg processPayOrderBillTelegramBot(PayOrder payOrder) {
+        try {
+            String payOrderId = payOrder.getPayOrderId();
+            //查询支付接口是否存在
+            IPayOrderQueryService queryService = SpringBeansUtil.getBean(payOrder.getIfCode() + "PayOrderQueryService", IPayOrderQueryService.class);
+            // 支付通道接口实现不存在
+            if (queryService == null) {
+                log.error("{} interface not exists!", payOrder.getIfCode());
+                return null;
+            }
+            //查询出商户应用的配置信息
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
+            ChannelRetMsg channelRetMsg = queryService.queryTelegramBot(payOrder, mchAppConfigContext);
+            if (channelRetMsg == null) {
+                channelRetMsg = new ChannelRetMsg();
+                channelRetMsg.setChannelErrMsg("上游查询失败,检查配置参数");
+                return null;
+            }
+            // 查询成功
+            if (channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS) {
+                if (payOrderService.updateIng2Success(payOrderId, channelRetMsg.getChannelOrderId())) {
+                    //订单支付成功，其他业务逻辑
+                    payOrderProcessService.confirmSuccessPolling(payOrder);
+                }
+            }
+            return channelRetMsg;
+        } catch (Exception e) {  //继续下一次迭代查询
+            log.error("error payOrderId = {}", payOrder.getPayOrderId(), e);
+            return null;
+        }
+    }
     /**
      * 处理退款订单
      **/

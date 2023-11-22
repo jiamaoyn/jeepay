@@ -106,4 +106,9 @@ public class WxpayPayOrderQueryService implements IPayOrderQueryService {
         }
     }
 
+    @Override
+    public ChannelRetMsg queryTelegramBot(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
+        return null;
+    }
+
 }
