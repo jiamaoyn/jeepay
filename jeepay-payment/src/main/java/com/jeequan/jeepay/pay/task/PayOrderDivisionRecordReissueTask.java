@@ -39,7 +39,7 @@ public class PayOrderDivisionRecordReissueTask {
     @Autowired
     private PayOrderService payOrderService;
 
-//    @Scheduled(cron = "0 0/1 * * * ?") // 每分钟执行一次
+    @Scheduled(cron = "0 0/1 * * * ?") // 每分钟执行一次
     public void start() {
 
         log.info("处理分账补单任务 开始");
