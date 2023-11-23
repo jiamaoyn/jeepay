@@ -1,14 +1,15 @@
 package com.jeequan.jeepay.pay.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.jeequan.jeepay.components.mq.model.PayOrderMchNotifyMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
-import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.core.utils.JeepayKit;
+import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRS;
 import com.jeequan.jeepay.pay.rqrs.refund.QueryRefundOrderRS;
@@ -18,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /*
  * 商户通知 service
@@ -44,10 +47,11 @@ public class PayMchNotifyService {
             }
             //获取到通知对象
             mchNotifyRecord = mchNotifyRecordService.findByPayOrder(mchNotifyRecord.getOrderId());
-            if (mchNotifyRecord.getOrderType() == MchNotifyRecord.TYPE_PAY_ORDER && mchNotifyRecord.getState() == MchNotifyRecord.STATE_ING) {
+            if (mchNotifyRecord.getOrderType() == MchNotifyRecord.TYPE_PAY_ORDER && mchNotifyRecord.getState() != MchNotifyRecord.STATE_ING) {
                 log.info("当前通知消息已完成， 不再发送。");
                 return;
             }
+            mchNotifyRecordService.updateNotifyRecord(mchNotifyRecord);
             //推送到MQ
             Long notifyId = mchNotifyRecord.getNotifyId();
             mqSender.send(PayOrderMchNotifyMQ.build(notifyId));
