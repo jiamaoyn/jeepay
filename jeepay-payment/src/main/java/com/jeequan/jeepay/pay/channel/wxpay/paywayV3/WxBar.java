@@ -30,7 +30,7 @@ public class WxBar extends WxpayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) throws Exception {
-        return wxBar.pay(rq, payOrder, mchAppConfigContext, request);
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
+        return wxBar.pay(rq, payOrder, mchAppConfigContext);
     }
 }

@@ -32,14 +32,14 @@ public class UnifiedOrderPollingController extends AbstractPayOrderController {
      * 统一下单接口
      **/
     @PostMapping("/api/pay/unifiedOrderPolling")
-    public ApiRes unifiedOrderPolling(HttpServletRequest request) {
+    public ApiRes unifiedOrderPolling() {
 
         //获取参数 & 验签
         UnifiedOrderRQ rq = getRQByWithMchSignPolling(UnifiedOrderRQ.class);
 
         UnifiedOrderRQ bizRQ = buildBizRQ(rq);
         //实现子类的res
-        ApiRes apiRes = unifiedOrderPolling(bizRQ.getWayCode(), bizRQ, request);
+        ApiRes apiRes = unifiedOrderPolling(bizRQ.getWayCode(), bizRQ);
         if (apiRes.getData() == null) {
             return apiRes;
         }

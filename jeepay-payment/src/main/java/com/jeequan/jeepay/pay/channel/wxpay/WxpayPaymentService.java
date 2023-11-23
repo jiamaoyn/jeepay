@@ -47,7 +47,7 @@ public class WxpayPaymentService extends AbstractPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) throws Exception {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
 
         // 微信API版本
 
@@ -55,9 +55,9 @@ public class WxpayPaymentService extends AbstractPaymentService {
 
         String apiVersion = wxServiceWrapper.getApiVersion();
         if (CS.PAY_IF_VERSION.WX_V2.equals(apiVersion)) {
-            return PaywayUtil.getRealPaywayService(this, payOrder.getWayCode()).pay(rq, payOrder, mchAppConfigContext, request);
+            return PaywayUtil.getRealPaywayService(this, payOrder.getWayCode()).pay(rq, payOrder, mchAppConfigContext);
         } else if (CS.PAY_IF_VERSION.WX_V3.equals(apiVersion)) {
-            return PaywayUtil.getRealPaywayV3Service(this, payOrder.getWayCode()).pay(rq, payOrder, mchAppConfigContext, request);
+            return PaywayUtil.getRealPaywayV3Service(this, payOrder.getWayCode()).pay(rq, payOrder, mchAppConfigContext);
         } else {
             throw new BizException("不支持的微信支付API版本");
         }
