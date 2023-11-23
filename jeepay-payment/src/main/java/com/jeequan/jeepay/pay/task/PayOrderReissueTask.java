@@ -72,7 +72,7 @@ public class PayOrderReissueTask {
                     break;
                 }
                 for (PayOrder payOrder : payOrderIPage.getRecords()) {
-                    log.info("本次查询payOrder, 不再继续查询"+payOrder);
+                    log.info("本次查询payOrder"+payOrder);
                     channelOrderReissueService.processPayOrderBill(payOrder);
                 }
                 //已经到达页码最大量，无需再次查询
