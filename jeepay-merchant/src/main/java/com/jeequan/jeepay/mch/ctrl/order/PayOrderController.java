@@ -4,24 +4,27 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.JeepayClient;
+import com.jeequan.jeepay.components.mq.model.PayOrderMchNotifyMQ;
+import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
 import com.jeequan.jeepay.core.entity.MchApp;
+import com.jeequan.jeepay.core.entity.MchNotifyRecord;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PayWay;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.core.utils.SeqKit;
+import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.exception.JeepayException;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
+import com.jeequan.jeepay.mch.diy.QueryPayOrderRS;
 import com.jeequan.jeepay.model.RefundOrderCreateReqModel;
 import com.jeequan.jeepay.request.RefundOrderCreateRequest;
 import com.jeequan.jeepay.response.RefundOrderCreateResponse;
-import com.jeequan.jeepay.service.impl.MchAppService;
-import com.jeequan.jeepay.service.impl.PayOrderService;
-import com.jeequan.jeepay.service.impl.PayWayService;
-import com.jeequan.jeepay.service.impl.SysConfigService;
+import com.jeequan.jeepay.service.impl.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -47,7 +50,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/payOrder")
 public class PayOrderController extends CommonCtrl {
-
+    @Autowired
+    private MchInfoService mchInfoService;
+    @Autowired
+    private IMQSender mqSender;
+    @Autowired
+    private MchNotifyRecordService mchNotifyRecordService;
     @Autowired
     private PayOrderService payOrderService;
     @Autowired
@@ -131,6 +139,85 @@ public class PayOrderController extends CommonCtrl {
         return ApiRes.ok(payOrder);
     }
 
+    @ApiOperation("手动回调支付订单")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "payOrderId", value = "支付订单号", required = true)
+    })
+    @PreAuthorize("hasAuthority('ENT_PAY_ORDER_NOTIFY')")
+    @RequestMapping(value = "detailNotify/{payOrderId}", method = RequestMethod.GET)
+    public ApiRes detailNotify(@PathVariable("payOrderId") String payOrderId) {
+        PayOrder payOrder = payOrderService.getById(payOrderId);
+        if (payOrder == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+        if (!payOrder.getMchNo().equals(getCurrentMchNo())) {
+            return ApiRes.fail(ApiCodeEnum.SYS_PERMISSION_ERROR);
+        }
+        System.out.println("手动回调订单:"+payOrderId);
+        payOrderService.updateIng2SuccessDiy(payOrderId);
+        payOrder = payOrderService.getById(payOrder.getPayOrderId());
+        payOrder.setState(PayOrder.STATE_SUCCESS);
+        payOrderNotifyPolling(payOrder);
+        return ApiRes.ok();
+    }
+    /**
+     * 商户通知信息， 只有订单是终态，才会发送通知， 如明确成功和明确失败
+     **/
+    public void payOrderNotifyPolling(PayOrder dbPayOrder) {
+
+        try {
+            // 通知地址为空
+            if (StringUtils.isEmpty(dbPayOrder.getNotifyUrl())) {
+                return;
+            }
+
+            //获取到通知对象
+            MchNotifyRecord mchNotifyRecord = mchNotifyRecordService.findByPayOrder(dbPayOrder.getPayOrderId());
+            if (mchNotifyRecord != null) {
+                return;
+            }
+
+            //商户app私钥
+            String appSecret = mchInfoService.getOneByMch(dbPayOrder.getMchNo()).getSecret();
+            // 封装通知url
+            String notifyUrl = createNotifyUrl(dbPayOrder, appSecret);
+            mchNotifyRecord = new MchNotifyRecord();
+            mchNotifyRecord.setOrderId(dbPayOrder.getPayOrderId());
+            mchNotifyRecord.setOrderType(MchNotifyRecord.TYPE_PAY_ORDER);
+            mchNotifyRecord.setMchNo(dbPayOrder.getMchNo());
+            mchNotifyRecord.setMchOrderNo(dbPayOrder.getMchOrderNo()); //商户订单号
+            mchNotifyRecord.setIsvNo(dbPayOrder.getIsvNo());
+            mchNotifyRecord.setAppId(dbPayOrder.getAppId());
+            mchNotifyRecord.setNotifyUrl(notifyUrl);
+            mchNotifyRecord.setResResult("");
+            mchNotifyRecord.setNotifyCount(0);
+            mchNotifyRecord.setState(MchNotifyRecord.STATE_ING); // 通知中
+
+            try {
+                mchNotifyRecordService.save(mchNotifyRecord);
+            } catch (Exception e) {
+                return;
+            }
+
+            //推送到MQ
+            Long notifyId = mchNotifyRecord.getNotifyId();
+            mqSender.send(PayOrderMchNotifyMQ.build(notifyId));
+
+        } catch (Exception ignored) {
+        }
+    }
+    public String createNotifyUrl(PayOrder payOrder, String appSecret) {
+
+        QueryPayOrderRS queryPayOrderRS = QueryPayOrderRS.buildByPayOrder(payOrder);
+        JSONObject jsonObject = (JSONObject) JSONObject.toJSON(queryPayOrderRS);
+        jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
+        // 报文签名
+        jsonObject.put("sign", JeepayKit.getSign(jsonObject, appSecret));
+
+        // 生成通知
+        return StringKit.appendUrlQuery(payOrder.getNotifyUrl(), jsonObject);
+    }
 
     /**
      * 发起订单退款
