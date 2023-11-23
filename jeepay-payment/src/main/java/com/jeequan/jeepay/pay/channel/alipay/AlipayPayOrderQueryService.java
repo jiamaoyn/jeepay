@@ -1,5 +1,6 @@
 package com.jeequan.jeepay.pay.channel.alipay;
 
+import cn.hutool.core.date.DateUtil;
 import com.alipay.api.domain.*;
 import com.alipay.api.request.AlipayDataBillAccountlogQueryRequest;
 import com.alipay.api.request.AlipayDataBillTransferQueryRequest;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 /*
@@ -43,18 +45,19 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
             AlipayDataBillAccountlogQueryModel model = new AlipayDataBillAccountlogQueryModel();
             // 获取当前时间
             LocalDateTime now = LocalDateTime.now();
-            LocalDateTime threeMinutesAgo = now.minusMinutes(100);
-            model.setStartTime(threeMinutesAgo.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-            model.setEndTime(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            LocalDateTime onsetDate = now.minusMinutes(10);
+            LocalDateTime offsetDate = now.minusMinutes(20);
+            model.setStartTime(offsetDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            model.setEndTime(onsetDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             request.setBizModel(model);
             AlipayDataBillAccountlogQueryResponse resp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
             if(resp.isSuccess()){
                 List<AccountLogItemResult> transferDetailResults = resp.getDetailList();
                 if (transferDetailResults!=null){
                     for (AccountLogItemResult accountLogItemResult : transferDetailResults) {
-                        log.info("alipay_order_no:{},balance:{},trans_amount:{},direction:{},trans_dt:{},trans_memo:{}" ,
-                                accountLogItemResult.getAlipayOrderNo(),accountLogItemResult.getBalance(),accountLogItemResult.getTransAmount(),accountLogItemResult.getDirection(),accountLogItemResult.getTransDt(),accountLogItemResult.getTransMemo());
                         if (accountLogItemResult.getTransMemo()!=null && accountLogItemResult.getTransMemo().equals(payOrder.getPayOrderId()) && Long.parseLong(AmountUtil.convertDollar2Cent(accountLogItemResult.getTransAmount())) == payOrder.getAmount()) {
+                            log.info("alipay_order_no:{},balance:{},trans_amount:{},direction:{},trans_dt:{},trans_memo:{}" ,
+                                    accountLogItemResult.getAlipayOrderNo(),accountLogItemResult.getBalance(),accountLogItemResult.getTransAmount(),accountLogItemResult.getDirection(),accountLogItemResult.getTransDt(),accountLogItemResult.getTransMemo());
                             return ChannelRetMsg.confirmSuccess(accountLogItemResult.getAlipayOrderNo());  //支付成功
                         }
                     }

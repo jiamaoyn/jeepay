@@ -62,7 +62,9 @@ public class PayOrderReissueTask {
 
     @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
     public void start_bill() {
-        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).in(PayOrder::getWayCode, "ALI_BILL");
+        Date offsetDate = DateUtil.offsetMinute(new Date(), -10);
+        Date onsetDate = DateUtil.offsetMinute(new Date(), -20);
+        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).in(PayOrder::getWayCode, "ALI_BILL").le(PayOrder::getCreatedAt, offsetDate).ge(PayOrder::getCreatedAt, onsetDate);
         int currentPageIndex = 1; //当前页码
         while (true) {
             try {
@@ -72,7 +74,6 @@ public class PayOrderReissueTask {
                     break;
                 }
                 for (PayOrder payOrder : payOrderIPage.getRecords()) {
-                    log.info("本次查询payOrder"+payOrder);
                     channelOrderReissueService.processPayOrderBill(payOrder);
                 }
                 //已经到达页码最大量，无需再次查询
