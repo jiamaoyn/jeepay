@@ -1,6 +1,7 @@
 package com.jeequan.jeepay.pay.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.jeequan.jeepay.components.mq.model.PayOrderMchNotifyMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
@@ -8,6 +9,7 @@ import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.RefundOrder;
 import com.jeequan.jeepay.core.entity.TransferOrder;
 import com.jeequan.jeepay.core.utils.JeepayKit;
+import com.jeequan.jeepay.core.utils.SeqKit;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRS;
 import com.jeequan.jeepay.pay.rqrs.refund.QueryRefundOrderRS;
@@ -18,9 +20,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/*
+import java.util.Date;
+
+/**
  * 商户通知 service
- * @date 2021/6/8 17:43
  */
 @Slf4j
 @Service
@@ -32,8 +35,29 @@ public class PayMchNotifyService {
     private ConfigContextQueryService configContextQueryService;
     @Autowired
     private IMQSender mqSender;
-
-
+    /**
+     * 商户通知发送中检测，重试
+     **/
+    public void notifyRecord(MchNotifyRecord mchNotifyRecord) {
+        try {
+            // 通知地址为空
+            if (StringUtils.isEmpty(mchNotifyRecord.getNotifyUrl())) {
+                return;
+            }
+            //获取到通知对象
+            mchNotifyRecord = mchNotifyRecordService.findByPayOrder(mchNotifyRecord.getOrderId());
+            if (mchNotifyRecord.getOrderType() == MchNotifyRecord.TYPE_PAY_ORDER && mchNotifyRecord.getState() != MchNotifyRecord.STATE_ING) {
+                log.info("当前通知消息已完成， 不再发送。");
+                return;
+            }
+            mchNotifyRecordService.updateNotifyRecord(mchNotifyRecord);
+            //推送到MQ
+            Long notifyId = mchNotifyRecord.getNotifyId();
+            mqSender.send(PayOrderMchNotifyMQ.build(notifyId));
+        } catch (Exception e) {
+            log.error("推送失败！", e);
+        }
+    }
     /**
      * 商户通知信息， 只有订单是终态，才会发送通知， 如明确成功和明确失败
      **/

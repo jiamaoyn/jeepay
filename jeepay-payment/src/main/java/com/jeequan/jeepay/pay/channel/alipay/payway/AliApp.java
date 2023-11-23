@@ -32,7 +32,7 @@ public class AliApp extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
 
         AlipayTradeAppPayRequest req = new AlipayTradeAppPayRequest();
         AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();

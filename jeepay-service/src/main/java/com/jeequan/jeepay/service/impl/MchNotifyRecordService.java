@@ -1,9 +1,13 @@
 package com.jeequan.jeepay.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.entity.MchNotifyRecord;
+import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.service.mapper.MchNotifyRecordMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -48,6 +52,18 @@ public class MchNotifyRecordService extends ServiceImpl<MchNotifyRecordMapper, M
 
     public Integer updateNotifyResult(Long notifyId, Byte state, String resResult) {
         return baseMapper.updateNotifyResult(notifyId, state, resResult);
+    }
+
+    /**
+     * 更新通知信息  【x】 --》 【0】
+     **/
+    public boolean updateNotifyRecord(MchNotifyRecord mchNotifyRecord) {
+
+        MchNotifyRecord updateRecord = new MchNotifyRecord();
+        updateRecord.setNotifyCount(0);
+
+        return update(updateRecord, new LambdaUpdateWrapper<MchNotifyRecord>()
+                .eq(MchNotifyRecord::getNotifyId, mchNotifyRecord.getNotifyId()).eq(MchNotifyRecord::getState, MchNotifyRecord.STATE_ING));
     }
 
 

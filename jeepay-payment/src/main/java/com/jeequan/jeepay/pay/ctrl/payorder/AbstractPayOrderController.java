@@ -194,7 +194,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             }
 
             //调起上游支付接口
-            bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext, null);
+            bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext);
 
             //处理上游返回数据
             this.processChannelMsg(bizRS.getChannelRetMsg(), payOrder);
@@ -224,14 +224,14 @@ public abstract class AbstractPayOrderController extends ApiController {
     /**
      * 统一下单 (新建订单模式)
      **/
-    protected ApiRes unifiedOrderPolling(String wayCode, UnifiedOrderRQ bizRQ, HttpServletRequest request) {
-        return unifiedOrderPolling(wayCode, bizRQ, null, request);
+    protected ApiRes unifiedOrderPolling(String wayCode, UnifiedOrderRQ bizRQ) {
+        return unifiedOrderPolling(wayCode, bizRQ, null);
     }
 
     /**
      * 统一下单
      **/
-    protected ApiRes unifiedOrderPolling(String wayCode, UnifiedOrderRQ bizRQ, PayOrder payOrder, HttpServletRequest request) {
+    protected ApiRes unifiedOrderPolling(String wayCode, UnifiedOrderRQ bizRQ, PayOrder payOrder) {
 
         // 响应数据
         UnifiedOrderRS bizRS = null;
@@ -353,7 +353,7 @@ public abstract class AbstractPayOrderController extends ApiController {
             }
 
             //调起上游支付接口
-            bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext, request);
+            bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext);
 
             //处理上游返回数据
             this.processChannelMsgPolling(bizRS.getChannelRetMsg(), payOrder);

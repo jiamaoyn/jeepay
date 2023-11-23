@@ -41,7 +41,7 @@ public class AliJsapi extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) throws Exception {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
 
         AliJsapiOrderRQ bizRQ = (AliJsapiOrderRQ) rq;
 

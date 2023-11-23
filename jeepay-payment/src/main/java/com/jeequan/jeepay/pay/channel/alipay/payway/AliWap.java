@@ -35,7 +35,7 @@ public class AliWap extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
 
         AliWapOrderRQ bizRQ = (AliWapOrderRQ) rq;
 

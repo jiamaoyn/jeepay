@@ -38,7 +38,7 @@ public class WxNative extends WxpayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
 
         WxNativeOrderRQ bizRQ = (WxNativeOrderRQ) rq;
 

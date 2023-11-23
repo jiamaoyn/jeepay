@@ -21,13 +21,11 @@ public class AliBill extends AlipayPaymentService {
     }
 
     @Override
-    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext, HttpServletRequest request) {
+    public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
         // 构造函数响应数据
         AliBillOrderRS res = new AliBillOrderRS();
         ChannelRetMsg channelRetMsg = new ChannelRetMsg();
-        String scheme = request.getScheme(); // "http" 或 "https"
-        String serverName = request.getServerName(); // "localhost" 或其他域名
-        String url = scheme + "://" + serverName + "/api/pay/bill/" + payOrder.getPayOrderId();
+        String url = sysConfigService.getDBApplicationConfig().getPaySiteUrl() + "/api/pay/bill/" + payOrder.getPayOrderId();
         // ↓↓↓↓↓↓ 调起接口成功后业务判断务必谨慎！！ 避免因代码编写bug，导致不能正确返回订单状态信息  ↓↓↓↓↓↓
         res.setCodeUrl(url);
         channelRetMsg.setChannelState(ChannelRetMsg.ChannelState.WAITING);
