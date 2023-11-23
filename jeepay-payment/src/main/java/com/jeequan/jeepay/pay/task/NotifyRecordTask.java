@@ -38,6 +38,7 @@ public class NotifyRecordTask {
                     break;
                 }
                 for (MchNotifyRecord mchNotifyRecord : mchNotifyRecordIPage.getRecords()) {
+                    log.info("开始处理支付通知记录: {}", mchNotifyRecord);
                     payMchNotifyService.notifyRecord(mchNotifyRecord);
                 }
                 //已经到达页码最大量，无需再次查询
