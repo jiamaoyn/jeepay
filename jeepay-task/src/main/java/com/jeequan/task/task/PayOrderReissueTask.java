@@ -52,31 +52,31 @@ public class PayOrderReissueTask {
         Date endDate = DateUtil.offsetMinute(new Date(), -10);
         startBillDate(startDate, endDate);
     }
-    @Scheduled(cron = "* */1 * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "*/8 * * * * ?") // 每2秒钟执行一次
     public void start_bill20() {
         Date startDate = DateUtil.offsetMinute(new Date(), -10);
         Date endDate = DateUtil.offsetMinute(new Date(), -20);
         startBillDate(startDate, endDate);
     }
-    @Scheduled(cron = "* */10 * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "*/10 * * * * ?") // 每2秒钟执行一次
     public void start_bill40() {
         Date startDate = DateUtil.offsetMinute(new Date(), -20);
         Date endDate = DateUtil.offsetMinute(new Date(), -40);
         startBillDate(startDate, endDate);
     }
-    @Scheduled(cron = "* */20 * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "*/20 * * * * ?") // 每2秒钟执行一次
     public void start_bill60() {
         Date startDate = DateUtil.offsetMinute(new Date(), -40);
         Date endDate = DateUtil.offsetMinute(new Date(), -60);
         startBillDate(startDate, endDate);
     }
-    @Scheduled(cron = "* */30 * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "*/30 * * * * ?") // 每2秒钟执行一次
     public void start_bill120() {
         Date startDate = DateUtil.offsetMinute(new Date(), -60);
         Date endDate = DateUtil.offsetMinute(new Date(), -120);
         startBillDate(startDate, endDate);
     }
-    @Scheduled(cron = "* * */1 * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "* */1 * * * ?") // 每2秒钟执行一次
     public void start_bill240() {
         Date startDate = DateUtil.offsetMinute(new Date(), -120);
         Date endDate = DateUtil.offsetMinute(new Date(), -240);
