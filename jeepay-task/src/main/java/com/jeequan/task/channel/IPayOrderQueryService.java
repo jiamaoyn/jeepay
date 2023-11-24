@@ -22,6 +22,4 @@ public interface IPayOrderQueryService {
      * 查询订单
      **/
     ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext, Date startDate, Date endDate) throws Exception;
-
-    ChannelRetMsg queryTelegramBot(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
 }

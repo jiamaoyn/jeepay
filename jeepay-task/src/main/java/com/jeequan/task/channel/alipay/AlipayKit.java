@@ -13,13 +13,7 @@ import com.jeequan.task.model.MchAppConfigContext;
 import com.jeequan.task.service.ConfigContextQueryService;
 import org.apache.commons.lang3.StringUtils;
 
-/*
- * 【支付宝】支付通道工具包
- * @date 2021/6/8 17:19
- */
 public class AlipayKit {
-
-
     /**
      * 放置 isv特殊信息
      **/

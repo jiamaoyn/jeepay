@@ -136,33 +136,4 @@
              throw ChannelException.sysError("调用支付宝client服务异常");
          }
      }
-
-     public <T extends AlipayResponse> T execute(AlipayRequest<T> request, String accessToken) {
-
-         try {
-
-             T alipayResp = null;
-
-             if (useCert != null && useCert == CS.YES) { //证书加密方式
-                 alipayResp = alipayClient.certificateExecute(request, accessToken);
-
-             } else { //key 或者 空都为默认普通加密方式
-                 alipayResp = alipayClient.execute(request, accessToken);
-             }
-
-             return alipayResp;
-
-         } catch (AlipayApiException e) { // 调起接口前出现异常，如私钥问题。  调起后出现验签异常等。
-
-             log.error("调起支付宝execute[AlipayApiException]异常！", e);
-             //如果数据返回出现验签异常，则需要抛出： UNKNOWN 异常。
-             throw ChannelException.sysError(e.getMessage());
-
-         } catch (Exception e) {
-             log.error("调起支付宝execute[Exception]异常！", e);
-             throw ChannelException.sysError("调用支付宝client服务异常");
-         }
-     }
-
-
  }

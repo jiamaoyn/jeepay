@@ -31,11 +31,6 @@ public class IsvConfigContext {
      **/
     private AlipayClientWrapper alipayClientWrapper;
 
-    /**
-     * 缓存 wxServiceWrapper 对象
-     **/
-    private WxServiceWrapper wxServiceWrapper;
-
 
     /**
      * 获取isv配置信息

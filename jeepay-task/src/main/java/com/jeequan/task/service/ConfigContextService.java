@@ -220,19 +220,6 @@ public class ConfigContextService {
                 mchAppConfigContext.setAlipayClientWrapper(AlipayClientWrapper.buildAlipayClientWrapper(alipayParams));
             }
 
-            //放置 wxJavaService
-            WxpayNormalMchParams wxpayParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.WXPAY, WxpayNormalMchParams.class);
-            if (wxpayParams != null) {
-                mchAppConfigContext.setWxServiceWrapper(WxServiceWrapper.buildWxServiceWrapper(wxpayParams));
-            }
-
-            //放置 paypal client
-            PpPayNormalMchParams ppPayMchParams = mchAppConfigContext.getNormalMchParamsByIfCode(CS.IF_CODE.PPPAY, PpPayNormalMchParams.class);
-            if (ppPayMchParams != null) {
-                mchAppConfigContext.setPaypalWrapper(PaypalWrapper.buildPaypalWrapper(ppPayMchParams));
-            }
-
-
         } else { //服务商模式商户
             for (PayInterfaceConfig payInterfaceConfig : allConfigList) {
                 mchAppConfigContext.getIsvsubMchParamsMap().put(
@@ -307,12 +294,6 @@ public class ConfigContextService {
         AlipayIsvParams alipayParams = isvConfigContext.getIsvParamsByIfCode(CS.IF_CODE.ALIPAY, AlipayIsvParams.class);
         if (alipayParams != null) {
             isvConfigContext.setAlipayClientWrapper(AlipayClientWrapper.buildAlipayClientWrapper(alipayParams));
-        }
-
-        //放置 wxJavaService
-        WxpayIsvParams wxpayParams = isvConfigContext.getIsvParamsByIfCode(CS.IF_CODE.WXPAY, WxpayIsvParams.class);
-        if (wxpayParams != null) {
-            isvConfigContext.setWxServiceWrapper(WxServiceWrapper.buildWxServiceWrapper(wxpayParams));
         }
 
         isvConfigContextMap.put(isvNo, isvConfigContext);

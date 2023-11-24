@@ -36,15 +36,13 @@ public class ConfigContextQueryService {
     private final MchInfoService mchInfoService;
     private final MchAppService mchAppService;
     private final PayInterfaceConfigService payInterfaceConfigService;
-    private final StringRedisTemplate stringRedisTemplate;
 
-    public ConfigContextQueryService(ConfigContextService configContextService, MchPayPassageService mchPayPassageService, MchInfoService mchInfoService, MchAppService mchAppService, PayInterfaceConfigService payInterfaceConfigService, StringRedisTemplate stringRedisTemplate) {
+    public ConfigContextQueryService(ConfigContextService configContextService, MchPayPassageService mchPayPassageService, MchInfoService mchInfoService, MchAppService mchAppService, PayInterfaceConfigService payInterfaceConfigService) {
         this.configContextService = configContextService;
         this.mchPayPassageService = mchPayPassageService;
         this.mchInfoService = mchInfoService;
         this.mchAppService = mchAppService;
         this.payInterfaceConfigService = payInterfaceConfigService;
-        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     private boolean isCache() {
@@ -62,10 +60,6 @@ public class ConfigContextQueryService {
     public MchInfo queryMchInfo(String mchNo) {
 
         return mchInfoService.getOneByMch(mchNo);
-    }
-
-    public MchAppConfigContext queryMchInfoAndAppInfo(String mchAppId) {
-        return queryMchInfoAndAppInfo(mchAppService.getById(mchAppId).getMchNo(), mchAppId);
     }
 
     public MchAppConfigContext queryMchInfoAndAppInfo(String mchNo, String mchAppId) {
@@ -88,51 +82,6 @@ public class ConfigContextQueryService {
 
         result.setMchApp(mchApp);
         result.setAppId(mchAppId);
-
-        return result;
-    }
-
-    public MchAppConfigContext queryMchInfoAndAppInfoByPayCode(String mchNo, String wayCode) {
-        List<MchApp> mchAppList = new ArrayList<>();
-        mchAppService.list(MchApp.gw().eq(MchApp::getMchNo, mchNo).eq(MchApp::getState, CS.PUB_USABLE)).forEach(mchApp -> {
-            MchPayPassage payInterfaceConfig = mchPayPassageService.getOne(MchPayPassage.gw()
-                    .select(MchPayPassage::getIfCode, MchPayPassage::getAppId)
-                    .eq(MchPayPassage::getState, CS.PUB_USABLE)
-                    .eq(MchPayPassage::getAppId, mchApp.getAppId())
-                    .eq(MchPayPassage::getMchNo, mchNo)
-                    .eq(MchPayPassage::getWayCode, wayCode)
-            );
-            if (payInterfaceConfig != null) {
-                mchAppList.add(mchApp);
-            }
-        });
-        if (mchAppList.isEmpty()) {
-            return null;
-        }
-        String string = stringRedisTemplate.opsForValue().get(mchNo);
-        int stringKey = 0;
-        if (string != null){
-            stringKey = Integer.parseInt(string);
-            if (mchAppList.size()<stringKey+1){
-                stringKey = 0;
-            }
-        }
-        stringRedisTemplate.opsForValue().set(mchNo, String.valueOf(stringKey+1), Duration.ofHours(3));
-        return queryMchInfoAndAppInfo(mchNo, mchAppList.get(stringKey).getAppId());
-    }
-
-    public MchAppConfigContext queryMchInfoAndAppInfoByMchNo(String mchNo) {
-
-        MchInfo mchInfo = mchInfoService.getById(mchNo);
-
-        if (mchInfo == null) {
-            return null;
-        }
-
-        MchAppConfigContext result = new MchAppConfigContext();
-        result.setMchInfo(mchInfo);
-        result.setMchNo(mchNo);
-        result.setMchType(mchInfo.getType());
 
         return result;
     }
@@ -221,36 +170,6 @@ public class ConfigContextQueryService {
             AlipayNormalMchParams alipayParams = (AlipayNormalMchParams) queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.ALIPAY);
             return AlipayClientWrapper.buildAlipayClientWrapper(alipayParams);
         }
-
-    }
-
-    public WxServiceWrapper getWxServiceWrapper(MchAppConfigContext mchAppConfigContext) {
-
-        if (isCache()) {
-            return
-                    configContextService.getMchAppConfigContext(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId()).getWxServiceWrapper();
-        }
-
-        if (mchAppConfigContext.isIsvsubMch()) {
-
-            WxpayIsvParams wxParams = (WxpayIsvParams) queryIsvParams(mchAppConfigContext.getMchInfo().getIsvNo(), CS.IF_CODE.WXPAY);
-            return WxServiceWrapper.buildWxServiceWrapper(wxParams);
-        } else {
-
-            WxpayNormalMchParams wxParams = (WxpayNormalMchParams) queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.WXPAY);
-            return WxServiceWrapper.buildWxServiceWrapper(wxParams);
-        }
-
-    }
-
-    public PaypalWrapper getPaypalWrapper(MchAppConfigContext mchAppConfigContext) {
-        if (isCache()) {
-            return
-                    configContextService.getMchAppConfigContext(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId()).getPaypalWrapper();
-        }
-        PpPayNormalMchParams ppPayNormalMchParams = (PpPayNormalMchParams) queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), CS.IF_CODE.PPPAY);
-        ;
-        return PaypalWrapper.buildPaypalWrapper(ppPayNormalMchParams);
 
     }
 

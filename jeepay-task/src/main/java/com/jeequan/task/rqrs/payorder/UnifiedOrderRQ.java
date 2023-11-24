@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.task.rqrs.AbstractMchAppRQ;
-import com.jeequan.task.rqrs.payorder.payway.*;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.Range;
@@ -99,61 +98,6 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
      * 返回真实的bizRQ
      **/
     public UnifiedOrderRQ buildBizRQ() {
-
-        if (CS.PAY_WAY_CODE.ALI_BAR.equals(wayCode)) {
-            AliBarOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AliBarOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.ALI_JSAPI.equals(wayCode)) {
-            AliJsapiOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AliJsapiOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.ALI_LITE.equals(wayCode)) {
-            AliLiteOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AliLiteOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.QR_CASHIER.equals(wayCode)) {
-            QrCashierOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), QrCashierOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.WX_JSAPI.equals(wayCode)) {
-            WxJsapiOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), WxJsapiOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.WX_LITE.equals(wayCode)) {
-            WxLiteOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), WxLiteOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.WX_BAR.equals(wayCode)) {
-            WxBarOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), WxBarOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.WX_NATIVE.equals(wayCode)) {
-            WxNativeOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), WxNativeOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.WX_H5.equals(wayCode)) {
-            WxH5OrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), WxH5OrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.ALI_APP.equals(wayCode)) {
-            AliAppOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AliAppOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.ALI_WAP.equals(wayCode)) {
-            AliWapOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AliWapOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.ALI_PC.equals(wayCode)) {
-            AliPcOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AliPcOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        } else if (CS.PAY_WAY_CODE.ALI_QR.equals(wayCode)) {
-            AliQrOrderRQ bizRQ = JSONObject.parseObject(StringUtils.defaultIfEmpty(this.channelExtra, "{}"), AliQrOrderRQ.class);
-            BeanUtils.copyProperties(this, bizRQ);
-            return bizRQ;
-        }
-
         return this;
     }
 

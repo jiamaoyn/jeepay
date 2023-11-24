@@ -39,19 +39,10 @@ public class MchAppConfigContext {
     private IsvConfigContext isvConfigContext;
 
     /**
-     * 缓存 Paypal 对象
-     **/
-    private PaypalWrapper paypalWrapper;
-
-    /**
      * 缓存支付宝client 对象
      **/
     private AlipayClientWrapper alipayClientWrapper;
 
-    /**
-     * 缓存 wxServiceWrapper 对象
-     **/
-    private WxServiceWrapper wxServiceWrapper;
 
     /**
      * 获取普通商户配置信息
@@ -75,13 +66,6 @@ public class MchAppConfigContext {
     }
 
     /**
-     * 获取isv配置信息
-     **/
-    public <T> T getIsvsubMchParamsByIfCode(String ifCode, Class<? extends IsvsubMchParams> cls) {
-        return (T) isvsubMchParamsMap.get(ifCode);
-    }
-
-    /**
      * 是否为 服务商特约商户
      **/
     public boolean isIsvsubMch() {
@@ -90,10 +74,6 @@ public class MchAppConfigContext {
 
     public AlipayClientWrapper getAlipayClientWrapper() {
         return isIsvsubMch() ? isvConfigContext.getAlipayClientWrapper() : alipayClientWrapper;
-    }
-
-    public WxServiceWrapper getWxServiceWrapper() {
-        return isIsvsubMch() ? isvConfigContext.getWxServiceWrapper() : wxServiceWrapper;
     }
 
 }

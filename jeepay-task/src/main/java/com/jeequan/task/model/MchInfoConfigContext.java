@@ -31,11 +31,4 @@ public class MchInfoConfigContext {
         appMap.put(mchApp.getAppId(), mchApp);
     }
 
-    /**
-     * get商户APP
-     **/
-    public MchApp getMchApp(String appId) {
-        return appMap.get(appId);
-    }
-
 }

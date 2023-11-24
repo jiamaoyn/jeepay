@@ -24,13 +24,6 @@ public class ChannelException extends RuntimeException {
     }
 
     /**
-     * 未知状态
-     **/
-    public static ChannelException unknown(String channelErrMsg) {
-        return new ChannelException(ChannelRetMsg.unknown(channelErrMsg));
-    }
-
-    /**
      * 系统内异常
      **/
     public static ChannelException sysError(String channelErrMsg) {
