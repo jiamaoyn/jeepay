@@ -1,23 +1,24 @@
-package com.jeequan.jeepay.pay.channel.alipay;
+package com.jeequan.task.channel.alipay;
 
-import cn.hutool.core.date.DateUtil;
-import com.alipay.api.domain.*;
+import com.alipay.api.domain.AccountLogItemResult;
+import com.alipay.api.domain.AlipayDataBillAccountlogQueryModel;
+import com.alipay.api.domain.AlipayTradeQueryModel;
 import com.alipay.api.request.AlipayDataBillAccountlogQueryRequest;
-import com.alipay.api.request.AlipayDataBillTransferQueryRequest;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayDataBillAccountlogQueryResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.utils.AmountUtil;
-import com.jeequan.jeepay.pay.channel.IPayOrderQueryService;
-import com.jeequan.jeepay.pay.model.MchAppConfigContext;
-import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
-import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
+import com.jeequan.task.channel.IPayOrderQueryService;
+import com.jeequan.task.model.MchAppConfigContext;
+import com.jeequan.task.rqrs.msg.ChannelRetMsg;
+import com.jeequan.task.service.ConfigContextQueryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -39,24 +40,23 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
     }
 
     @Override
-    public ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
+    public ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext, Date startDate, Date endDate) {
         if (payOrder.getWayCode().equals("ALI_BILL")){
             AlipayDataBillAccountlogQueryRequest request = new AlipayDataBillAccountlogQueryRequest();
             AlipayDataBillAccountlogQueryModel model = new AlipayDataBillAccountlogQueryModel();
             // 获取当前时间
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime offsetDate = now.minusMinutes(1L);
-            model.setStartTime(offsetDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-            model.setEndTime(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            model.setStartTime(sdf.format(startDate));
+            model.setEndTime(sdf.format(endDate));
             request.setBizModel(model);
             AlipayDataBillAccountlogQueryResponse resp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
             if(resp.isSuccess()){
                 List<AccountLogItemResult> transferDetailResults = resp.getDetailList();
                 if (transferDetailResults!=null){
                     for (AccountLogItemResult accountLogItemResult : transferDetailResults) {
+                        log.info("alipay_order_no:{},balance:{},trans_amount:{},direction:{},trans_dt:{},trans_memo:{}" ,
+                                accountLogItemResult.getAlipayOrderNo(),accountLogItemResult.getBalance(),accountLogItemResult.getTransAmount(),accountLogItemResult.getDirection(),accountLogItemResult.getTransDt(),accountLogItemResult.getTransMemo());
                         if (accountLogItemResult.getTransMemo()!=null && accountLogItemResult.getTransMemo().equals(payOrder.getPayOrderId()) && Long.parseLong(AmountUtil.convertDollar2Cent(accountLogItemResult.getTransAmount())) == payOrder.getAmount()) {
-                            log.info("alipay_order_no:{},balance:{},trans_amount:{},direction:{},trans_dt:{},trans_memo:{}" ,
-                                    accountLogItemResult.getAlipayOrderNo(),accountLogItemResult.getBalance(),accountLogItemResult.getTransAmount(),accountLogItemResult.getDirection(),accountLogItemResult.getTransDt(),accountLogItemResult.getTransMemo());
                             return ChannelRetMsg.confirmSuccess(accountLogItemResult.getAlipayOrderNo());  //支付成功
                         }
                     }

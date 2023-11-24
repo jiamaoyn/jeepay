@@ -62,9 +62,8 @@ public class PayOrderReissueTask {
 
     @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
     public void start_bill() {
-        Date offsetDate = DateUtil.offsetMinute(new Date(), -10);
-        Date onsetDate = DateUtil.offsetMinute(new Date(), -20);
-        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).in(PayOrder::getWayCode, "ALI_BILL").le(PayOrder::getCreatedAt, offsetDate).ge(PayOrder::getCreatedAt, onsetDate);
+        Date onsetDate = DateUtil.offsetMinute(new Date(), -1);
+        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).in(PayOrder::getWayCode, "ALI_BILL").ge(PayOrder::getCreatedAt, onsetDate);
         int currentPageIndex = 1; //当前页码
         while (true) {
             try {
