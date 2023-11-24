@@ -46,8 +46,8 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
             AlipayDataBillAccountlogQueryModel model = new AlipayDataBillAccountlogQueryModel();
             // 获取当前时间
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            model.setStartTime(sdf.format(startDate));
-            model.setEndTime(sdf.format(endDate));
+            model.setStartTime(sdf.format(endDate));
+            model.setEndTime(sdf.format(startDate));
             request.setBizModel(model);
             AlipayDataBillAccountlogQueryResponse resp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
             if(resp.isSuccess()){
