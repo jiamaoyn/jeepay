@@ -29,9 +29,60 @@ public class PayOrderReissueTask {
     private ChannelOrderReissueService channelOrderReissueService;
 
     @Scheduled(cron = "*/3 * * * * ?") // 每2秒钟执行一次
-    public void start_bill() {
+    public void start_bill2() {
         Date startDate = DateUtil.offsetMinute(new Date(), -1);
         Date endDate = DateUtil.offsetMinute(new Date(), -2);
+        startBillDate(startDate, endDate);
+    }
+    @Scheduled(cron = "*/4 * * * * ?") // 每2秒钟执行一次
+    public void start_bill4() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -2);
+        Date endDate = DateUtil.offsetMinute(new Date(), -4);
+        startBillDate(startDate, endDate);
+    }
+    @Scheduled(cron = "*/5 * * * * ?") // 每2秒钟执行一次
+    public void start_bill6() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -4);
+        Date endDate = DateUtil.offsetMinute(new Date(), -6);
+        startBillDate(startDate, endDate);
+    }
+    @Scheduled(cron = "*/6 * * * * ?") // 每2秒钟执行一次
+    public void start_bill10() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -6);
+        Date endDate = DateUtil.offsetMinute(new Date(), -10);
+        startBillDate(startDate, endDate);
+    }
+    @Scheduled(cron = "* */1 * * * ?") // 每2秒钟执行一次
+    public void start_bill20() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -10);
+        Date endDate = DateUtil.offsetMinute(new Date(), -20);
+        startBillDate(startDate, endDate);
+    }
+    @Scheduled(cron = "* */10 * * * ?") // 每2秒钟执行一次
+    public void start_bill40() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -20);
+        Date endDate = DateUtil.offsetMinute(new Date(), -40);
+        startBillDate(startDate, endDate);
+    }
+    @Scheduled(cron = "* */20 * * * ?") // 每2秒钟执行一次
+    public void start_bill60() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -40);
+        Date endDate = DateUtil.offsetMinute(new Date(), -60);
+        startBillDate(startDate, endDate);
+    }
+    @Scheduled(cron = "* */30 * * * ?") // 每2秒钟执行一次
+    public void start_bill120() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -60);
+        Date endDate = DateUtil.offsetMinute(new Date(), -120);
+        startBillDate(startDate, endDate);
+    }
+    @Scheduled(cron = "* * */1 * * ?") // 每2秒钟执行一次
+    public void start_bill240() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -120);
+        Date endDate = DateUtil.offsetMinute(new Date(), -240);
+        startBillDate(startDate, endDate);
+    }
+    public void startBillDate(Date startDate, Date endDate) {
         LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).in(PayOrder::getWayCode, "ALI_BILL").le(PayOrder::getCreatedAt, startDate).ge(PayOrder::getCreatedAt, endDate);
         int currentPageIndex = 1; //当前页码
         while (true) {
@@ -54,9 +105,6 @@ public class PayOrderReissueTask {
                 log.error("error", e);
                 break;
             }
-
         }
     }
-
-
 }

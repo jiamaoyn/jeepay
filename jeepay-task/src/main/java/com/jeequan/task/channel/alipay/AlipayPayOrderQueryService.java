@@ -54,9 +54,9 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
                 List<AccountLogItemResult> transferDetailResults = resp.getDetailList();
                 if (transferDetailResults!=null){
                     for (AccountLogItemResult accountLogItemResult : transferDetailResults) {
-                        log.info("alipay_order_no:{},balance:{},trans_amount:{},direction:{},trans_dt:{},trans_memo:{}" ,
-                                accountLogItemResult.getAlipayOrderNo(),accountLogItemResult.getBalance(),accountLogItemResult.getTransAmount(),accountLogItemResult.getDirection(),accountLogItemResult.getTransDt(),accountLogItemResult.getTransMemo());
                         if (accountLogItemResult.getTransMemo()!=null && accountLogItemResult.getTransMemo().equals(payOrder.getPayOrderId()) && Long.parseLong(AmountUtil.convertDollar2Cent(accountLogItemResult.getTransAmount())) == payOrder.getAmount()) {
+                            log.info("alipay_order_no:{},balance:{},trans_amount:{},direction:{},trans_dt:{},trans_memo:{}" ,
+                                    accountLogItemResult.getAlipayOrderNo(),accountLogItemResult.getBalance(),accountLogItemResult.getTransAmount(),accountLogItemResult.getDirection(),accountLogItemResult.getTransDt(),accountLogItemResult.getTransMemo());
                             return ChannelRetMsg.confirmSuccess(accountLogItemResult.getAlipayOrderNo());  //支付成功
                         }
                     }
