@@ -56,3 +56,4 @@ unpackage/
 /docs/ilianPay收银台/.hbuilderx/
 /docs/ilianPay收银台/package-lock.json
 conf/
+conf/*
