@@ -50,18 +50,14 @@ public class ChannelOrderReissueService {
                 return;
             }
             accountLogItemResultList.forEach(accountLogItemResult -> {
-                log.info("alipay_order_no:{},balance:{},trans_amount:{},direction:{},trans_dt:{},trans_memo:{}" ,
-                        accountLogItemResult.getAlipayOrderNo(),accountLogItemResult.getBalance(),accountLogItemResult.getTransAmount(),accountLogItemResult.getDirection(),accountLogItemResult.getTransDt(),accountLogItemResult.getTransMemo());
+//                log.info("alipay_order_no:{},balance:{},trans_amount:{},direction:{},trans_dt:{},trans_memo:{}" ,
+//                        accountLogItemResult.getAlipayOrderNo(),accountLogItemResult.getBalance(),accountLogItemResult.getTransAmount(),accountLogItemResult.getDirection(),accountLogItemResult.getTransDt(),accountLogItemResult.getTransMemo());
                 if (accountLogItemResult.getTransMemo()!=null) {
                     PayOrder payOrder = payOrderService.queryPayOrderIdNoStateIng(accountLogItemResult.getTransMemo());
-                    System.out.println("查找订单号："+accountLogItemResult.getTransMemo()+"查找订单号结果"+payOrder);
                     if (payOrder == null){
                         return;
                     }
-                    if (payOrder.getState() == PayOrder.STATE_SUCCESS){
-                        log.info("订单号：{},已被支付",accountLogItemResult.getTransMemo());
-                        return;
-                    }
+                    System.out.println("查找订单号："+accountLogItemResult.getTransMemo()+"查找订单号结果"+payOrder);
                     if (Long.parseLong(AmountUtil.convertDollar2Cent(accountLogItemResult.getTransAmount())) == payOrder.getAmount()){
                         if (payOrderService.updateIng2Success(payOrder.getPayOrderId(), accountLogItemResult.getAlipayOrderNo(), null)) {
                             //订单支付成功，其他业务逻辑

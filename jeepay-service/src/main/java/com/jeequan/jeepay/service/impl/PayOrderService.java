@@ -201,8 +201,8 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
     public PayOrder queryPayOrderIdNoStateIng(String payOrderId) {
 
         if (StringUtils.isNotEmpty(payOrderId)) {
-            return getOne(PayOrder.gw().eq(PayOrder::getPayOrderId, payOrderId));
-//            return getOne(PayOrder.gw().eq(PayOrder::getPayOrderId, payOrderId).notIn(PayOrder::getState, PayOrder.STATE_SUCCESS));
+//            return getOne(PayOrder.gw().eq(PayOrder::getPayOrderId, payOrderId));
+            return getOne(PayOrder.gw().eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_ING));
         }else {
             return null;
         }
