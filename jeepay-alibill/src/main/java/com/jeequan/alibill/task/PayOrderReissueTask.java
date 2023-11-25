@@ -34,9 +34,21 @@ public class PayOrderReissueTask {
     private MchPayPassageService mchPayPassageService;
     @Autowired
     private ChannelOrderReissueService channelOrderReissueService;
-    @Scheduled(cron = "*/5 * * * * ?") // 每2秒钟执行一次
-    public void start_bill1() {
+    @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
+    public void start_bill() {
         Date startDate = DateUtil.offsetMinute(new Date(), -0);
+        Date endDate = DateUtil.offsetMinute(new Date(), -1);
+        startBillDateExecutorService(startDate, endDate);
+    }
+    @Scheduled(cron = "*/3 * * * * ?") // 每2秒钟执行一次
+    public void start_bill1() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -1);
+        Date endDate = DateUtil.offsetMinute(new Date(), -3);
+        startBillDateExecutorService(startDate, endDate);
+    }
+    @Scheduled(cron = "*/5 * * * * ?") // 每2秒钟执行一次
+    public void start_bill0() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -3);
         Date endDate = DateUtil.offsetMinute(new Date(), -5);
         startBillDateExecutorService(startDate, endDate);
     }
@@ -52,10 +64,10 @@ public class PayOrderReissueTask {
         Date endDate = DateUtil.offsetMinute(new Date(), -30);
         startBillDateExecutorService(startDate, endDate);
     }
-    @Scheduled(cron = "* */5 * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "* */10 * * * ?") // 每2秒钟执行一次
     public void start_bill5() {
         Date startDate = DateUtil.offsetMinute(new Date(), -30);
-        Date endDate = DateUtil.offsetMinute(new Date(), -100);
+        Date endDate = DateUtil.offsetMinute(new Date(), -120);
         startBillDateExecutorService(startDate, endDate);
     }
     public void startBillDateExecutorService(Date startDate, Date endDate) {
