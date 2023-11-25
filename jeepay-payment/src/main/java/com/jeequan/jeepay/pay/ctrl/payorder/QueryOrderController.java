@@ -92,6 +92,12 @@ public class QueryOrderController extends ApiController {
         if (normalMchParams == null) {
             throw new BizException("商户支付宝接口没有配置！");
         }
+        if (payOrder.getState() == PayOrder.STATE_INIT){
+            boolean isSuccess = payOrderService.updateInit2Ing(payOrder.getPayOrderId(), payOrder);
+            if (!isSuccess) {
+                throw new BizException("更新订单异常!");
+            }
+        }
         response.sendRedirect("https://ds.alipay.com/?from=pc&appId=20000116&actionType=toAccount&goBack=NO&amount="+ AmountUtil.convertCent2Dollar(payOrder.getAmount().toString())+"&userId="+normalMchParams.getPid()+"&memo="+payOrderId);
     }
 
