@@ -1,4 +1,4 @@
-package com.jeequan.task.channel.alipay;
+package com.jeequan.alibill.channel.alipay;
 
 import com.alipay.api.domain.AccountLogItemResult;
 import com.alipay.api.domain.AlipayDataBillAccountlogQueryModel;
@@ -12,17 +12,15 @@ import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.service.impl.MchAppService;
-import com.jeequan.task.channel.IPayOrderQueryService;
-import com.jeequan.task.model.MchAppConfigContext;
-import com.jeequan.task.rqrs.msg.ChannelRetMsg;
-import com.jeequan.task.service.ConfigContextQueryService;
+import com.jeequan.alibill.channel.IPayOrderQueryService;
+import com.jeequan.alibill.model.MchAppConfigContext;
+import com.jeequan.alibill.rqrs.msg.ChannelRetMsg;
+import com.jeequan.alibill.service.ConfigContextQueryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -68,7 +66,6 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
                 MchApp dbRecord = mchAppService.getById(payOrder.getAppId());
                 dbRecord.setState(CS.NO);
                 mchAppService.updateById(dbRecord);
-                System.out.println(resp.getBody()+resp.getMsg()+resp.getSubCode());
             }
             return ChannelRetMsg.waiting(); //支付中
         }
@@ -90,5 +87,25 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
             return ChannelRetMsg.waiting(); //支付中
         }
         return ChannelRetMsg.waiting(); //支付中
+    }
+    @Override
+    public List<AccountLogItemResult> query(MchAppConfigContext mchAppConfigContext, Date startDate, Date endDate) {
+        AlipayDataBillAccountlogQueryRequest request = new AlipayDataBillAccountlogQueryRequest();
+        AlipayDataBillAccountlogQueryModel model = new AlipayDataBillAccountlogQueryModel();
+        // 获取当前时间
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        model.setStartTime(sdf.format(endDate));
+        model.setEndTime(sdf.format(startDate));
+        request.setBizModel(model);
+        AlipayDataBillAccountlogQueryResponse resp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
+        if(resp.isSuccess()){
+            return resp.getDetailList();
+        } else {
+            MchApp dbRecord = mchAppService.getById(mchAppConfigContext.getAppId());
+            dbRecord.setState(CS.NO);
+            mchAppService.updateById(dbRecord);
+            log.error("{},账号有问题！", mchAppConfigContext.getAppId());
+            return null;
+        }
     }
 }

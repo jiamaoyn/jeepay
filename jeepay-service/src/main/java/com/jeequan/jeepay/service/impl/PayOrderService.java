@@ -190,6 +190,15 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         }
     }
 
+    public PayOrder queryMchOrderNoStateIng(String mchOrderNo) {
+
+        if (StringUtils.isNotEmpty(mchOrderNo)) {
+            return getOne(PayOrder.gw().eq(PayOrder::getMchOrderNo, mchOrderNo).notIn(PayOrder::getState, PayOrder.STATE_SUCCESS));
+        }else {
+            return null;
+        }
+    }
+
 
     public Map payCount(String mchNo, Byte state, Byte refundState, String dayStart, String dayEnd) {
         Map param = new HashMap<>();
