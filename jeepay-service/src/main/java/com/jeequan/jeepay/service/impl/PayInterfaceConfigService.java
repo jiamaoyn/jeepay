@@ -84,11 +84,13 @@ public class PayInterfaceConfigService extends ServiceImpl<PayInterfaceConfigMap
     public List<PayInterfaceDefine> selectAllPayIfConfigListByAppId(String appId) {
 
         MchApp mchApp = mchAppService.getById(appId);
-        if (mchApp == null || mchApp.getState() != CS.YES) {
+        if (mchApp == null) {
+            System.out.println(88);
             throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
         MchInfo mchInfo = mchInfoService.getById(mchApp.getMchNo());
         if (mchInfo == null || mchInfo.getState() != CS.YES) {
+            System.out.println(93);
             throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
         // 支付定义列表

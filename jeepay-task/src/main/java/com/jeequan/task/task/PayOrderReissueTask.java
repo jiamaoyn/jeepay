@@ -116,7 +116,9 @@ public class PayOrderReissueTask {
         }
     }
     public void startBillDateExecutorService(Date startDate, Date endDate) {
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        int coreCount = Runtime.getRuntime().availableProcessors();
+        int poolSize = coreCount * 2; // 或者更根据实际情况调整
+        ExecutorService executor = Executors.newFixedThreadPool(poolSize);
         LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).in(PayOrder::getWayCode, "ALI_BILL").le(PayOrder::getCreatedAt, startDate).ge(PayOrder::getCreatedAt, endDate);
         int currentPageIndex = 1; //当前页码
         while (true) {
