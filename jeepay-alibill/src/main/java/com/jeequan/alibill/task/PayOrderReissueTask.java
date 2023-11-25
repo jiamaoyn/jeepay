@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /*
  * 补单定时任务
@@ -71,9 +74,21 @@ public class PayOrderReissueTask {
         if (mchAppList.isEmpty()) {
             return;
         }
-        mchAppList.forEach(mchapp -> {
-            log.info("当前查询appId：{}---MchNo:{}---appName:{}",mchapp.getAppId(),mchapp.getMchNo(),mchapp.getAppName());
-            channelOrderReissueService.processPayOrderBill(mchapp, startDate, endDate);
-        });
+        ExecutorService executor = Executors.newFixedThreadPool(8); // 根据服务器性能调整线程数
+        try {
+            for (MchApp mchApp : mchAppList) {
+                executor.submit(() -> {
+                    log.info("当前查询appId：{}---MchNo:{}---appName:{}", mchApp.getAppId(), mchApp.getMchNo(), mchApp.getAppName());
+                    channelOrderReissueService.processPayOrderBill(mchApp, startDate, endDate);
+                });
+            }
+        } finally {
+            executor.shutdown();
+            try {
+                executor.awaitTermination(1, TimeUnit.MINUTES); // 根据需要设置超时时间
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 }

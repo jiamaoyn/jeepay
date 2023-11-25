@@ -1,5 +1,5 @@
 server:
-  port: 9215 #设置端口
+  port: 9214 #设置端口
 
 spring:
   redis:
