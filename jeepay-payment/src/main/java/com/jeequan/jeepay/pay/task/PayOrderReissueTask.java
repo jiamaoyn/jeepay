@@ -63,44 +63,5 @@ public class PayOrderReissueTask {
         }
     }
 
-    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
-    public void start_bill() {
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        Date onsetDate = DateUtil.offsetMinute(new Date(), -1);
-        LambdaQueryWrapper<PayOrder> lambdaQueryWrapper = PayOrder.gw().eq(PayOrder::getState, PayOrder.STATE_ING).in(PayOrder::getWayCode, "ALI_BILL").ge(PayOrder::getCreatedAt, onsetDate);
-        int currentPageIndex = 1; //当前页码
-        while (true) {
-            try {
-                IPage<PayOrder> payOrderIPage = payOrderService.page(new Page(currentPageIndex, QUERY_PAGE_SIZE), lambdaQueryWrapper);
-                if (payOrderIPage == null || payOrderIPage.getRecords().isEmpty()) { //本次查询无结果, 不再继续查询;
-                    log.info("本次查询无结果, 不再继续查询");
-                    break;
-                }
-                for (PayOrder payOrder : payOrderIPage.getRecords()) {
-                    executor.submit(() -> channelOrderReissueService.processPayOrderBill(payOrder));
-                }
-                //已经到达页码最大量，无需再次查询
-                if (payOrderIPage.getPages() <= currentPageIndex) {
-                    break;
-                }
-                currentPageIndex++;
-                executor.shutdown();
-                try {
-                    if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-                        executor.shutdownNow(); // 超时后强制关闭
-                    }
-                } catch (InterruptedException e) {
-                    executor.shutdownNow(); // 如果等待被中断也强制关闭
-                    Thread.currentThread().interrupt(); // 重新设置中断状态
-                    log.error("Executor service interrupted", e);
-                }
-            } catch (Exception e) { //出现异常，直接退出，避免死循环。
-                log.error("error", e);
-                break;
-            }
-
-        }
-    }
-
 
 }
