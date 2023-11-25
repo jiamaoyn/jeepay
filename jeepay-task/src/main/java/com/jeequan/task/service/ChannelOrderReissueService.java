@@ -30,6 +30,10 @@ public class ChannelOrderReissueService {
     public void processPayOrderBill(PayOrder payOrder, Date startDate, Date endDate) {
         try {
             String payOrderId = payOrder.getPayOrderId();
+            payOrder = payOrderService.queryMchOrder(payOrderId);
+            if (payOrder.getState() == PayOrder.STATE_SUCCESS){
+                return;
+            }
             //查询支付接口是否存在
             IPayOrderQueryService queryService = SpringBeansUtil.getBean(payOrder.getIfCode() + "PayOrderQueryService", IPayOrderQueryService.class);
             // 支付通道接口实现不存在

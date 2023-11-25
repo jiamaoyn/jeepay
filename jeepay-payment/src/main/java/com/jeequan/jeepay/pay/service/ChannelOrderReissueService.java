@@ -85,6 +85,10 @@ public class ChannelOrderReissueService {
     public ChannelRetMsg processPayOrderBill(PayOrder payOrder) {
         try {
             String payOrderId = payOrder.getPayOrderId();
+            payOrder = payOrderService.queryMchOrder(payOrderId);
+            if (payOrder.getState() == PayOrder.STATE_SUCCESS){
+                return null;
+            }
             //查询支付接口是否存在
             IPayOrderQueryService queryService = SpringBeansUtil.getBean(payOrder.getIfCode() + "PayOrderQueryService", IPayOrderQueryService.class);
             // 支付通道接口实现不存在
