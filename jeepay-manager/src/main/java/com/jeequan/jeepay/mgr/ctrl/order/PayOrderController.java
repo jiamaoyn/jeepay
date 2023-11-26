@@ -97,8 +97,18 @@ public class PayOrderController extends CommonCtrl {
         for (PayWay payWay : payWayList) {
             payWayNameMap.put(payWay.getWayCode(), payWay.getWayName());
         }
+        Map<String, String> payMchAppName = new HashMap<>();
+        List<MchApp> payMchAppNameList = mchAppService.list();
+        for (MchApp mchApp : payMchAppNameList) {
+            payMchAppName.put(mchApp.getAppId(), mchApp.getAppName());
+        }
         for (PayOrder order : pages.getRecords()) {
             // 存入支付方式名称
+            if (StringUtils.isNotEmpty(payMchAppName.get(order.getAppId()))) {
+                order.addExt("mchAppName", payMchAppName.get(order.getAppId()));
+            } else {
+                order.addExt("mchAppName", "已删除或关闭");
+            }
             if (StringUtils.isNotEmpty(payWayNameMap.get(order.getWayCode()))) {
                 order.addExt("wayName", payWayNameMap.get(order.getWayCode()));
             } else {
