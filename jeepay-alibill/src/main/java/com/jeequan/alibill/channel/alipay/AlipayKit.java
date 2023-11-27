@@ -33,6 +33,8 @@ public class AlipayKit {
         // 子商户信息
         if (req instanceof AlipayTradePayRequest) {
             ((AlipayTradePayRequest) req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
+        } else if (req instanceof AlipayDataBillAccountlogQueryRequest) {
+            ((AlipayDataBillAccountlogQueryRequest) req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
         } else if (req instanceof AlipayTradeAppPayRequest) {
             ((AlipayTradeAppPayRequest) req).putOtherTextParam("app_auth_token", isvsubMchParams.getAppAuthToken());
         } else if (req instanceof AlipayTradeCreateRequest) {

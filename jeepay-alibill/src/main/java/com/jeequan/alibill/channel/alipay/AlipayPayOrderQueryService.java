@@ -95,6 +95,8 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
         model.setStartTime(sdf.format(endDate));
         model.setEndTime(sdf.format(startDate));
         request.setBizModel(model);
+        //统一放置 isv接口必传信息
+        AlipayKit.putApiIsvInfo(mchAppConfigContext, request, model);
         AlipayDataBillAccountlogQueryResponse resp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(request);
         if(resp.isSuccess()){
             return resp.getDetailList();
