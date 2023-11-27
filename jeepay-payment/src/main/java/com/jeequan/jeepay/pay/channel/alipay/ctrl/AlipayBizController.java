@@ -118,6 +118,7 @@ public class AlipayBizController extends AbstractCtrl {
                 ifParams.put("appAuthToken", appAuthToken);
                 ifParams.put("refreshToken", resp.getAppRefreshToken());
                 ifParams.put("expireTimestamp", resp.getExpiresIn());
+                ifParams.put("userId", resp.getUserId());
 
                 PayInterfaceConfig dbRecord = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_MCH_APP, mchAppId, CS.IF_CODE.ALIPAY);
 

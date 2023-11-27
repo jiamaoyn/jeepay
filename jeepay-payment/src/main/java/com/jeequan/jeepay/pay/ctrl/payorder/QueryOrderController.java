@@ -1,11 +1,9 @@
 package com.jeequan.jeepay.pay.ctrl.payorder;
 
-import cn.hutool.core.util.URLUtil;
-import com.jeequan.jeepay.core.entity.MchApp;
-import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvsubMchParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
 import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
@@ -88,9 +86,19 @@ public class QueryOrderController extends ApiController {
         if (mchAppConfigContext == null) {
             throw new BizException("获取商户应用信息失败");
         }
-        AlipayNormalMchParams normalMchParams = (AlipayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), "alipay");
-        if (normalMchParams == null) {
-            throw new BizException("商户支付宝接口没有配置！");
+        String pid;
+        if (!mchAppConfigContext.isIsvsubMch()){
+            AlipayNormalMchParams normalMchParams = (AlipayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), "alipay");
+            if (normalMchParams == null) {
+                throw new BizException("商户支付宝接口没有配置！");
+            }
+            pid = normalMchParams.getPid();
+        } else {
+            AlipayIsvsubMchParams normalMchParams = (AlipayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), "alipay");
+            if (normalMchParams == null) {
+                throw new BizException("商户支付宝接口没有配置！");
+            }
+            pid = normalMchParams.getUserId();
         }
         if (payOrder.getState() == PayOrder.STATE_INIT){
             boolean isSuccess = payOrderService.updateInit2Ing(payOrder.getPayOrderId(), payOrder);
@@ -98,7 +106,7 @@ public class QueryOrderController extends ApiController {
                 throw new BizException("更新订单异常!");
             }
         }
-        response.sendRedirect("https://ds.alipay.com/?from=pc&appId=20000116&actionType=toAccount&goBack=NO&amount="+ AmountUtil.convertCent2Dollar(payOrder.getAmount().toString())+"&userId="+normalMchParams.getPid()+"&memo="+payOrderId);
+        response.sendRedirect("https://ds.alipay.com/?from=pc&appId=20000116&actionType=toAccount&goBack=NO&amount="+ AmountUtil.convertCent2Dollar(payOrder.getAmount().toString())+"&userId="+pid+"&memo="+payOrderId);
     }
 
 }

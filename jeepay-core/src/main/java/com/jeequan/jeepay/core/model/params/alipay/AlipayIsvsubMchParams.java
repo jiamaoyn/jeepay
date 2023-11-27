@@ -11,6 +11,7 @@ import lombok.Data;
 public class AlipayIsvsubMchParams extends IsvsubMchParams {
 
     private String appAuthToken;
+    private String userId;
 
 
 }
