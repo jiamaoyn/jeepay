@@ -63,9 +63,7 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
                     }
                 }
             } else {
-                MchApp dbRecord = mchAppService.getById(payOrder.getAppId());
-                dbRecord.setState(CS.NO);
-                mchAppService.updateById(dbRecord);
+                log.error("{},账号有问题！错误信息：{}", mchAppConfigContext.getAppId(), resp.getMsg()+resp.getSubMsg());
             }
             return ChannelRetMsg.waiting(); //支付中
         }
@@ -101,10 +99,7 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
         if(resp.isSuccess()){
             return resp.getDetailList();
         } else {
-            MchApp dbRecord = mchAppService.getById(mchAppConfigContext.getAppId());
-            dbRecord.setState(CS.NO);
-            mchAppService.updateById(dbRecord);
-            log.error("{},账号有问题！", mchAppConfigContext.getAppId());
+            log.error("{},账号有问题！错误信息：{}", mchAppConfigContext.getAppId(), resp.getMsg()+resp.getSubMsg());
             return null;
         }
     }
