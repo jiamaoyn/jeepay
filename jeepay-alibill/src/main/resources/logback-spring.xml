@@ -34,6 +34,11 @@
             <fileNamePattern>${currentLoggerFilePath}/${currentLoggerFileName}.all.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>10</maxHistory> <!--日志文件保留天数-->
         </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
     </appender>
 
     <!-- appender：错误信息日志文件 -->

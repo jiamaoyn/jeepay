@@ -74,7 +74,7 @@ public class ChannelOrderReissueService {
 
             });
         } catch (Exception e) {  //继续下一次迭代查询
-            log.error("error 支付宝商家订单回调", e);
+            log.error("error appid:{} 支付宝商家订单回调",appId, e);
             if (!appId.isEmpty()){
                 MchApp dbRecord = mchAppService.getById(appId);
                 dbRecord.setState(CS.NO);
