@@ -130,7 +130,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
         String ifCode = getValStringRequired("ifCode");
 
         MchApp mchApp = mchAppService.getById(infoId);
-        if (mchApp == null || mchApp.getState() != CS.YES) {
+        if (mchApp == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
 
