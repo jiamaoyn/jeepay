@@ -1,6 +1,10 @@
 package com.jeequan.jeepay.mgr.ctrl.merchant;
 
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.alipay.api.domain.AlipayDataBillAccountlogQueryModel;
+import com.alipay.api.request.AlipayDataBillAccountlogQueryRequest;
+import com.alipay.api.response.AlipayDataBillAccountlogQueryResponse;
 import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.aop.MethodLog;
@@ -13,8 +17,10 @@ import com.jeequan.jeepay.core.entity.PayInterfaceDefine;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.DBApplicationConfig;
 import com.jeequan.jeepay.core.model.params.NormalMchParams;
+import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
 import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mgr.ctrl.CommonCtrl;
+import com.jeequan.jeepay.mgr.model.AlipayClientWrapper;
 import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.PayInterfaceConfigService;
@@ -29,6 +35,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -161,7 +169,26 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
             payInterfaceConfig.setCreatedUid(userId);
             payInterfaceConfig.setCreatedBy(realName);
         }
-
+        if (ifCode.equals(CS.IF_CODE.ALIPAY)){
+            MchInfo mchInfo = mchInfoService.getById(mchApp.getMchNo());
+            if (mchInfo != null && mchInfo.getType() == MchInfo.TYPE_NORMAL){
+                AlipayNormalMchParams alipayParams = (AlipayNormalMchParams) NormalMchParams.factory(ifCode, payInterfaceConfig.getIfParams());
+                if (alipayParams==null)return ApiRes.customFail("系统错误");
+                AlipayClientWrapper alipayClientWrapper = AlipayClientWrapper.buildAlipayClientWrapper(alipayParams);
+                AlipayDataBillAccountlogQueryRequest request = new AlipayDataBillAccountlogQueryRequest();
+                AlipayDataBillAccountlogQueryModel model = new AlipayDataBillAccountlogQueryModel();
+                Date startDate = DateUtil.offsetMinute(new Date(), -0);
+                Date endDate = DateUtil.offsetMinute(new Date(), -1);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                model.setStartTime(sdf.format(endDate));
+                model.setEndTime(sdf.format(startDate));
+                request.setBizModel(model);
+                AlipayDataBillAccountlogQueryResponse resp = alipayClientWrapper.execute(request);
+                if(!resp.isSuccess()){
+                    return ApiRes.customFail(resp.getMsg()+resp.getSubMsg());
+                }
+            }
+        }
         boolean result = payInterfaceConfigService.saveOrUpdate(payInterfaceConfig);
         if (!result) {
             return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "配置失败");
