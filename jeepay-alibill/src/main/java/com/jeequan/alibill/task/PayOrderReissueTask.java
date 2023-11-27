@@ -26,8 +26,6 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class PayOrderReissueTask {
 
-    private static final int QUERY_PAGE_SIZE = 50; //每次查询数量
-
     @Autowired
     private MchAppService mchAppService;
     @Autowired
