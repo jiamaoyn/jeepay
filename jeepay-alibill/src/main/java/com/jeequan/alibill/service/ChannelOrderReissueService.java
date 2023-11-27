@@ -32,7 +32,10 @@ public class ChannelOrderReissueService {
     @Autowired
     private PayOrderService payOrderService;
     @Autowired
+    private MchAppService mchAppService;
+    @Autowired
     private PayOrderProcessService payOrderProcessService;
+    private String appId;
     public void processPayOrderBill(MchApp mchApp, Date startDate, Date endDate) {
         try {
             //查询支付接口是否存在
@@ -49,6 +52,7 @@ public class ChannelOrderReissueService {
                 log.error("appid={},未查询到支付宝订单，结束时间：{},开始时间:{}", mchAppConfigContext.getAppId(), startDate, endDate);
                 return;
             }
+            appId = mchAppConfigContext.getAppId();
             accountLogItemResultList.forEach(accountLogItemResult -> {
 //                log.info("alipay_order_no:{},balance:{},trans_amount:{},direction:{},trans_dt:{},trans_memo:{}" ,
 //                        accountLogItemResult.getAlipayOrderNo(),accountLogItemResult.getBalance(),accountLogItemResult.getTransAmount(),accountLogItemResult.getDirection(),accountLogItemResult.getTransDt(),accountLogItemResult.getTransMemo());
@@ -71,6 +75,11 @@ public class ChannelOrderReissueService {
             });
         } catch (Exception e) {  //继续下一次迭代查询
             log.error("error 支付宝商家订单回调", e);
+            if (!appId.isEmpty()){
+                MchApp dbRecord = mchAppService.getById(appId);
+                dbRecord.setState(CS.NO);
+                mchAppService.updateById(dbRecord);
+            }
         }
     }
 
