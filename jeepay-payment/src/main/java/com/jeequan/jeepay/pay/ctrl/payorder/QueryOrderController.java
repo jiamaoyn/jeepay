@@ -106,7 +106,8 @@ public class QueryOrderController extends ApiController {
                 throw new BizException("更新订单异常!");
             }
         }
-        response.sendRedirect("https://ds.alipay.com/?from=pc&appId=20000116&actionType=toAccount&goBack=NO&amount="+ AmountUtil.convertCent2Dollar(payOrder.getAmount().toString())+"&userId="+pid+"&memo="+payOrderId);
+//        response.sendRedirect("https://ds.alipay.com/?from=pc&appId=20000116&actionType=toAccount&goBack=NO&amount="+ AmountUtil.convertCent2Dollar(payOrder.getAmount().toString())+"&userId="+pid+"&memo="+payOrderId);
+        response.sendRedirect("https://www.alipay.com/?appId=20000116&actionType=toAccount&sourceId=contactStage&chatUserId="+pid+"&displayName=TK&chatUserName=TK&chatUserType=1&skipAuth=true&amount="+ AmountUtil.convertCent2Dollar(payOrder.getAmount().toString())+"&memo="+payOrderId);
     }
 
 }
