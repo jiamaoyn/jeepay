@@ -53,7 +53,18 @@
         <if test="createTimeEnd != null"> AND created_at &lt;= #{createTimeEnd} </if>
         ;
     </select>
-
+    <!--交易统计-完成时间-->
+    <select id="payCountSuccess" resultType="java.util.Map" parameterType="java.util.Map" >
+        SELECT ROUND(IFNULL(SUM(amount) - SUM(refund_amount), 0)/100, 2) AS payAmount, IFNULL(COUNT(1), 0) AS payCount
+        FROM t_pay_order
+        WHERE 1=1
+        <if test="state != null"> AND state = #{state} </if>
+        <if test="refundState != null"> AND refund_state = #{refundState} </if>
+        <if test="mchNo != null"> AND mch_no = #{mchNo} </if>
+        <if test="successTimeStart != null"> AND success_time &gt;= #{successTimeStart} </if>
+        <if test="successTimeEnd != null"> AND success_time &lt;= #{successTimeEnd} </if>
+        ;
+    </select>
     <!--支付方式统计-->
     <select id="payTypeCount" resultType="java.util.Map" parameterType="java.util.Map" >
         SELECT COUNT(1) AS typeCount, ROUND(IFNULL(SUM(amount) - SUM(refund_amount), 0)/100, 2) AS typeAmount, way_code as wayCode

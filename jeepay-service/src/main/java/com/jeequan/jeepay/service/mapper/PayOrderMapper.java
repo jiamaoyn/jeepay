@@ -18,6 +18,7 @@ import java.util.Map;
 public interface PayOrderMapper extends BaseMapper<PayOrder> {
 
     Map payCount(Map param);
+    Map payCountSuccess(Map param);
 
     List<Map> payTypeCount(Map param);
 

@@ -228,6 +228,25 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         }
         return payOrderMapper.payCount(param);
     }
+    public Map payCountSuccess(String mchNo, Byte state, Byte refundState, String dayStart, String dayEnd) {
+        Map param = new HashMap<>();
+        if (state != null) {
+            param.put("state", state);
+        }
+        if (refundState != null) {
+            param.put("refundState", refundState);
+        }
+        if (StrUtil.isNotBlank(mchNo)) {
+            param.put("mchNo", mchNo);
+        }
+        if (StrUtil.isNotBlank(dayStart)) {
+            param.put("successTimeStart", dayStart);
+        }
+        if (StrUtil.isNotBlank(dayEnd)) {
+            param.put("successTimeEnd", dayEnd);
+        }
+        return payOrderMapper.payCountSuccess(param);
+    }
 
     public List<Map> payTypeCount(String mchNo, Byte state, Byte refundState, String dayStart, String dayEnd) {
         Map param = new HashMap<>();
@@ -279,13 +298,20 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
      **/
     public JSONObject mainPageWeekCount(String mchNo) {
         JSONObject json = new JSONObject();
-        Map dayAmount = new LinkedHashMap();
+        Map dayAmount;
         ArrayList array = new ArrayList<>();
         BigDecimal payAmount = new BigDecimal(0);    // 当日金额
         BigDecimal payWeek = payAmount;   // 周总收益
         String todayAmount = "0.00";    // 今日金额
         String todayPayCount = "0";    // 今日交易笔数
         String yesterdayAmount = "0.00";    // 昨日金额
+        Map dayAmountSuccess;
+        ArrayList arraySuccess = new ArrayList<>();
+        BigDecimal payAmountSuccess = new BigDecimal(0);    // 当日金额
+        BigDecimal payWeekSuccess = payAmountSuccess;   // 周总收益
+        String todayAmountSuccess = "0.00";    // 今日金额
+        String todayPayCountSuccess = "0";    // 今日交易笔数
+        String yesterdayAmountSuccess = "0.00";    // 昨日金额
         Date today = new Date();
         for (int i = 0; i < 7; i++) {
             Date date = DateUtil.offsetDay(today, -i).toJdkDate();
@@ -305,15 +331,36 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
             }
             payWeek = payWeek.add(payAmount);
             array.add(payAmount);
+
+            dayAmountSuccess = payCountSuccess(mchNo, PayOrder.STATE_SUCCESS, null, dayStart, dayEnd);
+            if (dayAmountSuccess != null) {
+                payAmountSuccess = new BigDecimal(dayAmountSuccess.get("payAmount").toString());
+            }
+            if (i == 0) {
+                todayAmountSuccess = dayAmountSuccess.get("payAmount").toString();
+                todayPayCountSuccess = dayAmountSuccess.get("payCount").toString();
+            }
+            if (i == 1) {
+                yesterdayAmountSuccess = dayAmountSuccess.get("payAmount").toString();
+            }
+            payWeekSuccess = payWeekSuccess.add(payAmountSuccess);
+            arraySuccess.add(payAmountSuccess);
         }
 
         // 倒序排列
         Collections.reverse(array);
+        Collections.reverse(arraySuccess);
         json.put("dataArray", array);
         json.put("todayAmount", todayAmount);
         json.put("todayPayCount", todayPayCount);
         json.put("payWeek", payWeek);
         json.put("yesterdayAmount", yesterdayAmount);
+
+        json.put("dataArraySuccess", arraySuccess);
+        json.put("todayAmountSuccess", todayAmountSuccess);
+        json.put("todayPayCountSuccess", todayPayCountSuccess);
+        json.put("payWeekSuccess", payWeekSuccess);
+        json.put("yesterdayAmountSuccess", yesterdayAmountSuccess);
         return json;
     }
 
