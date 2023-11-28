@@ -52,13 +52,16 @@ public class ChannelOrderReissueService {
             }
             //查询出商户应用的配置信息
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchApp.getMchNo(), mchApp.getAppId());
+            appId = mchAppConfigContext.getAppId();
             List<AccountLogItemResult> accountLogItemResultList = queryService.query(mchAppConfigContext, startDate, endDate);
             if (accountLogItemResultList == null) {
                 if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(mchAppConfigContext.getAppId()))){
                     Long expire = stringRedisTemplate.getExpire(mchAppConfigContext.getAppId(), TimeUnit.SECONDS);
-                    if (expire != null && 3600-expire>Long.getLong(sysConfigService.getDBApplicationConfig().getAccountAutoOff())){
+                    if (expire != null && 3600>Long.parseLong(sysConfigService.getDBApplicationConfig().getAccountAutoOff())+expire){
                         MchApp dbRecord = mchAppService.getById(mchAppConfigContext.getAppId());
                         dbRecord.setState(CS.NO);
+                        System.out.println("关闭应用");
+                        stringRedisTemplate.delete(mchAppConfigContext.getAppId());
                         mchAppService.updateById(dbRecord);
                     }
                 } else {
@@ -69,7 +72,6 @@ public class ChannelOrderReissueService {
             } else {
                 stringRedisTemplate.delete(mchAppConfigContext.getAppId());
             }
-            appId = mchAppConfigContext.getAppId();
             accountLogItemResultList.forEach(accountLogItemResult -> {
 //                log.info("alipay_order_no:{},balance:{},trans_amount:{},direction:{},trans_dt:{},trans_memo:{}" ,
 //                        accountLogItemResult.getAlipayOrderNo(),accountLogItemResult.getBalance(),accountLogItemResult.getTransAmount(),accountLogItemResult.getDirection(),accountLogItemResult.getTransDt(),accountLogItemResult.getTransMemo());
@@ -95,6 +97,7 @@ public class ChannelOrderReissueService {
             if (!appId.isEmpty()){
                 MchApp dbRecord = mchAppService.getById(appId);
                 dbRecord.setState(CS.NO);
+                System.out.println("关闭应用99");
                 mchAppService.updateById(dbRecord);
             }
         }
