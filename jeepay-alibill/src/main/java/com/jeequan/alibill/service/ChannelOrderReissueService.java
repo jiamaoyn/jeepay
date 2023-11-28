@@ -10,13 +10,14 @@ import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.alibill.channel.IPayOrderQueryService;
 import com.jeequan.alibill.model.MchAppConfigContext;
-import com.jeequan.alibill.rqrs.msg.ChannelRetMsg;
+import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /*
  * 查询上游订单， &  补单服务实现类
@@ -35,6 +36,10 @@ public class ChannelOrderReissueService {
     private MchAppService mchAppService;
     @Autowired
     private PayOrderProcessService payOrderProcessService;
+    @Autowired
+    protected SysConfigService sysConfigService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;;
     private String appId;
     public void processPayOrderBill(MchApp mchApp, Date startDate, Date endDate) {
         try {
@@ -49,8 +54,20 @@ public class ChannelOrderReissueService {
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchApp.getMchNo(), mchApp.getAppId());
             List<AccountLogItemResult> accountLogItemResultList = queryService.query(mchAppConfigContext, startDate, endDate);
             if (accountLogItemResultList == null) {
+                if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(mchAppConfigContext.getAppId()))){
+                    Long expire = stringRedisTemplate.getExpire(mchAppConfigContext.getAppId(), TimeUnit.SECONDS);
+                    if (expire != null && 3600-expire>Long.getLong(sysConfigService.getDBApplicationConfig().getAccountAutoOff())){
+                        MchApp dbRecord = mchAppService.getById(mchAppConfigContext.getAppId());
+                        dbRecord.setState(CS.NO);
+                        mchAppService.updateById(dbRecord);
+                    }
+                } else {
+                    stringRedisTemplate.opsForValue().set(mchAppConfigContext.getAppId(), mchAppConfigContext.getAppId(), 3600 ,TimeUnit.SECONDS);
+                }
                 log.error("appid={},未查询到支付宝订单，结束时间：{},开始时间:{}", mchAppConfigContext.getAppId(), startDate, endDate);
                 return;
+            } else {
+                stringRedisTemplate.delete(mchAppConfigContext.getAppId());
             }
             appId = mchAppConfigContext.getAppId();
             accountLogItemResultList.forEach(accountLogItemResult -> {
