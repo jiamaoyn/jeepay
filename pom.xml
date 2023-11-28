@@ -31,7 +31,8 @@
     <module>jeepay-payment</module>	<!-- 支付统一网关 -->
 
     <module>jeepay-components</module>
-    <module>jeepay-alibill</module> <!-- 组件包 -->
+    <module>jeepay-alibill</module>
+      <module>jeepay-telegram</module> <!-- 组件包 -->
   </modules>
 
   <!-- 配置属性声明, 支持自定义参数 -->
