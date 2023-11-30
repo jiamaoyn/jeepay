@@ -33,6 +33,11 @@ public class DBApplicationConfig implements Serializable {
      * oss公共读文件地址
      **/
     private String ossPublicSiteUrl;
+    /**
+     * oss公共读文件地址
+     **/
+    private String botTelegramToken;
+    private String botTelegramUsername;
 
     /**
      * 生成  【jsapi统一收银台跳转地址】

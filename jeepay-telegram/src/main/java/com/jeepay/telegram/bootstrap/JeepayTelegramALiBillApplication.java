@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.jeepay.telegram.config.SystemYmlConfig;
+import com.jeepay.telegram.telegram.MyCustomBot;
 import org.hibernate.validator.HibernateValidator;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,7 @@ public class JeepayTelegramALiBillApplication {
 
         //启动项目
         SpringApplication.run(JeepayTelegramALiBillApplication.class, args);
+
     }
 
 
@@ -71,7 +73,7 @@ public class JeepayTelegramALiBillApplication {
         converter.setFastJsonConfig(config);
 
         //设置响应的 Content-Type
-        converter.setSupportedMediaTypes(Arrays.asList(new MediaType[]{MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON_UTF8}));
+        converter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON_UTF8));
         return new HttpMessageConverters(converter);
     }
 

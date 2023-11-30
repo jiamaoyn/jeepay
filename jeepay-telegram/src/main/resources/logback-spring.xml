@@ -3,15 +3,10 @@
 
     <!-- 日志存放路径, 读取application.yml 需要使用springProperty获取 -->
     <springProperty scope="context" name="currentLoggerFilePath" source="logging.path"/>
-
     <!-- 主日志级别配置  -->
     <springProperty scope="context" name="currentRootLevel" source="logging.level.root"/>
-
-    <!-- 项目配置， 如修改包名，请搜索并全部替换掉  -->
-    <springProperty scope="context" name="currentProjectLevel" source="logging.level.com.jeequan.alibill"/>
-
     <!-- 日志文件名称  logback属性 -->
-    <property name="currentLoggerFileName" value="alibill" />
+    <property name="currentLoggerFileName" value="telegram" />
     <!-- 日志格式, 参考：https://logback.qos.ch/manual/layouts.html -->
     <property name="currentLoggerPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [%logger{15}] - %msg%n" />
 
@@ -69,6 +64,8 @@
     </root>
 
     <!-- 项目日志级别配置 -->
-    <logger name="com.jeequan.alibill" level="${currentProjectLevel}"/>
+    <logger name="com.jeepay.telegram" level="${currentRootLevel}"/>
+    <Logger name="org.apache.http" level="${currentRootLevel}"/>
+    <Logger name="org.apache.http.headers" level="${currentRootLevel}"/>
 
 </configuration>

@@ -1,6 +1,5 @@
 package com.jeepay.telegram.ctrl;
 
-import com.jeepay.telegram.service.ChannelOrderReissueService;
 import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.model.ApiRes;
