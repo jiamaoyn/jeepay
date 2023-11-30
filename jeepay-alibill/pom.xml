@@ -18,7 +18,11 @@
 
     <!-- 项目依赖声明 -->
     <dependencies>
-
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots</artifactId>
+            <version>6.8.0</version>
+        </dependency>
         <!-- 依赖[ service ]包, 会自动传递依赖[ core ]包。  -->
         <dependency>
             <groupId>com.jeequan</groupId>

@@ -33,7 +33,7 @@ public class SysConfigService extends ServiceImpl<SysConfigMapper, SysConfig> im
     /**
      * 数据库application配置参数
      **/
-    private static MutablePair<String, DBApplicationConfig> APPLICATION_CONFIG = new MutablePair<>("applicationConfig", null);
+    private static final MutablePair<String, DBApplicationConfig> APPLICATION_CONFIG = new MutablePair<>("applicationConfig", null);
     @Autowired
     private SysConfigService sysConfigService;
 
