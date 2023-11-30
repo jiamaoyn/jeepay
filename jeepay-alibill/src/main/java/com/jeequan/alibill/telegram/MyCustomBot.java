@@ -1,73 +1,80 @@
 package com.jeequan.alibill.telegram;
 
-import com.jeequan.jeepay.service.impl.SysConfigService;
+import com.jeequan.jeepay.core.entity.TelegramChat;
 import com.jeequan.jeepay.service.impl.TelegramChatService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
+@Component
 public class MyCustomBot extends TelegramLongPollingBot {
-    public final TelegramChatService telegramChatService;
-    public SysConfigService sysConfigService;
-    public MyCustomBot(DefaultBotOptions options, TelegramChatService telegramChatService, SysConfigService sysConfigService) {
+
+    private final BotConfigService botConfigService;
+    private final TelegramChatService telegramChatService;
+
+    @Autowired
+    public MyCustomBot(DefaultBotOptions options, BotConfigService botConfigService, TelegramChatService telegramChatService) {
         super(options);
+        this.botConfigService = botConfigService;
         this.telegramChatService = telegramChatService;
-        this.sysConfigService = sysConfigService;
     }
 
     @Override
     public String getBotUsername() {
-        return "ilianpay_bot"; // 替换为您的 用户名
+        return botConfigService.getBotUsername();
     }
 
     @Override
     public String getBotToken() {
-        return "6215593979:AAG9MPC4fRoIp--d1WS2fVij3aAe3FHi08s"; // 替换为您的  Token
+        return botConfigService.getBotToken();
     }
 
     @Override
     public void onUpdateReceived(Update update) {
-        Message msg = update.getMessage();
-        User user = msg.getFrom();
-        Long id = user.getId();
-        Integer messageId = msg.getMessageId();
-        long chatId = msg.getChatId();
-        sendText(chatId, messageId, msg.getText());
-        System.out.println("消息的发送者。id:"+id);
-        System.out.println("消息所在的聊天。idchatId:"+chatId);
-        System.out.println("消息的唯一messageId:"+messageId);
-        System.out.println("消息的内容:"+msg.getText());
-        System.out.println("消息的发送时间:"+msg.getDate());
-    }
-
-    public void sendText(Long chatId,Integer messageId, String messageText){
-        // 创建回复消息
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText(messageText);
-        message.setReplyToMessageId(messageId); // 设置这条消息作为回复的消息ID
-        try {
-            // 发送回复
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-    public static void main(String[] args) {
-        DefaultBotOptions options = new DefaultBotOptions();
-        options.setBaseUrl("https://apitelegram.aod.icu/bot"); // 设置自定义的 URL
-        MyCustomBot bot = new MyCustomBot(options, null,null);
-        try {
-            TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-            botsApi.registerBot(bot);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            String messageText = update.getMessage().getText();
+            String sendText = "";
+            String chatId = String.valueOf(update.getMessage().getChatId());
+            SendMessage message = new SendMessage();
+            message.setChatId(chatId);
+            message.setReplyToMessageId(update.getMessage().getMessageId());
+            if (messageText.startsWith("绑定M")){
+                String[] parts = messageText.split("M");
+                sendText = "绑定失败，商户号已被绑定或错误";
+                if (parts.length > 1){
+                    TelegramChat telegramChat = telegramChatService.createTelegramChat(chatId, "M" + parts[1]);
+                    if (telegramChat != null){
+                        sendText = "绑定成功";
+                    }
+                }
+            } else if (messageText.equals("解绑")) {
+                Boolean aBoolean = telegramChatService.deleteTelegramChat(chatId);
+                if (aBoolean){
+                    sendText = "解绑成功";
+                } else {
+                    sendText = "解绑失败";
+                }
+            } else if (messageText.equals("收款统计")) {
+                sendText = "收款统计";
+            }
+//            TelegramChat telegramChat = telegramChatService.queryTelegramChat(chatId);
+//            if (telegramChat == null){
+//                messageText = "商户号未绑定，请先绑定商户号。\n绑定命令：绑定+商户号\n例如：绑定+M111111111";
+//            } else {
+//                messageText = "有什么可以帮你";
+//            }
+            if (!sendText.isEmpty()){
+                try {
+                    message.setText(sendText);
+                    execute(message);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

@@ -1,9 +1,12 @@
 package com.jeequan.alibill.service;
 
 import com.alipay.api.domain.AccountLogItemResult;
+import com.jeequan.alibill.telegram.MyCustomBot;
+import com.jeequan.alibill.telegram.TelegramService;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.core.entity.TelegramChat;
 import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
 import com.jeequan.jeepay.service.impl.MchAppService;
@@ -11,10 +14,14 @@ import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.alibill.channel.IPayOrderQueryService;
 import com.jeequan.alibill.model.MchAppConfigContext;
 import com.jeequan.jeepay.service.impl.SysConfigService;
+import com.jeequan.jeepay.service.impl.TelegramChatService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +38,10 @@ public class ChannelOrderReissueService {
     @Autowired
     private ConfigContextQueryService configContextQueryService;
     @Autowired
+    private MyCustomBot myCustomBot;
+    @Autowired
+    private TelegramChatService telegramChatService;
+    @Autowired
     private PayOrderService payOrderService;
     @Autowired
     private MchAppService mchAppService;
@@ -40,7 +51,6 @@ public class ChannelOrderReissueService {
     protected SysConfigService sysConfigService;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;;
-    private String appId;
     public void processPayOrderBill(MchApp mchApp, Date startDate, Date endDate) {
         try {
             //查询支付接口是否存在
@@ -52,7 +62,6 @@ public class ChannelOrderReissueService {
             }
             //查询出商户应用的配置信息
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchApp.getMchNo(), mchApp.getAppId());
-            appId = mchAppConfigContext.getAppId();
             List<AccountLogItemResult> accountLogItemResultList = queryService.query(mchAppConfigContext, startDate, endDate);
             if (accountLogItemResultList == null) {
                 if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(mchAppConfigContext.getAppId()))){
@@ -63,6 +72,7 @@ public class ChannelOrderReissueService {
                         System.out.println("关闭应用");
                         stringRedisTemplate.delete(mchAppConfigContext.getAppId());
                         mchAppService.updateById(dbRecord);
+                        sendMessage(mchApp.getMchNo(),"长时间无成功订单，应用："+mchApp.getAppName()+"----被关闭");
                     }
                 } else {
                     stringRedisTemplate.opsForValue().set(mchAppConfigContext.getAppId(), mchAppConfigContext.getAppId(), 3600 ,TimeUnit.SECONDS);
@@ -93,13 +103,26 @@ public class ChannelOrderReissueService {
 
             });
         } catch (Exception e) {  //继续下一次迭代查询
-            log.error("error appid:{} 支付宝商家订单回调",appId, e);
-            if (!appId.isEmpty()){
-                MchApp dbRecord = mchAppService.getById(appId);
-                dbRecord.setState(CS.NO);
-                System.out.println("关闭应用99");
-                mchAppService.updateById(dbRecord);
-            }
+            log.error("error appid:{} 支付宝商家订单回调",mchApp.getAppId(), e);
+            MchApp dbRecord = mchAppService.getById(mchApp.getAppId());
+            dbRecord.setState(CS.NO);
+            System.out.println("关闭应用99");
+            mchAppService.updateById(dbRecord);
+            sendMessage(mchApp.getMchNo(),"出现异常，应用："+mchApp.getAppName()+"----被关闭。\n请登陆后台查看，如错误关闭，请重新打开");
+        }
+    }
+    public void sendMessage(String mchNo, String messageText) {
+        TelegramChat telegramChat = telegramChatService.queryTelegramChatByMchNo(mchNo);
+        if (telegramChat == null){
+            return;
+        }
+        SendMessage message = new SendMessage();
+        message.setChatId(telegramChat.getChatId());
+        message.setText(messageText);
+        try {
+            myCustomBot.execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 
