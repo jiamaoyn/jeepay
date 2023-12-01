@@ -69,23 +69,20 @@ public class ChannelOrderReissueService {
                     if (expire != null && 3600>Long.parseLong(sysConfigService.getDBApplicationConfig().getAccountAutoOff())+expire){
                         MchApp dbRecord = mchAppService.getById(mchAppConfigContext.getAppId());
                         dbRecord.setState(CS.NO);
-                        System.out.println("关闭应用");
                         stringRedisTemplate.delete(mchAppConfigContext.getAppId());
                         mchAppService.updateById(dbRecord);
+                        log.error("长时间无成功订单，应用："+mchApp.getAppName()+"----被关闭");
                         sendMessage(mchApp.getMchNo(),"长时间无成功订单，应用："+mchApp.getAppName()+"----被关闭");
                     }
                 } else {
                     stringRedisTemplate.opsForValue().set(mchAppConfigContext.getAppId(), mchAppConfigContext.getAppId(), 3600 ,TimeUnit.SECONDS);
                 }
-                log.error("appid={},未查询到支付宝订单，结束时间：{},开始时间:{}", mchAppConfigContext.getAppId(), startDate, endDate);
                 return;
             } else {
                 stringRedisTemplate.delete(mchAppConfigContext.getAppId());
             }
             accountLogItemResultList.forEach(accountLogItemResult -> {
-//                log.info("alipay_order_no:{},balance:{},trans_amount:{},direction:{},trans_dt:{},trans_memo:{}" ,
-//                        accountLogItemResult.getAlipayOrderNo(),accountLogItemResult.getBalance(),accountLogItemResult.getTransAmount(),accountLogItemResult.getDirection(),accountLogItemResult.getTransDt(),accountLogItemResult.getTransMemo());
-                if (accountLogItemResult.getTransMemo()!=null) {
+                 if (accountLogItemResult.getTransMemo()!=null) {
                     PayOrder payOrder = payOrderService.queryPayOrderIdNoStateIng(accountLogItemResult.getTransMemo());
                     if (payOrder == null){
                         return;
@@ -106,8 +103,8 @@ public class ChannelOrderReissueService {
             log.error("error appid:{} 支付宝商家订单回调",mchApp.getAppId(), e);
             MchApp dbRecord = mchAppService.getById(mchApp.getAppId());
             dbRecord.setState(CS.NO);
-            System.out.println("关闭应用99");
             mchAppService.updateById(dbRecord);
+            log.error("出现异常，应用："+mchApp.getAppName()+"----被关闭。\n请登陆后台查看，如错误关闭，请重新打开");
             sendMessage(mchApp.getMchNo(),"出现异常，应用："+mchApp.getAppName()+"----被关闭。\n请登陆后台查看，如错误关闭，请重新打开");
         }
     }

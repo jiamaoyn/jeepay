@@ -95,7 +95,11 @@ public class PayOrderController extends CommonCtrl {
         wrapper.eq(PayOrder::getMchNo, getCurrentMchNo());
 
         IPage<PayOrder> pages = payOrderService.listByPage(getIPage(), payOrder, paramJSON, wrapper);
-
+        Map<String, String> payMchAppName = new HashMap<>();
+        List<MchApp> payMchAppNameList = mchAppService.list();
+        for (MchApp mchApp : payMchAppNameList) {
+            payMchAppName.put(mchApp.getAppId(), mchApp.getAppName());
+        }
         // 得到所有支付方式
         Map<String, String> payWayNameMap = new HashMap<>();
         List<PayWay> payWayList = payWayService.list();
@@ -104,6 +108,11 @@ public class PayOrderController extends CommonCtrl {
                 payWayNameMap.put(payWay.getWayCode(), payWay.getWayName());
             }
             for (PayOrder order : pages.getRecords()) {
+                if (StringUtils.isNotEmpty(payMchAppName.get(order.getAppId()))) {
+                    order.addExt("mchAppName", payMchAppName.get(order.getAppId()));
+                } else {
+                    order.addExt("mchAppName", "已删除或关闭");
+                }
                 // 存入支付方式名称
                 if (StringUtils.isNotEmpty(payWayNameMap.get(order.getWayCode()))) {
                     order.addExt("wayName", payWayNameMap.get(order.getWayCode()));
