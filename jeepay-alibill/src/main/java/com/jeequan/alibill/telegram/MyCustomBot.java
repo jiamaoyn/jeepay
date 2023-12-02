@@ -1,6 +1,7 @@
 package com.jeequan.alibill.telegram;
 
 import com.jeequan.jeepay.core.entity.TelegramChat;
+import com.jeequan.jeepay.service.impl.SysConfigService;
 import com.jeequan.jeepay.service.impl.TelegramChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,24 +14,24 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class MyCustomBot extends TelegramLongPollingBot {
 
-    private final BotConfigService botConfigService;
+    private final SysConfigService sysConfigService;
     private final TelegramChatService telegramChatService;
 
     @Autowired
-    public MyCustomBot(DefaultBotOptions options, BotConfigService botConfigService, TelegramChatService telegramChatService) {
+    public MyCustomBot(DefaultBotOptions options, SysConfigService sysConfigService, TelegramChatService telegramChatService) {
         super(options);
-        this.botConfigService = botConfigService;
+        this.sysConfigService = sysConfigService;
         this.telegramChatService = telegramChatService;
     }
 
     @Override
     public String getBotUsername() {
-        return botConfigService.getBotUsername();
+        return sysConfigService.getDBApplicationConfig().getBotTelegramUsername();
     }
 
     @Override
     public String getBotToken() {
-        return botConfigService.getBotToken();
+        return sysConfigService.getDBApplicationConfig().getBotTelegramToken();
     }
 
     @Override

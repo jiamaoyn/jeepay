@@ -37,6 +37,8 @@ public class DBApplicationConfig implements Serializable {
     private String botTelegramToken;
     private String botTelegramUsername;
     private String accountAutoOff;
+    private String botTelegramUrl;
+    private String botTelegramChatId;
 
     /**
      * 生成  【jsapi统一收银台跳转地址】

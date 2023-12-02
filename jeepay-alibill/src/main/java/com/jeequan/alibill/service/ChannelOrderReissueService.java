@@ -1,9 +1,14 @@
 package com.jeequan.alibill.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.domain.AccountLogItemResult;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jeequan.alibill.telegram.MyCustomBot;
 import com.jeequan.alibill.telegram.TelegramService;
 import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.TelegramChat;
@@ -16,6 +21,7 @@ import com.jeequan.alibill.model.MchAppConfigContext;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import com.jeequan.jeepay.service.impl.TelegramChatService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -33,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-public class ChannelOrderReissueService {
+public class ChannelOrderReissueService extends AbstractCtrl {
 
     @Autowired
     private ConfigContextQueryService configContextQueryService;
@@ -60,26 +66,25 @@ public class ChannelOrderReissueService {
                 log.error("{} interface not exists error!", "alipay");
                 return;
             }
+            String string = stringRedisTemplate.opsForValue().get("alipayAppId"+mchApp.getAppId());
+            if (string != null && mchApp.getState() == CS.NO){
+                return;
+            }
             //查询出商户应用的配置信息
             MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(mchApp.getMchNo(), mchApp.getAppId());
             List<AccountLogItemResult> accountLogItemResultList = queryService.query(mchAppConfigContext, startDate, endDate);
             if (accountLogItemResultList == null) {
-                if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(mchAppConfigContext.getAppId()))){
-                    Long expire = stringRedisTemplate.getExpire(mchAppConfigContext.getAppId(), TimeUnit.SECONDS);
-                    if (expire != null && 3600>Long.parseLong(sysConfigService.getDBApplicationConfig().getAccountAutoOff())+expire){
-                        MchApp dbRecord = mchAppService.getById(mchAppConfigContext.getAppId());
+                String accountAutoOff = sysConfigService.getDBApplicationConfig().getAccountAutoOff();
+                if (isAccountOff(mchApp, Long.parseLong(accountAutoOff))){
+                    MchApp dbRecord = mchAppService.getById(mchAppConfigContext.getAppId());
+                    if (dbRecord.getState()!=CS.NO){
                         dbRecord.setState(CS.NO);
-                        stringRedisTemplate.delete(mchAppConfigContext.getAppId());
                         mchAppService.updateById(dbRecord);
-                        log.error("长时间无成功订单，应用："+mchApp.getAppName()+"----被关闭");
-                        sendMessage(mchApp.getMchNo(),"长时间无成功订单，应用："+mchApp.getAppName()+"----被关闭");
+                        log.error("累计---{}---笔无成功订单，应用：{}----被关闭", accountAutoOff, mchApp.getAppName());
+                        sendMessage(mchApp.getMchNo(),"累计---"+ accountAutoOff +"---笔无成功订单，应用："+mchApp.getAppName()+"----被关闭");
                     }
-                } else {
-                    stringRedisTemplate.opsForValue().set(mchAppConfigContext.getAppId(), mchAppConfigContext.getAppId(), 3600 ,TimeUnit.SECONDS);
                 }
                 return;
-            } else {
-                stringRedisTemplate.delete(mchAppConfigContext.getAppId());
             }
             accountLogItemResultList.forEach(accountLogItemResult -> {
                  if (accountLogItemResult.getTransMemo()!=null) {
@@ -102,19 +107,41 @@ public class ChannelOrderReissueService {
         } catch (Exception e) {  //继续下一次迭代查询
             log.error("error appid:{} 支付宝商家订单回调",mchApp.getAppId(), e);
             MchApp dbRecord = mchAppService.getById(mchApp.getAppId());
-            dbRecord.setState(CS.NO);
-            mchAppService.updateById(dbRecord);
-            log.error("出现异常，应用："+mchApp.getAppName()+"----被关闭。\n请登陆后台查看，如错误关闭，请重新打开");
-            sendMessage(mchApp.getMchNo(),"出现异常，应用："+mchApp.getAppName()+"----被关闭。\n请登陆后台查看，如错误关闭，请重新打开");
+            if (dbRecord.getState()!=CS.NO){
+                dbRecord.setState(CS.NO);
+                mchAppService.updateById(dbRecord);
+                log.error("出现异常，应用："+mchApp.getAppName()+"----被关闭。请登陆后台查看，如错误关闭，请重新打开");
+                sendMessage(mchApp.getMchNo(),"出现异常，应用："+mchApp.getAppName()+"----被关闭。\n请登陆后台查看，如错误关闭，请重新打开");
+            } else {
+                stringRedisTemplate.opsForValue().set("alipayAppId"+mchApp.getAppId(), "yourValue", 3, TimeUnit.MINUTES);
+            }
         }
+    }
+    public boolean isAccountOff(MchApp mchApp, Long accountAutoOff){
+        PayOrder payOrder = new PayOrder();
+        boolean offAccount = false;
+        payOrder.setAppId(mchApp.getAppId());
+        LambdaQueryWrapper<PayOrder> wrapper = PayOrder.gw();
+        IPage<PayOrder> pages = payOrderService.listByPage(new Page(1, accountAutoOff), payOrder, null, wrapper);
+        if (pages.getRecords().size() == accountAutoOff){
+            offAccount = true;
+            for (PayOrder order : pages.getRecords()) {
+                if (order.getState() == PayOrder.STATE_SUCCESS) {
+                    offAccount = false;
+                    break;
+                }
+            }
+        }
+        return offAccount;
     }
     public void sendMessage(String mchNo, String messageText) {
         TelegramChat telegramChat = telegramChatService.queryTelegramChatByMchNo(mchNo);
-        if (telegramChat == null){
-            return;
-        }
         SendMessage message = new SendMessage();
-        message.setChatId(telegramChat.getChatId());
+        if (telegramChat == null){
+            message.setChatId(sysConfigService.getDBApplicationConfig().getBotTelegramChatId());
+        } else {
+            message.setChatId(telegramChat.getChatId());
+        }
         message.setText(messageText);
         try {
             myCustomBot.execute(message);
