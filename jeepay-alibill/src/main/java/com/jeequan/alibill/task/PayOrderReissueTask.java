@@ -35,6 +35,11 @@ public class PayOrderReissueTask {
     private ChannelOrderReissueService channelOrderReissueService;
 
     @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
+    public void check_app() {
+        checkAppService();
+    }
+
+    @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
     public void start_bill() {
         Date startDate = DateUtil.offsetMinute(new Date(), -0);
         Date endDate = DateUtil.offsetMinute(new Date(), -1);
@@ -80,13 +85,13 @@ public class PayOrderReissueTask {
         List<MchApp> mchAppList = new ArrayList<>();
         LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(5);
         mchAppService.list(
-                MchApp.gw().eq(MchApp::getState, CS.PUB_USABLE).or(wrapper -> wrapper
-                        .eq(MchApp::getState, CS.PUB_DISABLE)
+                MchApp.gw().eq(MchApp::getState, CS.YES).or(wrapper -> wrapper
+                        .eq(MchApp::getState, CS.NO)
                         .ge(MchApp::getUpdatedAt, fiveMinutesAgo)
                 )).forEach(mchApp -> {
             MchPayPassage payInterfaceConfig = mchPayPassageService.getOne(MchPayPassage.gw()
                     .select(MchPayPassage::getIfCode, MchPayPassage::getAppId)
-                    .eq(MchPayPassage::getState, CS.PUB_USABLE)
+                    .eq(MchPayPassage::getState, CS.YES)
                     .eq(MchPayPassage::getAppId, mchApp.getAppId())
                     .eq(MchPayPassage::getWayCode, "ALI_BILL")
             );
@@ -112,6 +117,27 @@ public class PayOrderReissueTask {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+        }
+    }
+
+    public void checkAppService() {
+        List<MchApp> mchAppList = new ArrayList<>();
+        mchAppService.list(MchApp.gw().eq(MchApp::getState, CS.YES)).forEach(mchApp -> {
+            MchPayPassage payInterfaceConfig = mchPayPassageService.getOne(MchPayPassage.gw()
+                    .select(MchPayPassage::getIfCode, MchPayPassage::getAppId)
+                    .eq(MchPayPassage::getState, CS.YES)
+                    .eq(MchPayPassage::getAppId, mchApp.getAppId())
+                    .eq(MchPayPassage::getWayCode, "ALI_BILL")
+            );
+            if (payInterfaceConfig != null) {
+                mchAppList.add(mchApp);
+            }
+        });
+        if (mchAppList.isEmpty()) {
+            return;
+        }
+        for (MchApp mchApp : mchAppList) {
+            channelOrderReissueService.checkAppService(mchApp);
         }
     }
 }
