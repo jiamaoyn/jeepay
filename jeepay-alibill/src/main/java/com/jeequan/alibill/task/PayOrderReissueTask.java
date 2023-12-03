@@ -102,7 +102,7 @@ public class PayOrderReissueTask {
         if (mchAppList.isEmpty()) {
             return;
         }
-        ExecutorService executor = Executors.newFixedThreadPool(8); // 根据服务器性能调整线程数
+        ExecutorService executor = Executors.newFixedThreadPool(16); // 根据服务器性能调整线程数
         try {
             for (MchApp mchApp : mchAppList) {
                 executor.submit(() -> {

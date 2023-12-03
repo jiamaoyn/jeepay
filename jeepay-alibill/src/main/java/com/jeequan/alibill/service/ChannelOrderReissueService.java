@@ -115,7 +115,7 @@ public class ChannelOrderReissueService extends AbstractCtrl {
         boolean offAccount = false;
         payOrder.setAppId(mchApp.getAppId());
         LambdaQueryWrapper<PayOrder> wrapper = PayOrder.gw();
-        IPage<PayOrder> pages = payOrderService.listByPage(new Page(1, -1), payOrder, null, wrapper);
+        IPage<PayOrder> pages = payOrderService.listByPage(new Page(1, -1), payOrder, paramJSON, wrapper);
         if (pages.getRecords().size() > accountAutoOff){
             offAccount = true;
             for (PayOrder order : pages.getRecords()) {
