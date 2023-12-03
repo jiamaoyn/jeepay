@@ -31,6 +31,13 @@ public class TelegramChatService extends ServiceImpl<TelegramChatMapper, Telegra
             return null;
         }
     }
+    public TelegramChat queryTelegramChatByChatId(String chatId) {
+        if (StringUtils.isNotEmpty(chatId)) {
+            return getOne(TelegramChat.gw().eq(TelegramChat::getChatId, chatId));
+        }else {
+            return null;
+        }
+    }
     public Boolean deleteTelegramChat(String chatId){
         if (StringUtils.isNotEmpty(chatId) || queryTelegramChat(chatId) == null) {
             this.remove(TelegramChat.gw().eq(TelegramChat::getChatId, chatId));

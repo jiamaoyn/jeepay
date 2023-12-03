@@ -1,6 +1,10 @@
 package com.jeetask.telegram.telegram;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
+import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.TelegramChat;
+import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import com.jeequan.jeepay.service.impl.TelegramChatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,17 +15,23 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.Map;
+
 @Component
 public class MyCustomBot extends TelegramLongPollingBot {
 
     private final SysConfigService sysConfigService;
     private final TelegramChatService telegramChatService;
+    private final PayOrderService payOrderService;
 
     @Autowired
-    public MyCustomBot(DefaultBotOptions options, SysConfigService sysConfigService, TelegramChatService telegramChatService) {
+    public MyCustomBot(DefaultBotOptions options, SysConfigService sysConfigService, TelegramChatService telegramChatService, PayOrderService payOrderService) {
         super(options);
         this.sysConfigService = sysConfigService;
         this.telegramChatService = telegramChatService;
+        this.payOrderService = payOrderService;
     }
 
     @Override
@@ -61,14 +71,36 @@ public class MyCustomBot extends TelegramLongPollingBot {
                     sendText = "解绑失败";
                 }
             } else if (messageText.equals("收款统计")) {
-                sendText = "收款统计";
+                TelegramChat telegramChat = telegramChatService.queryTelegramChatByChatId(chatId);
+                System.out.println(telegramChat);
+                System.out.println(sysConfigService.getDBApplicationConfig().getBotTelegramChatId());
+                System.out.println(chatId);
+                System.out.println(sysConfigService.getDBApplicationConfig().getBotTelegramChatId().equals(chatId));
+                if (telegramChat == null && sysConfigService.getDBApplicationConfig().getBotTelegramChatId().equals(chatId)){
+                    Date date = DateUtil.offsetDay(new Date(),-0).toJdkDate();
+                    String dayStart = DateUtil.beginOfDay(date).toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN);
+                    String dayEnd = DateUtil.endOfDay(date).toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN);
+                    // 每日交易金额查询
+                    Map dayAmount = payOrderService.payCount(null, PayOrder.STATE_SUCCESS, null, dayStart, dayEnd);
+                    Map dayAmountSuccess = payOrderService.payCountSuccess(null, PayOrder.STATE_SUCCESS, null, dayStart, dayEnd);
+                    String todayAmount = "0.00";    // 今日金额
+                    String todayPayCount = "0";    // 今日交易笔数
+                    String todayAmountSuccess = "0.00";    // 今日完成金额
+                    String todayPayCountSuccess = "0";    // 今日完成交易笔数
+                    if (dayAmount != null) {
+                        todayAmount = dayAmount.get("payAmount").toString();
+                        todayPayCount = dayAmount.get("payCount").toString();
+                        todayAmountSuccess = dayAmountSuccess.get("payAmount").toString();
+                        todayPayCountSuccess = dayAmountSuccess.get("payCount").toString();
+                    }
+                    sendText =  "今日收款金额：￥"+todayAmount+"元\n"+
+                                "今日收款笔数："+todayPayCount+"笔\n"+
+                                "今日完成金额：￥"+todayAmountSuccess+"元\n"+
+                                "今日完成笔数："+todayPayCountSuccess+"笔\n";
+                } else {
+                    sendText = "收款统计";
+                }
             }
-//            TelegramChat telegramChat = telegramChatService.queryTelegramChat(chatId);
-//            if (telegramChat == null){
-//                messageText = "商户号未绑定，请先绑定商户号。\n绑定命令：绑定+商户号\n例如：绑定+M111111111";
-//            } else {
-//                messageText = "有什么可以帮你";
-//            }
             if (!sendText.isEmpty()){
                 try {
                     message.setText(sendText);
