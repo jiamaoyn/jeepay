@@ -1,5 +1,7 @@
 package com.jeetask.telegram.service;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -21,6 +23,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Map;
+
 @Service
 @Slf4j
 public class TelegramService extends AbstractCtrl {
@@ -81,6 +86,29 @@ public class TelegramService extends AbstractCtrl {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+
+    public String payOrderCount(String mchNo){
+        Date date = DateUtil.offsetDay(new Date(),-0).toJdkDate();
+        String dayStart = DateUtil.beginOfDay(date).toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN);
+        String dayEnd = DateUtil.endOfDay(date).toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN);
+        // 每日交易金额查询
+        Map dayAmount = payOrderService.payCount(null, PayOrder.STATE_SUCCESS, null, dayStart, dayEnd);
+        Map dayAmountSuccess = payOrderService.payCountSuccess(mchNo, PayOrder.STATE_SUCCESS, null, dayStart, dayEnd);
+        String todayAmount = "0.00";    // 今日金额
+        String todayPayCount = "0";    // 今日交易笔数
+        String todayAmountSuccess = "0.00";    // 今日完成金额
+        String todayPayCountSuccess = "0";    // 今日完成交易笔数
+        if (dayAmount != null) {
+            todayAmount = dayAmount.get("payAmount").toString();
+            todayPayCount = dayAmount.get("payCount").toString();
+            todayAmountSuccess = dayAmountSuccess.get("payAmount").toString();
+            todayPayCountSuccess = dayAmountSuccess.get("payCount").toString();
+        }
+        return "今日收款金额：￥"+todayAmount+"元\n"+
+                "今日收款笔数："+todayPayCount+"笔\n"+
+                "今日完成金额：￥"+todayAmountSuccess+"元\n"+
+                "今日完成笔数："+todayPayCountSuccess+"笔\n";
     }
 
 
