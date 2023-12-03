@@ -9,13 +9,12 @@
         <version>Final</version>
     </parent>
 
-    <artifactId>jeepay-alibill</artifactId>
-
+    <groupId>com.jeetask.telegram</groupId>
+    <artifactId>jeepay-telegram</artifactId>
     <!-- 项目属性 -->
     <properties>
         <projectRootDir>${basedir}/../</projectRootDir>
     </properties>
-
     <!-- 项目依赖声明 -->
     <dependencies>
         <!-- 依赖[ service ]包, 会自动传递依赖[ core ]包。  -->
@@ -79,17 +78,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.binarywang</groupId>
-            <artifactId>weixin-java-mp</artifactId>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/com.alipay.sdk/alipay-sdk-java -->
-        <dependency>
-            <groupId>com.alipay.sdk</groupId>
-            <artifactId>alipay-sdk-java</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>jakarta.activation</groupId>
             <artifactId>jakarta.activation-api</artifactId>
             <version>1.2.2</version>
@@ -105,6 +93,11 @@
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots</artifactId>
+            <version>6.8.0</version>
         </dependency>
     </dependencies>
 

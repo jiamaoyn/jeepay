@@ -32,6 +32,7 @@
 
     <module>jeepay-components</module>
     <module>jeepay-alibill</module>
+      <module>jeepay-telegram</module>
   </modules>
 
   <!-- 配置属性声明, 支持自定义参数 -->

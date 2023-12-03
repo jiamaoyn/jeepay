@@ -1,4 +1,4 @@
-package com.jeequan.alibill.telegram;
+package com.jeetask.telegram.telegram;
 
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import org.springframework.beans.factory.annotation.Autowired;

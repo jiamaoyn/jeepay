@@ -5,8 +5,6 @@ import com.alipay.api.domain.AccountLogItemResult;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.jeequan.alibill.telegram.MyCustomBot;
-import com.jeequan.alibill.telegram.TelegramService;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
 import com.jeequan.jeepay.core.entity.MchApp;
@@ -19,19 +17,14 @@ import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.alibill.channel.IPayOrderQueryService;
 import com.jeequan.alibill.model.MchAppConfigContext;
 import com.jeequan.jeepay.service.impl.SysConfigService;
-import com.jeequan.jeepay.service.impl.TelegramChatService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /*
  * 查询上游订单， &  补单服务实现类
@@ -45,19 +38,11 @@ public class ChannelOrderReissueService extends AbstractCtrl {
     @Autowired
     private ConfigContextQueryService configContextQueryService;
     @Autowired
-    private MyCustomBot myCustomBot;
-    @Autowired
-    private TelegramChatService telegramChatService;
-    @Autowired
     private PayOrderService payOrderService;
-    @Autowired
-    private MchAppService mchAppService;
     @Autowired
     private PayOrderProcessService payOrderProcessService;
     @Autowired
     protected SysConfigService sysConfigService;
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;;
     public void processPayOrderBill(MchApp mchApp, Date startDate, Date endDate) {
         try {
             //查询支付接口是否存在
@@ -93,53 +78,6 @@ public class ChannelOrderReissueService extends AbstractCtrl {
             });
         } catch (Exception e) {  //继续下一次迭代查询
             log.error("error appid:{} 支付宝商家订单回调",mchApp.getAppId(), e);
-        }
-    }
-    public void checkAppService(MchApp mchApp) {
-        MchApp dbRecord = mchAppService.getById(mchApp.getAppId());
-        if (dbRecord.getState()!=CS.NO){
-            String accountAutoOff = sysConfigService.getDBApplicationConfig().getAccountAutoOff();
-            if (isAccountOff(mchApp, Long.parseLong(accountAutoOff))){
-                dbRecord.setState(CS.NO);
-                mchAppService.updateById(dbRecord);
-                log.error("符合自动关闭逻辑，应用：{}----被关闭", mchApp.getAppName());
-                sendMessage(mchApp.getMchNo(),"符合自动关闭逻辑。\n应用："+mchApp.getAppName()+"----被关闭");
-            }
-        }
-    }
-    public boolean isAccountOff(MchApp mchApp, Long accountAutoOff){
-        JSONObject paramJSON = new JSONObject();
-        paramJSON.put("createdEnd",LocalDateTime.now().minusMinutes(Integer.parseInt(sysConfigService.getDBApplicationConfig().getCreatedEnd())));
-        paramJSON.put("createdStart",LocalDateTime.now().minusMinutes(Integer.parseInt(sysConfigService.getDBApplicationConfig().getCreatedStart())));
-        PayOrder payOrder = new PayOrder();
-        boolean offAccount = false;
-        payOrder.setAppId(mchApp.getAppId());
-        LambdaQueryWrapper<PayOrder> wrapper = PayOrder.gw();
-        IPage<PayOrder> pages = payOrderService.listByPage(new Page(1, -1), payOrder, paramJSON, wrapper);
-        if (pages.getRecords().size() > accountAutoOff){
-            offAccount = true;
-            for (PayOrder order : pages.getRecords()) {
-                if (order.getState() == PayOrder.STATE_SUCCESS) {
-                    offAccount = false;
-                    break;
-                }
-            }
-        }
-        return offAccount;
-    }
-    public void sendMessage(String mchNo, String messageText) {
-        TelegramChat telegramChat = telegramChatService.queryTelegramChatByMchNo(mchNo);
-        SendMessage message = new SendMessage();
-        if (telegramChat == null){
-            message.setChatId(sysConfigService.getDBApplicationConfig().getBotTelegramChatId());
-        } else {
-            message.setChatId(telegramChat.getChatId());
-        }
-        message.setText(messageText);
-        try {
-            myCustomBot.execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
         }
     }
 

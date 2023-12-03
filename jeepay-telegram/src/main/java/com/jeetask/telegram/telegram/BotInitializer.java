@@ -1,4 +1,4 @@
-package com.jeequan.alibill.telegram;
+package com.jeetask.telegram.telegram;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

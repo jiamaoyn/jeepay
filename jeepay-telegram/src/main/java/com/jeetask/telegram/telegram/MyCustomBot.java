@@ -1,4 +1,4 @@
-package com.jeequan.alibill.telegram;
+package com.jeetask.telegram.telegram;
 
 import com.jeequan.jeepay.core.entity.TelegramChat;
 import com.jeequan.jeepay.service.impl.SysConfigService;
@@ -38,6 +38,7 @@ public class MyCustomBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
+            System.out.println(messageText);
             String sendText = "";
             String chatId = String.valueOf(update.getMessage().getChatId());
             SendMessage message = new SendMessage();
