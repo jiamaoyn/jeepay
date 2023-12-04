@@ -222,6 +222,7 @@
                 updateQrNo==1;
                 intDiff = -1;
                 window.clearInterval(orderlst);
+                $("#startApp").hide();
                 $("#divTime").html("<small style='color:red; font-size:26px'>订单二维码已过期</small>");
                 $("#qrcode").html('<img id="qrcode_load" src="https://static.ilian.icu/index/images/status/qrcode_timeout.png">');//输出过期二维码提示图片
                 Swal.fire({
@@ -234,10 +235,9 @@
                     buttonsStyling: false
                 });
             }
-            //订单已经超时
+            //订单成功
             if(result.code === 0 && updateQrNo === 0  && result.data.state ===2){
                 updateQrOk = 1;
-                $("#startApp").hide();
                 $("#divTime").html("<small style='color:red; font-size:22px'>"+ result.msg +"</small>");
                 $("#qrcode").html('<img id="qrcode_load" src="https://static.ilian.icu/index/images/status/pay_ok.png">');//支付成功
                 //回调页面
