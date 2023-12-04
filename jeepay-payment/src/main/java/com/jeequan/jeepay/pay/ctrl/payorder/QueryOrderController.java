@@ -6,12 +6,16 @@ import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvsubMchParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
 import com.jeequan.jeepay.core.utils.AmountUtil;
+import com.jeequan.jeepay.core.utils.SpringBeansUtil;
+import com.jeequan.jeepay.pay.channel.IPayOrderQueryService;
 import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
+import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
 import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.QueryPayOrderRS;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
+import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +35,8 @@ public class QueryOrderController extends ApiController {
 
     @Autowired
     private PayOrderService payOrderService;
+    @Autowired
+    private SysConfigService sysConfigService;
     @Autowired
     private ConfigContextQueryService configContextQueryService;
 
@@ -109,5 +115,30 @@ public class QueryOrderController extends ApiController {
 //        response.sendRedirect("https://ds.alipay.com/?from=pc&appId=20000116&actionType=toAccount&goBack=NO&amount="+ AmountUtil.convertCent2Dollar(payOrder.getAmount().toString())+"&userId="+pid+"&memo="+payOrderId);
         response.sendRedirect("https://www.alipay.com/?appId=20000116&actionType=toAccount&sourceId=contactStage&chatUserId="+pid+"&displayName=TK&chatUserName=TK&chatUserType=1&skipAuth=true&amount="+ AmountUtil.convertCent2Dollar(payOrder.getAmount().toString())+"&memo="+payOrderId);
     }
+    @RequestMapping("/api/pay/bill_q_pay/{payOrderId}")
+    public ApiRes queryOrderBillTem(@PathVariable("payOrderId") String payOrderId) throws Exception {
+        PayOrder payOrder = payOrderService.queryMchOrder(payOrderId);
+        if (payOrder == null) {
+            throw new BizException("订单不存在");
+        }
+        IPayOrderQueryService queryService = SpringBeansUtil.getBean(payOrder.getIfCode() + "PayOrderQueryService", IPayOrderQueryService.class);
+        // 支付通道接口实现不存在
+        if (queryService == null) {
+            log.error("{} interface not exists!", payOrder.getIfCode());
+            return null;
+        }
+        PayOrder payOrder1 = new PayOrder();
+        if (payOrder.getState() == PayOrder.STATE_ING){
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfo(payOrder.getMchNo(), payOrder.getAppId());
+            ChannelRetMsg channelRetMsg = queryService.query(payOrder, mchAppConfigContext);
+            if (channelRetMsg.getChannelState() == ChannelRetMsg.ChannelState.CONFIRM_SUCCESS){
+                payOrder1.setState(PayOrder.STATE_SUCCESS);
+            }
+        } else {
+            payOrder1.setState(payOrder.getState());
+        }
 
+        payOrder1.setReturnUrl(sysConfigService.getDBApplicationConfig().genScanImgUrl(sysConfigService.getDBApplicationConfig().getPaySiteUrl()+"/api/pay/bill/"+payOrderId));
+        return ApiRes.ok(payOrder1);
+    }
 }

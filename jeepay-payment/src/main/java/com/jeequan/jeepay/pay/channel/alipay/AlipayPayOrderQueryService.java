@@ -45,7 +45,7 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
             AlipayDataBillAccountlogQueryModel model = new AlipayDataBillAccountlogQueryModel();
             // 获取当前时间
             LocalDateTime now = LocalDateTime.now();
-            LocalDateTime offsetDate = now.minusMinutes(1L);
+            LocalDateTime offsetDate = now.minusMinutes(120L);
             model.setStartTime(offsetDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             model.setEndTime(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             request.setBizModel(model);
