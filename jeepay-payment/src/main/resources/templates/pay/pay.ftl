@@ -134,6 +134,9 @@
         <div class="make">
             <p><img src="https://static.ilian.icu/index/pay/console/images/alipay.jpg" alt="" style="height:30px;"></p>
             <p class="money" id="price" style="font-weight:bold; color:green">支付金额：${amount!''}元</p>
+            <#if aliName>
+                <p class="money" id="price" style="font-weight:bold; color:red">商户姓名：${aliName!''}</p>
+            </#if>
             <p>
                 <font face="微软雅黑" size="+1" color="#FF000">${payOrder.payOrderId!''}</font>
                 <button id='copy' class="layui-btn layui-btn-default copy" data-clipboard-text="${payOrder.payOrderId}" >复制订单号</button>
@@ -145,7 +148,7 @@
             <p><font face="微软雅黑" size="+1" color="#FF000">请务必按照上方金额付款</font><br></p>
             <center><p class="qrcode" id="qrcode" ><img class="kalecloud" id="qrcode_load" src="https://static.ilian.icu/index/images/status/loading.gif" style="display: block;"></p></center>
             <center>
-                <a id="startApp" type="button" class="btn btn-lg btn-block btn-danger" style="font-size:13px;width:250px;display:none">一键启动APP支付</a>
+                <a id="startApp" type="button" class="btn btn-lg btn-block btn-danger" href="${payOrder.returnUrl}" style="font-size:13px;width:250px;display:none">一键启动APP支付</a>
             </center>
             <div class="info">
                 <p id="divTime">正在获取二维码,请稍等...</p>
@@ -186,9 +189,6 @@
                 $("#qrcode").html('<img id="qrcode_load" src="https://static.ilian.icu/index/images/status/pay_ok.png">');//支付成功
             } else {
                 $("#divTime").html("二维码有效时间:<small style='color:red; font-size:24px'>" + minute + "</small>分<small style='color:red; font-size:24px'>" + second + "</small>秒,失效勿付");
-                if (window.navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)) {
-                    setTimeout(jscode(), 5000 )
-                }
             }
             if(intDiff < 0){
                 clearInterval(timerId);
@@ -220,7 +220,6 @@
                 {
                     if(isMobilCheck())
                     {
-                        $("#startApp").attr("href", "${payOrder.returnUrl}");
                         $("#startApp").show();
                     }
                 }
@@ -308,13 +307,6 @@
             });
         });
     });
-    function jscode(){
-        if("${payOrder.ifCode}" == 'alipay'){
-            var url_scheme = '${payOrder.returnUrl}';
-            layer.msg('正在自动唤醒支付宝...', {shade: 0,time: 1000});
-            window.location.href = url_scheme;
-        }
-    }
 </script>
 </body>
 </html>

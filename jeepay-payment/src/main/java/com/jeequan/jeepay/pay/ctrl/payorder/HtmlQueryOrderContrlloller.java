@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 @Slf4j
 @Controller
@@ -37,12 +38,14 @@ public class HtmlQueryOrderContrlloller extends ApiController {
             throw new BizException("获取商户应用信息失败");
         }
         String pid;
+        String aliName = null;
         if (!mchAppConfigContext.isIsvsubMch()){
             AlipayNormalMchParams normalMchParams = (AlipayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), "alipay");
             if (normalMchParams == null) {
                 throw new BizException("商户支付宝接口没有配置！");
             }
             pid = normalMchParams.getPid();
+            aliName = normalMchParams.getAliName();
         } else {
             AlipayIsvsubMchParams normalMchParams = (AlipayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), "alipay");
             if (normalMchParams == null) {
@@ -61,8 +64,9 @@ public class HtmlQueryOrderContrlloller extends ApiController {
         payOrder1.setPayOrderId(payOrderId);
         payOrder1.setIfCode(payOrder.getIfCode());
         request.setAttribute("pid", pid);
+        if (aliName!=null)request.setAttribute("aliName", aliName);
         request.setAttribute("amount", AmountUtil.convertCent2Dollar(payOrder.getAmount()));
-        payOrder1.setReturnUrl("https://" + request.getServerName() + "/api/pay/bill/"+payOrderId);
+        payOrder1.setReturnUrl("alipayqr://platformapi/startapp?saId=10000007&qrcode="+ URLEncoder.encode("https://" + request.getServerName() + "/api/pay/bill/"+payOrderId, "UTF-8"));
         request.setAttribute("payOrder", payOrder1);
         return "pay/pay";
     }

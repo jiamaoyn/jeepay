@@ -29,6 +29,11 @@ public class AlipayNormalMchParams extends NormalMchParams {
     private String pid;
 
     /**
+     * aliName 支付宝实名信息
+     */
+    private String aliName;
+
+    /**
      * privateKey
      */
     private String privateKey;
