@@ -38,11 +38,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Date;
-import java.util.Objects;
 
-/*
+/**
  * 创建支付订单抽象类
- * @date 2021/6/8 17:26
  */
 @Slf4j
 public abstract class AbstractPayOrderController extends ApiController {
@@ -351,15 +349,14 @@ public abstract class AbstractPayOrderController extends ApiController {
                 payOrderService.save(payOrder);
                 stringRedisTemplate.opsForValue().set(payOrder.getPayOrderId()+payOrder.getMchOrderNo(), "666", Duration.ofHours(24));
             }
-
+            if (wayCode.equals("ALI_BILL")){
+                bizRQ.setDomain("https://" + request.getServerName());
+            }
             //调起上游支付接口
             bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext);
 
             //处理上游返回数据
             this.processChannelMsgPolling(bizRS.getChannelRetMsg(), payOrder);
-            if (Objects.equals(request.getServerName(), request.getHeader("host")) && bizRS.getPayData().startsWith("/api/pay/bill/")){
-                bizRS.setPayData(request.getHeader("host")+bizRS.getPayData());
-            }
             return packageApiResByPayOrderPolling(bizRQ, bizRS, payOrder);
         } catch (BizException e) {
             return ApiRes.customFail(e.getMessage());
