@@ -35,7 +35,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Date;
@@ -357,9 +356,10 @@ public abstract class AbstractPayOrderController extends ApiController {
 
             //处理上游返回数据
             this.processChannelMsgPolling(bizRS.getChannelRetMsg(), payOrder);
-
+            if (request.getServerName() == request.getHeader("host") && bizRS.getPayData().startsWith("/api/pay/bill/")){
+                bizRS.setPayData(request.getHeader("host")+bizRS.getPayData());
+            }
             return packageApiResByPayOrderPolling(bizRQ, bizRS, payOrder);
-
         } catch (BizException e) {
             return ApiRes.customFail(e.getMessage());
 
