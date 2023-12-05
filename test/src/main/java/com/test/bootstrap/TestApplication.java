@@ -2,8 +2,12 @@ package com.test.bootstrap;
 
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
+import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.test.config.SystemYmlConfig;
 import org.hibernate.validator.HibernateValidator;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,7 +33,9 @@ import java.util.Arrays;
  **/
 @SpringBootApplication
 @EnableScheduling
+@MapperScan("com.jeequan.jeepay.service.mapper")    //Mybatis mapper接口路径
 @ComponentScan(basePackages = "com.test.*")   //由于MainApplication没有在项目根目录， 需要配置basePackages属性使得成功扫描所有Spring组件；
+@ComponentScan(basePackages = "com.jeequan.jeepay.*")   //由于MainApplication没有在项目根目录， 需要配置basePackages属性使得成功扫描所有Spring组件；
 @Configuration
 public class TestApplication {
 
@@ -62,8 +68,19 @@ public class TestApplication {
         converter.setFastJsonConfig(config);
 
         //设置响应的 Content-Type
-        converter.setSupportedMediaTypes(Arrays.asList(new MediaType[]{MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON_UTF8}));
+        converter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON_UTF8));
         return new HttpMessageConverters(converter);
+    }
+
+    /**
+     * Mybatis plus 分页插件
+     **/
+    @Bean
+    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+        //分页插件
+        MybatisPlusInterceptor mybatisPlusInterceptor = new MybatisPlusInterceptor();
+        mybatisPlusInterceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+        return mybatisPlusInterceptor;
     }
 
     /**

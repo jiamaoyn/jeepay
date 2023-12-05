@@ -1,19 +1,18 @@
 package com.test.ctrl.telegram;
 
+import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
 import com.jeequan.jeepay.core.model.ApiRes;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-
 @Slf4j
 @RestController
-@RequestMapping("/api/ceshi")
-public class TelegramQueryOrderController {
+@RequestMapping("/api/test")
+public class TelegramQueryOrderController extends AbstractCtrl {
+
     @RequestMapping(value = "/info")
-    private ApiRes<Object> toPayForm(HttpServletRequest request) {
+    private ApiRes<Object> toPayForm() {
         System.out.println(request.getRequestURI());
         System.out.println(request.getScheme());
         System.out.println(request.getServerName());
