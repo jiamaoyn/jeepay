@@ -1,5 +1,6 @@
 package com.jeequan.jeepay.pay.channel.alipay.payway;
 
+import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.channel.alipay.AlipayPaymentService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
@@ -19,7 +20,12 @@ public class AliBill extends AlipayPaymentService {
     public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
         // 构造函数响应数据
         AliBillOrderRS res = new AliBillOrderRS();
-        String url = rq.getDomain() + "/api/pay/bill_pay/" + payOrder.getPayOrderId();
+        String url;
+        if (rq.getPayHtmlModel() != null && rq.getPayHtmlModel() == CS.YES){
+            url = rq.getDomain() + "/api/pay/bill_pay/" + payOrder.getPayOrderId();
+        } else {
+            url = rq.getDomain() + "/api/pay/bill/" + payOrder.getPayOrderId();
+        }
         // ↓↓↓↓↓↓ 调起接口成功后业务判断务必谨慎！！ 避免因代码编写bug，导致不能正确返回订单状态信息  ↓↓↓↓↓↓
         res.setCodeUrl(url);
         return res;

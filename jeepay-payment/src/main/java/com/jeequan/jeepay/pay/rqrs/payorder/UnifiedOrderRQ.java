@@ -94,6 +94,12 @@ public class UnifiedOrderRQ extends AbstractMchAppRQ {
     private String domain;
 
     /**
+     * 是否使用系统支付画面
+     **/
+    @Range(min = 0, max = 1, message = "支付画面模式选择错误")
+    private Byte payHtmlModel;
+
+    /**
      * 分账模式： 0-该笔订单不允许分账, 1-支付成功按配置自动完成分账, 2-商户手动分账(解冻商户金额)
      **/
     @Range(min = 0, max = 2, message = "分账模式设置值有误")

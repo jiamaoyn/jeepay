@@ -5,13 +5,10 @@ import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.exception.BizException;
-import com.jeequan.jeepay.core.model.BaseModel;
 import com.jeequan.jeepay.core.utils.JeepayKit;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractMchAppRQ;
-import com.jeequan.jeepay.pay.rqrs.AbstractMchRQ;
 import com.jeequan.jeepay.pay.rqrs.AbstractRQ;
-import com.jeequan.jeepay.pay.rqrs.payorder.UnifiedOrderRQ;
 import com.jeequan.jeepay.pay.rqrs.payorder.payway.AliJsapiUserIDRQ;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.pay.service.ValidateService;
@@ -147,6 +144,7 @@ public abstract class ApiController extends AbstractCtrl {
         String appSecret = mchAppConfigContext.getMchInfo().getSecret();
         // 转换为 JSON
         JSONObject bizReqJSON = (JSONObject) JSONObject.toJSON(bizRQ);
+
         bizReqJSON.remove("sign");
         if (!sign.equalsIgnoreCase(JeepayKit.getSign(bizReqJSON, appSecret))) {
             throw new BizException("验签失败");
