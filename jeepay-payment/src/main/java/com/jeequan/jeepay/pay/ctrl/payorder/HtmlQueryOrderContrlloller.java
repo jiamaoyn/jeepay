@@ -2,7 +2,6 @@ package com.jeequan.jeepay.pay.ctrl.payorder;
 
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.exception.BizException;
-import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvsubMchParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
 import com.jeequan.jeepay.core.utils.AmountUtil;
@@ -10,7 +9,6 @@ import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
-import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,8 +22,6 @@ import java.io.IOException;
 public class HtmlQueryOrderContrlloller extends ApiController {
     @Autowired
     private PayOrderService payOrderService;
-    @Autowired
-    private SysConfigService sysConfigService;
     @Autowired
     private ConfigContextQueryService configContextQueryService;
 
@@ -66,7 +62,7 @@ public class HtmlQueryOrderContrlloller extends ApiController {
         payOrder1.setIfCode(payOrder.getIfCode());
         request.setAttribute("pid", pid);
         request.setAttribute("amount", AmountUtil.convertCent2Dollar(payOrder.getAmount()));
-        payOrder1.setReturnUrl(sysConfigService.getDBApplicationConfig().getPaySiteUrl()+"/api/pay/bill/"+payOrderId);
+        payOrder1.setReturnUrl("https://" + request.getServerName() + "/api/pay/bill/"+payOrderId);
         request.setAttribute("payOrder", payOrder1);
         return "pay/pay";
     }

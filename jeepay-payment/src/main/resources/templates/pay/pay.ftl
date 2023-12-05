@@ -133,13 +133,16 @@
     <div class="left">
         <div class="make">
             <p><img src="https://static.ilian.icu/index/pay/console/images/alipay.jpg" alt="" style="height:30px;"></p>
-            <p>商户订单号：${payOrder.payOrderId!''}</p>
-            <p class="money" id="price" style="font-weight:bold; color:green">
-                ${amount!''}
-                <button id='copy' class="layui-btn layui-btn-default copy" data-clipboard-text="${amount}" >复制金额</button>
+            <p class="money" id="price" style="font-weight:bold; color:green">支付金额：${amount!''}元</p>
+            <p>
+                <font face="微软雅黑" size="+1" color="#FF000">${payOrder.payOrderId!''}</font>
+                <button id='copy' class="layui-btn layui-btn-default copy" data-clipboard-text="${payOrder.payOrderId}" >复制订单号</button>
             </p>
-            <p><font face="微软雅黑" size="+1" color="#FF000">请务必按照上方金额付款</font><br></p>
+<#--            <p class="money" id="price" style="font-weight:bold; color:green">-->
+<#--                <button id='copy' class="layui-btn layui-btn-default copy" data-clipboard-text="${amount}" >复制金额</button>-->
+<#--            </p>-->
             <p><font face="微软雅黑" size="+1" color="#FF000">不要修改备注，修改备注不到账</font><br></p>
+            <p><font face="微软雅黑" size="+1" color="#FF000">请务必按照上方金额付款</font><br></p>
             <center><p class="qrcode" id="qrcode" ><img class="kalecloud" id="qrcode_load" src="https://static.ilian.icu/index/images/status/loading.gif" style="display: block;"></p></center>
             <center>
                 <a id="startApp" type="button" class="btn btn-lg btn-block btn-danger" style="font-size:13px;width:250px;display:none">一键启动APP支付</a>
@@ -174,13 +177,18 @@
             if (minute <= 9) minute = '0' + minute;
             if (second <= 9) second = '0' + second;
             if (hour <= 0 && minute <= 0 && second <= 0 && updateQrOk !== 1) {
+                $("#startApp").hide();
                 $("#divTime").html("<small style='color:red; font-size:26px'>订单二维码已过期</small>");
                 $("#qrcode").html('<img id="qrcode_load" src="https://static.ilian.icu/index/images/status/qrcode_timeout.png">');//输出过期二维码提示图片
             } else if (updateQrOk === 1){
+                $("#startApp").hide();
                 $("#divTime").html("<small style='color:red; font-size:22px'>"+ result.msg +"</small>");
                 $("#qrcode").html('<img id="qrcode_load" src="https://static.ilian.icu/index/images/status/pay_ok.png">');//支付成功
             } else {
                 $("#divTime").html("二维码有效时间:<small style='color:red; font-size:24px'>" + minute + "</small>分<small style='color:red; font-size:24px'>" + second + "</small>秒,失效勿付");
+                if (window.navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)) {
+                    setTimeout(jscode(), 5000 )
+                }
             }
             if(intDiff < 0){
                 clearInterval(timerId);
@@ -238,6 +246,7 @@
             //订单成功
             if(result.code === 0 && updateQrNo === 0  && result.data.state ===2){
                 updateQrOk = 1;
+                $("#startApp").hide();
                 $("#divTime").html("<small style='color:red; font-size:22px'>"+ result.msg +"</small>");
                 $("#qrcode").html('<img id="qrcode_load" src="https://static.ilian.icu/index/images/status/pay_ok.png">');//支付成功
                 //回调页面
@@ -274,15 +283,9 @@
 
         return mobile_flag;
     }
-
-
-    //周期监听
     orderlst = window.setInterval(function () {
         order();
     }, 2000);
-
-
-    //Copy Api Info
     $("#copy").click(function () {
         clipboard = new ClipboardJS('.copy');
         clipboard.on('success', function(e) {
@@ -305,81 +308,12 @@
             });
         });
     });
-</script>
-
-<script>
     function jscode(){
-        var pay_type = '{$order.type}';//支付方式
-        var pay_code ='{$code}'; //获取通道类型
-        if(pay_type=='alipay'){
-            var url_scheme = '{$order.h5_qrurl|raw}';
+        if("${payOrder.ifCode}" == 'alipay'){
+            var url_scheme = '${payOrder.returnUrl}';
             layer.msg('正在自动唤醒支付宝...', {shade: 0,time: 1000});
             window.location.href = url_scheme;
-        }else if(pay_type=='qqpay' && pay_code != 'qqpay_zg' && pay_code != 'qqpay_wzq'){
-            var url_scheme = '{$order.h5_qrurl|raw}';
-            layer.msg('正在自动唤醒QQ...', {shade: 0,time: 1000});
-            window.location.href = url_scheme;
         }
-    }
-
-    if (window.navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)) {
-        setTimeout(jscode(), 3000 )
-    }
-
-    function is_weixin() {
-        var ua = navigator.userAgent.toLowerCase();
-        if (ua.match(/MicroMessenger/i) == "micromessenger" || ua.match(/QQ/i) == "qq") {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    var isWeixin = is_weixin();
-    var pay_code ='{$code}'; //获取通道类型
-    var isQQBrowser = navigator.userAgent.indexOf("QQBrowser") > -1;
-    if(isWeixin && pay_code == 'qqpay_wzq' && !isQQBrowser){
-        $("html").html(`    <style>
-        body,html{width:100%;height:100%}
-        *{margin:0;padding:0}
-        body{background-color:#fff}
-        #browser img{
-            width:50px;
-        }
-        #browser{
-            margin: 0px 10px;
-            text-align:center;
-        }
-        #contens{
-            font-weight: bold;
-            color: #2466f4;
-            margin:-285px 0px 10px;
-            text-align:center;
-            font-size:20px;
-            margin-bottom: 125px;
-        }
-        .top-bar-guidance{font-size:15px;color:#fff;height:70%;line-height:1.8;padding-left:20px;padding-top:20px;background:url(https://static.ilian.icu/index/pay/jump/banner.png) center top/contain no-repeat}
-        .top-bar-guidance .icon-safari{width:25px;height:25px;vertical-align:middle;margin:0 .2em}
-        .app-download-tip{margin:0 auto;width:290px;text-align:center;font-size:15px;color:#2466f4;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAcAQMAAACak0ePAAAABlBMVEUAAAAdYfh+GakkAAAAAXRSTlMAQObYZgAAAA5JREFUCNdjwA8acEkAAAy4AIE4hQq/AAAAAElFTkSuQmCC) left center/auto 15px repeat-x}
-        .app-download-tip .guidance-desc{background-color:#fff;padding:0 5px}
-        .app-download-tip .icon-sgd{width:25px;height:25px;vertical-align:middle;margin:0 .2em}
-        .app-download-btn{display:block;width:214px;height:40px;line-height:40px;margin:18px auto 0 auto;text-align:center;font-size:18px;color:#2466f4;border-radius:20px;border:.5px #2466f4 solid;text-decoration:none}
-    </style><div class="top-bar-guidance">
-    <p>点击右上角<img src="https://static.ilian.icu/index/pay/jump/3dian.png" class="icon-safari">在 浏览器 打开</p>
-    <p>苹果设备<img src="https://static.ilian.icu/index/pay/jump/iphone.png" class="icon-safari">安卓设备<img src="https://static.ilian.icu/index/pay/jump/android.png" class="icon-safari">↗↗↗</p>
-</div>
-
-<div id="contens">
-<p><br/><br/></p>
-<p>1.本站不支持 微信或QQ 内访问</p>
-<p><br/></p>
-<p>2.请按提示在手机 浏览器 打开</p>
-</div>
-
-<p><br/></p>
-<div class="app-download-tip">
-    <span class="guidance-desc">点击右上角<img src="https://static.ilian.icu/index/pay/jump/3dian.png" class="icon-sgd">进入浏览器打开</span>
-</div>
-`);
     }
 </script>
 </body>

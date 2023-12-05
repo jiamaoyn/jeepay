@@ -19,8 +19,7 @@ public class AliBill extends AlipayPaymentService {
     public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
         // 构造函数响应数据
         AliBillOrderRS res = new AliBillOrderRS();
-        String url = rq.getDomain() + "/api/pay/bill/" + payOrder.getPayOrderId();
-//        String url = "https://1y7037s862.goho.co/api/pay/bill/" + payOrder.getPayOrderId();
+        String url = rq.getDomain() + "/api/pay/bill_pay/" + payOrder.getPayOrderId();
         // ↓↓↓↓↓↓ 调起接口成功后业务判断务必谨慎！！ 避免因代码编写bug，导致不能正确返回订单状态信息  ↓↓↓↓↓↓
         res.setCodeUrl(url);
         return res;

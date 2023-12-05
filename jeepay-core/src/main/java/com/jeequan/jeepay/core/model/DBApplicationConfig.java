@@ -69,7 +69,9 @@ public class DBApplicationConfig implements Serializable {
     public String genScanImgUrl(String url) {
         return getPaySiteUrl() + "/api/scan/imgs/" + JeepayKit.aesEncode(url) + ".png";
     }
-
+    public String genScanImgUrlDomain(String url) {
+        return "/api/scan/imgs/" + JeepayKit.aesEncode(url) + ".png";
+    }
     /**
      * 生成  【支付宝 isv子商户的授权链接地址】
      **/
