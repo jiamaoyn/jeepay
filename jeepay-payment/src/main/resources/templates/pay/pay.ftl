@@ -135,7 +135,7 @@
             <p><img src="https://static.ilian.icu/index/pay/console/images/alipay.jpg" alt="" style="height:30px;"></p>
             <p class="money" id="price" style="font-weight:bold; color:green">支付金额：${amount!''}元</p>
             <#if aliName>
-                <p><font face="微软雅黑" size="+1" color="#FF000">商户姓名：${aliName!''}</font></p>
+                <p><font face="微软雅黑" size="+1" color="#FF000">商户姓名：${aliName!''}--付款时请校验姓名</font></p>
             </#if>
             <p>
                 <font face="微软雅黑" size="+1" color="#FF000">${payOrder.payOrderId!''}</font>
