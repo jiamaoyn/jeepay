@@ -135,17 +135,15 @@
             <p><img src="https://static.ilian.icu/index/pay/console/images/alipay.jpg" alt="" style="height:30px;"></p>
             <p class="money" id="price" style="font-weight:bold; color:green">支付金额：${amount!''}元</p>
             <#if aliName>
-                <p class="money" id="price" style="font-weight:bold; color:red">商户姓名：${aliName!''}</p>
+                <p><font face="微软雅黑" size="+1" color="#FF000">商户姓名：${aliName!''}</font></p>
             </#if>
             <p>
                 <font face="微软雅黑" size="+1" color="#FF000">${payOrder.payOrderId!''}</font>
                 <button id='copy' class="layui-btn layui-btn-default copy" data-clipboard-text="${payOrder.payOrderId}" >复制订单号</button>
             </p>
-<#--            <p class="money" id="price" style="font-weight:bold; color:green">-->
-<#--                <button id='copy' class="layui-btn layui-btn-default copy" data-clipboard-text="${amount}" >复制金额</button>-->
-<#--            </p>-->
-            <p><font face="微软雅黑" size="+1" color="#FF000">不要修改备注，修改备注不到账</font><br></p>
-            <p><font face="微软雅黑" size="+1" color="#FF000">请务必按照上方金额付款</font><br></p>
+            <#if payHtmlWarn>
+                <p><font face="微软雅黑" size="+1" color="#FF000">${payHtmlWarn!''}</font><br></p>
+            </#if>
             <center><p class="qrcode" id="qrcode" ><img class="kalecloud" id="qrcode_load" src="https://static.ilian.icu/index/images/status/loading.gif" style="display: block;"></p></center>
             <center>
                 <a id="startApp" type="button" class="btn btn-lg btn-block btn-danger" href="${payOrder.returnUrl}" style="font-size:13px;width:250px;display:none">一键启动APP支付</a>

@@ -41,6 +41,7 @@ public class DBApplicationConfig implements Serializable {
     private String botTelegramChatId;
     private String createdEnd;
     private String createdStart;
+    private String payHtmlWarn;
 
     /**
      * 生成  【jsapi统一收银台跳转地址】

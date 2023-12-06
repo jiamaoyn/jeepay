@@ -9,6 +9,7 @@ import com.jeequan.jeepay.pay.ctrl.ApiController;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.service.ConfigContextQueryService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
+import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,6 +26,8 @@ public class HtmlQueryOrderContrlloller extends ApiController {
     private PayOrderService payOrderService;
     @Autowired
     private ConfigContextQueryService configContextQueryService;
+    @Autowired
+    private SysConfigService sysConfigService;
 
     @RequestMapping("/api/pay/bill_pay/{payOrderId}")
     public String getAliPayBill(@PathVariable("payOrderId") String payOrderId) throws IOException {
@@ -65,6 +68,7 @@ public class HtmlQueryOrderContrlloller extends ApiController {
         payOrder1.setIfCode(payOrder.getIfCode());
         request.setAttribute("pid", pid);
         if (aliName!=null)request.setAttribute("aliName", aliName);
+        request.setAttribute("payHtmlWarn", sysConfigService.getDBApplicationConfig().getPayHtmlWarn());
         request.setAttribute("amount", AmountUtil.convertCent2Dollar(payOrder.getAmount()));
         payOrder1.setReturnUrl("alipayqr://platformapi/startapp?saId=10000007&qrcode="+ URLEncoder.encode("https://" + request.getServerName() + "/api/pay/bill/"+payOrderId, "UTF-8"));
         request.setAttribute("payOrder", payOrder1);
