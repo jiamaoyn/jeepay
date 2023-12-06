@@ -190,7 +190,9 @@ public abstract class AbstractPayOrderController extends ApiController {
                 //订单入库 订单状态： 生成状态  此时没有和任何上游渠道产生交互。
                 payOrderService.save(payOrder);
             }
-
+            if (wayCode.equals("ALI_BILL")){
+                bizRQ.setDomain("https://" + request.getServerName());
+            }
             //调起上游支付接口
             bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext);
 
