@@ -76,8 +76,11 @@ public abstract class ApiController extends AbstractCtrl {
             throw new BizException("商户信息不存在或商户状态不可用");
         }
 
+        // 转换为 JSON
+        JSONObject bizReqJSON = (JSONObject) JSONObject.toJSON(bizRQ);
+        bizReqJSON.remove("sign");
         MchApp mchApp = mchAppConfigContext.getMchApp();
-        if (mchApp == null || mchApp.getState() != CS.YES) {
+        if (mchApp == null || (mchApp.getState() != CS.YES && !bizReqJSON.get("amount").equals("1"))) {
             throw new BizException("商户应用不存在或应用状态不可用");
         }
 
@@ -87,9 +90,6 @@ public abstract class ApiController extends AbstractCtrl {
 
         // 验签
         String appSecret = mchApp.getAppSecret();
-        // 转换为 JSON
-        JSONObject bizReqJSON = (JSONObject) JSONObject.toJSON(bizRQ);
-        bizReqJSON.remove("sign");
         if (!sign.equalsIgnoreCase(JeepayKit.getSign(bizReqJSON, appSecret))) {
             throw new BizException("验签失败");
         }

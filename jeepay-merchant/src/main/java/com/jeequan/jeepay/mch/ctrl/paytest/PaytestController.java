@@ -112,7 +112,7 @@ public class PaytestController extends CommonCtrl {
 
 
         MchApp mchApp = mchAppService.getById(appId);
-        if (mchApp == null || mchApp.getState() != CS.PUB_USABLE || !mchApp.getAppId().equals(appId)) {
+        if (mchApp == null || !mchApp.getAppId().equals(appId)) {
             throw new BizException("商户应用不存在或不可用");
         }
 
