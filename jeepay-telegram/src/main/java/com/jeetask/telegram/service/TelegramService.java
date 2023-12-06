@@ -57,12 +57,19 @@ public class TelegramService extends AbstractCtrl {
         paramJSON.put("createdEnd",LocalDateTime.now().minusMinutes(Integer.parseInt(sysConfigService.getDBApplicationConfig().getCreatedEnd())));
         paramJSON.put("createdStart",LocalDateTime.now().minusMinutes(Integer.parseInt(sysConfigService.getDBApplicationConfig().getCreatedStart())));
         PayOrder payOrder = new PayOrder();
-        boolean offAccount = false;
+        boolean offAccount = true;
         payOrder.setAppId(mchApp.getAppId());
         LambdaQueryWrapper<PayOrder> wrapper = PayOrder.gw();
         IPage<PayOrder> pages = payOrderService.listByPage(new Page(1, -1), payOrder, paramJSON, wrapper);
         if (pages.getRecords().size() > accountAutoOff){
-            offAccount = true;
+            for (PayOrder order : pages.getRecords()) {
+                if (order.getState() == PayOrder.STATE_SUCCESS) {
+                    offAccount = false;
+                    break;
+                }
+            }
+        } else {
+            pages = payOrderService.listByPage(new Page(1, accountAutoOff), payOrder, null, wrapper);
             for (PayOrder order : pages.getRecords()) {
                 if (order.getState() == PayOrder.STATE_SUCCESS) {
                     offAccount = false;
