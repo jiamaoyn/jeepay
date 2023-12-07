@@ -1,6 +1,7 @@
 package com.jeequan.jeepay.pay.channel.wxpay;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alipay.api.domain.AccountLogItemResult;
 import com.github.binarywang.wxpay.bean.request.WxPayOrderQueryRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayOrderQueryResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
@@ -107,7 +108,7 @@ public class WxpayPayOrderQueryService implements IPayOrderQueryService {
     }
 
     @Override
-    public ChannelRetMsg queryTelegramBot(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
+    public AccountLogItemResult queryTelegramBot(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception {
         return null;
     }
 

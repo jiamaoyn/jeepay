@@ -1,9 +1,9 @@
 package com.jeequan.jeepay.pay.channel.alipay;
 
-import cn.hutool.core.date.DateUtil;
-import com.alipay.api.domain.*;
+import com.alipay.api.domain.AccountLogItemResult;
+import com.alipay.api.domain.AlipayDataBillAccountlogQueryModel;
+import com.alipay.api.domain.AlipayTradeQueryModel;
 import com.alipay.api.request.AlipayDataBillAccountlogQueryRequest;
-import com.alipay.api.request.AlipayDataBillTransferQueryRequest;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayDataBillAccountlogQueryResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 
 /*
@@ -87,7 +86,7 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
     }
 
     @Override
-    public ChannelRetMsg queryTelegramBot(PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
+    public AccountLogItemResult queryTelegramBot(PayOrder payOrder, MchAppConfigContext mchAppConfigContext){
         if (payOrder.getWayCode().equals("ALI_BILL")){
             AlipayDataBillAccountlogQueryRequest request = new AlipayDataBillAccountlogQueryRequest();
             AlipayDataBillAccountlogQueryModel model = new AlipayDataBillAccountlogQueryModel();
@@ -103,47 +102,15 @@ public class AlipayPayOrderQueryService implements IPayOrderQueryService {
                 List<AccountLogItemResult> transferDetailResults = resp.getDetailList();
                 if (transferDetailResults!=null){
                     for (AccountLogItemResult accountLogItemResult : transferDetailResults) {
-                        System.out.println(Long.parseLong(AmountUtil.convertDollar2Cent(accountLogItemResult.getTransAmount())) == payOrder.getAmount());
-                        System.out.println(payOrder.getAmount());
-                        System.out.println(Long.parseLong(AmountUtil.convertDollar2Cent(accountLogItemResult.getTransAmount())));
-                        if (Long.parseLong(AmountUtil.convertDollar2Cent(accountLogItemResult.getTransAmount())) == payOrder.getAmount()) {
-                            System.out.println("accountLogItemResult-------------start");
-                            System.out.println("alipay_order_no:" + accountLogItemResult.getAlipayOrderNo());
-                            System.out.println("balance:" + accountLogItemResult.getBalance());
-                            System.out.println("trans_amount:" + accountLogItemResult.getTransAmount());
-                            System.out.println("direction:" + accountLogItemResult.getDirection());
-                            System.out.println("trans_dt:" + accountLogItemResult.getTransDt());
-                            System.out.println("trans_memo:" + accountLogItemResult.getTransMemo());
-                            System.out.println("accountLogItemResult-------------end");
-                            return ChannelRetMsg.confirmSuccess(accountLogItemResult.getAlipayOrderNo());  //支付成功
-                        } else {
-                            return ChannelRetMsg.unknown("未查到匹配的订单，请检查金额或单号");  //支付成功
-                        }
+                        accountLogItemResult.setAccountLogId(payOrder.getPayOrderId());
+                        return accountLogItemResult;
                     }
                 }
             } else {
                 System.out.println(resp.getBody()+resp.getMsg()+resp.getSubCode());
             }
-            return ChannelRetMsg.waiting(); //支付中
         }
-        AlipayTradeQueryRequest req = new AlipayTradeQueryRequest();
-        // 商户订单号，商户网站订单系统中唯一订单号，必填
-        AlipayTradeQueryModel model = new AlipayTradeQueryModel();
-        model.setOutTradeNo(payOrder.getPayOrderId());
-        req.setBizModel(model);
-
-        //通用字段
-        AlipayKit.putApiIsvInfo(mchAppConfigContext, req, model);
-
-        AlipayTradeQueryResponse resp = configContextQueryService.getAlipayClientWrapper(mchAppConfigContext).execute(req);
-        String result = resp.getTradeStatus();
-
-        if ("TRADE_SUCCESS".equals(result)) {
-            return ChannelRetMsg.confirmSuccess(resp.getTradeNo());  //支付成功
-        } else if ("WAIT_BUYER_PAY".equals(result)) {
-            return ChannelRetMsg.waiting(); //支付中
-        }
-        return ChannelRetMsg.waiting(); //支付中
+        return null;
     }
 
 

@@ -1,5 +1,6 @@
 package com.jeequan.jeepay.pay.channel;
 
+import com.alipay.api.domain.AccountLogItemResult;
 import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.msg.ChannelRetMsg;
@@ -21,5 +22,5 @@ public interface IPayOrderQueryService {
      **/
     ChannelRetMsg query(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
 
-    ChannelRetMsg queryTelegramBot(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
+    AccountLogItemResult queryTelegramBot(PayOrder payOrder, MchAppConfigContext mchAppConfigContext) throws Exception;
 }

@@ -170,6 +170,31 @@ public class PayOrderController extends CommonCtrl {
         payOrderNotifyPolling(payOrder);
         return ApiRes.ok();
     }
+    @ApiOperation("手动回调支付订单")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "iToken", value = "用户身份凭证", required = true, paramType = "header"),
+            @ApiImplicitParam(name = "payOrderId", value = "支付订单号", required = true)
+    })
+    @PreAuthorize("hasAuthority('ENT_PAY_ORDER_NOTIFY_TO')")
+    @RequestMapping(value = "detailNotifyTo/{payOrderId}/{channelOrderNo}", method = RequestMethod.GET)
+    public ApiRes detailNotifyToSystem(@PathVariable("payOrderId") String payOrderId, @PathVariable("channelOrderNo") String channelOrderNo) {
+        PayOrder payOrder = payOrderService.getById(payOrderId);
+        if (payOrder == null) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+        if (!payOrder.getMchNo().equals(getCurrentMchNo())) {
+            return ApiRes.fail(ApiCodeEnum.SYS_PERMISSION_ERROR);
+        }
+        if (payOrder.getState() == PayOrder.STATE_SUCCESS){
+            return ApiRes.ok("订单已被支付，无需重复回调");
+        }
+        payOrderService.updateIng2Success(payOrderId,channelOrderNo);
+        payOrder = payOrderService.getById(payOrder.getPayOrderId());
+        payOrder.setState(PayOrder.STATE_SUCCESS);
+        payOrderNotifyPolling(payOrder);
+        return ApiRes.ok();
+    }
+
     /**
      * 商户通知信息， 只有订单是终态，才会发送通知， 如明确成功和明确失败
      **/
