@@ -34,10 +34,34 @@ public class PayOrderReissueTask {
     @Autowired
     private ChannelOrderReissueService channelOrderReissueService;
 
-    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
     public void start_bill() {
         Date startDate = DateUtil.offsetMinute(new Date(), -0);
-        Date endDate = DateUtil.offsetMinute(new Date(), -5);
+        Date endDate = DateUtil.offsetMinute(new Date(), -1);
+        startBillDateExecutorService(startDate, endDate);
+    }
+    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
+    public void start_bill11() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -1);
+        Date endDate = DateUtil.offsetMinute(new Date(), -2);
+        startBillDateExecutorService(startDate, endDate);
+    }
+    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
+    public void start_bill2_3() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -2);
+        Date endDate = DateUtil.offsetMinute(new Date(), -3);
+        startBillDateExecutorService(startDate, endDate);
+    }
+    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
+    public void start_bill3_4() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -3);
+        Date endDate = DateUtil.offsetMinute(new Date(), -4);
+        startBillDateExecutorService(startDate, endDate);
+    }
+    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
+    public void start_bill0_4() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -0);
+        Date endDate = DateUtil.offsetMinute(new Date(), -4);
         startBillDateExecutorService(startDate, endDate);
     }
     @Scheduled(cron = "*/4 * * * * ?") // 每2秒钟执行一次
@@ -67,7 +91,7 @@ public class PayOrderReissueTask {
 
     public void startBillDateExecutorService(Date startDate, Date endDate) {
         List<MchApp> mchAppList = new ArrayList<>();
-        LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(5);
+        LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(10);
         mchAppService.list(
                 MchApp.gw().eq(MchApp::getState, CS.YES).or(wrapper -> wrapper
                         .eq(MchApp::getState, CS.NO)
