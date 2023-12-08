@@ -1,28 +1,19 @@
 package com.jeequan.alibill.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.domain.AccountLogItemResult;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.jeequan.jeepay.core.constants.CS;
+import com.jeequan.alibill.channel.IPayOrderQueryService;
+import com.jeequan.alibill.model.MchAppConfigContext;
 import com.jeequan.jeepay.core.ctrls.AbstractCtrl;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.PayOrder;
-import com.jeequan.jeepay.core.entity.TelegramChat;
 import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.core.utils.SpringBeansUtil;
-import com.jeequan.jeepay.service.impl.MchAppService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
-import com.jeequan.alibill.channel.IPayOrderQueryService;
-import com.jeequan.alibill.model.MchAppConfigContext;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -61,7 +52,7 @@ public class ChannelOrderReissueService extends AbstractCtrl {
             accountLogItemResultList.forEach(accountLogItemResult -> {
                  if (accountLogItemResult.getTransMemo()!=null) {
                     PayOrder payOrder = payOrderService.queryPayOrderIdNoStateIng(accountLogItemResult.getTransMemo());
-                    if (payOrder == null){
+                    if (payOrder == null || payOrder.getState() == PayOrder.STATE_SUCCESS){
                         return;
                     }
                     System.out.println("查找订单号："+accountLogItemResult.getTransMemo()+"查找订单号结果"+payOrder);
