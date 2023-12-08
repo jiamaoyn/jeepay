@@ -40,25 +40,25 @@ public class PayOrderReissueTask {
         Date endDate = DateUtil.offsetMinute(new Date(), -1);
         startBillDateExecutorService(startDate, endDate);
     }
-    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
     public void start_bill11() {
         Date startDate = DateUtil.offsetMinute(new Date(), -1);
         Date endDate = DateUtil.offsetMinute(new Date(), -2);
         startBillDateExecutorService(startDate, endDate);
     }
-    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
     public void start_bill2_3() {
         Date startDate = DateUtil.offsetMinute(new Date(), -2);
         Date endDate = DateUtil.offsetMinute(new Date(), -3);
         startBillDateExecutorService(startDate, endDate);
     }
-    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
     public void start_bill3_4() {
         Date startDate = DateUtil.offsetMinute(new Date(), -3);
         Date endDate = DateUtil.offsetMinute(new Date(), -4);
         startBillDateExecutorService(startDate, endDate);
     }
-    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
     public void start_bill0_4() {
         Date startDate = DateUtil.offsetMinute(new Date(), -0);
         Date endDate = DateUtil.offsetMinute(new Date(), -4);
@@ -114,7 +114,6 @@ public class PayOrderReissueTask {
         try {
             for (MchApp mchApp : mchAppList) {
                 executor.submit(() -> {
-                    log.info("当前查询appId：{}---MchNo:{}---appName:{}", mchApp.getAppId(), mchApp.getMchNo(), mchApp.getAppName());
                     channelOrderReissueService.processPayOrderBill(mchApp, startDate, endDate);
                 });
             }

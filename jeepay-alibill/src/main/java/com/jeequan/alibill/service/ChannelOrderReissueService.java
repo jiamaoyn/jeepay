@@ -55,13 +55,10 @@ public class ChannelOrderReissueService extends AbstractCtrl {
                     if (payOrder == null || payOrder.getState() == PayOrder.STATE_SUCCESS){
                         return;
                     }
-                    System.out.println("查找订单号："+accountLogItemResult.getTransMemo()+"查找订单号结果"+payOrder);
                     if (Long.parseLong(AmountUtil.convertDollar2Cent(accountLogItemResult.getTransAmount())) == payOrder.getAmount()){
                         if (payOrderService.updateIng2Success(payOrder.getPayOrderId(), accountLogItemResult.getAlipayOrderNo(), null)) {
                             //订单支付成功，其他业务逻辑
                             payOrderProcessService.confirmSuccessPolling(payOrder);
-                            log.info("订单支付成功[{}],alipay_order_no:{},balance:{},trans_amount:{},direction:{},trans_dt:{},trans_memo:{}" ,
-                                    payOrder.getPayOrderId(),accountLogItemResult.getAlipayOrderNo(),accountLogItemResult.getBalance(),accountLogItemResult.getTransAmount(),accountLogItemResult.getDirection(),accountLogItemResult.getTransDt(),accountLogItemResult.getTransMemo());
                         }
                     }
                 }
