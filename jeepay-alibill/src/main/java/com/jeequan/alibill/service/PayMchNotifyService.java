@@ -88,7 +88,6 @@ public class PayMchNotifyService {
         QueryPayOrderRS queryPayOrderRS = QueryPayOrderRS.buildByPayOrder(payOrder);
         JSONObject jsonObject = (JSONObject) JSONObject.toJSON(queryPayOrderRS);
         jsonObject.put("reqTime", System.currentTimeMillis()); //添加请求时间
-        log.info("回调参数加密前："+jsonObject);
         // 报文签名
         jsonObject.put("sign", JeepayKit.getSign(jsonObject, appSecret));
 
