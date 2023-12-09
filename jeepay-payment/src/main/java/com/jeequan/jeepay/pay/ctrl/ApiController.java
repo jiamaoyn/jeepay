@@ -80,7 +80,7 @@ public abstract class ApiController extends AbstractCtrl {
         JSONObject bizReqJSON = (JSONObject) JSONObject.toJSON(bizRQ);
         bizReqJSON.remove("sign");
         MchApp mchApp = mchAppConfigContext.getMchApp();
-        if (mchApp == null || (mchApp.getState() != CS.YES && !bizReqJSON.get("amount").equals("1"))) {
+        if (mchApp == null || (mchApp.getState() != CS.YES && !String.valueOf(bizReqJSON.get("amount")).equals("1"))) {
             throw new BizException("商户应用不存在或应用状态不可用");
         }
 

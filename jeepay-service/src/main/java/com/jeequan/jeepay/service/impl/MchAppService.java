@@ -83,17 +83,24 @@ public class MchAppService extends ServiceImpl<MchAppMapper, MchApp> {
         wrapper.orderByDesc(MchApp::getCreatedAt);
 
         IPage<MchApp> pages = this.page(iPage, wrapper);
+        if (pages.getRecords().size() > 50){
+            pages.getRecords().forEach(item -> {
+                item.setAppSecret(StringKit.str2Star(item.getAppSecret(), 6, 6, 6));
+                // 添加其他字段的修改操作...
+            });
+        } else {
+            pages.getRecords().forEach(item -> {
+                item.setAppSecret(StringKit.str2Star(item.getAppSecret(), 6, 6, 6));
+                Map mainSuccessRate = payOrderService.mainSuccessRate(item.getAppId());
+                item.setSuccessRate(mainSuccessRate.get("percentage").toString()); // 修改另一个字段
+                item.setSuccessCountPayAmount(mainSuccessRate.get("successCountPayAmount").toString());
+                item.setCountAllPayAmount(mainSuccessRate.get("countAllPayAmount").toString());
+                item.setSuccessCountPayAmountToday(mainSuccessRate.get("successCountPayAmountToday").toString());
+                item.setCountAllPayAmountToday(mainSuccessRate.get("countAllPayAmountToday").toString());
+                // 添加其他字段的修改操作...
+            });
+        }
 
-        pages.getRecords().forEach(item -> {
-            item.setAppSecret(StringKit.str2Star(item.getAppSecret(), 6, 6, 6));
-            Map mainSuccessRate = payOrderService.mainSuccessRate(item.getAppId());
-            item.setSuccessRate(mainSuccessRate.get("percentage").toString()); // 修改另一个字段
-            item.setSuccessCountPayAmount(mainSuccessRate.get("successCountPayAmount").toString());
-            item.setCountAllPayAmount(mainSuccessRate.get("countAllPayAmount").toString());
-            item.setSuccessCountPayAmountToday(mainSuccessRate.get("successCountPayAmountToday").toString());
-            item.setCountAllPayAmountToday(mainSuccessRate.get("countAllPayAmountToday").toString());
-            // 添加其他字段的修改操作...
-        });
 
         return pages;
     }
