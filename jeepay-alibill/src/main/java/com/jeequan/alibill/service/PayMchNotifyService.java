@@ -42,14 +42,12 @@ public class PayMchNotifyService {
             MchNotifyRecord mchNotifyRecord = mchNotifyRecordService.findByPayOrder(dbPayOrder.getPayOrderId());
 
             if (mchNotifyRecord != null) {
-
                 log.info("当前已存在通知消息， 不再发送。");
                 return;
             }
 
             //商户app私钥
             String appSecret = configContextQueryService.queryMchInfo(dbPayOrder.getMchNo()).getSecret();
-            log.info("appSecret:"+appSecret);
             // 封装通知url
             String notifyUrl = createNotifyUrl(dbPayOrder, appSecret);
             mchNotifyRecord = new MchNotifyRecord();
