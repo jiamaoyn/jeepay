@@ -23,8 +23,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Map;
 
 @Service
 @Slf4j
