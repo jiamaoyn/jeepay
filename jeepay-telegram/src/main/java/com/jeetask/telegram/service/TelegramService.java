@@ -46,8 +46,8 @@ public class TelegramService extends AbstractCtrl {
                 dbRecord.setState(CS.NO);
                 mchAppService.updateById(dbRecord);
                 log.error("符合自动关闭逻辑，应用：{}----被关闭", mchApp.getAppName());
-                sendMessage(mchApp.getMchNo(),mchApp.getAppName()+"----被关闭\n"+"该应用长时间没有支付成功订单,系统自动停止使用，请手动检查账号状态。\n若账号没有问题，请十分钟后启用");
-                sendMessageSys(mchApp.getAppName()+"----被关闭\n"+"该应用长时间没有支付成功订单,系统自动停止使用，请手动检查账号状态。\n若账号没有问题，请十分钟后启用");
+                sendMessage(mchApp.getMchNo(),mchApp.getAppName()+"----被关闭\n（提示：该账号有连续多笔交易未成功，系统已自动停用，请检查账号状态，若账号正常，请10分钟后手动启用）");
+                sendMessageSys(mchApp.getAppName()+"----被关闭\n（提示：该账号有连续多笔交易未成功，系统已自动停用，请检查账号状态，若账号正常，请10分钟后手动启用）");
             }
         }
     }
