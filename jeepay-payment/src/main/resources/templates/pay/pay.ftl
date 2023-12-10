@@ -11,13 +11,13 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1.2, user-scalable=0" name="viewport" />
     <title>在线支付 - 网上支付 安全快速！</title>
     <!-- 依 赖 样 式-->
-    <link rel="stylesheet" href="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/component/pear/css/pear.css" type="text/css"/>
-    <link href="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/pay/console/qrcode.css" rel="stylesheet" />
-    <script src="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/js/jquery-3.2.1.min.js"></script>
-    <link rel="stylesheet" href="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/user/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/user/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/user/assets/css/demo.css" />
-    <link rel="stylesheet" href="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/user/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+    <link rel="stylesheet" href="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/component/pear/css/pear.css" type="text/css"/>
+    <link href="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/pay/console/qrcode.css" rel="stylesheet" />
+    <script src="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/js/jquery-3.2.1.min.js"></script>
+    <link rel="stylesheet" href="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/user/assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/user/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/user/assets/css/demo.css" />
+    <link rel="stylesheet" href="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/user/assets/vendor/libs/sweetalert2/sweetalert2.css" />
     <style>
         body {
             background: #f2f2f4;
@@ -132,7 +132,7 @@
 <div id="main">
     <div class="left">
         <div class="make">
-            <p><img src="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/pay/console/images/alipay.jpg" alt="" style="height:30px;"></p>
+            <p><img src="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/pay/console/images/alipay.jpg" alt="" style="height:30px;"></p>
             <p class="money" id="price" style="font-weight:bold; color:green">支付金额：${amount!''}元</p>
             <#if aliName>
                 <p><font face="微软雅黑" size="+1" color="#FF000">商户姓名：${aliName!''}--付款时请校验姓名</font></p>
@@ -144,7 +144,7 @@
             <#if payHtmlWarn>
                 <p><font face="微软雅黑" size="+1" color="#FF000">${payHtmlWarn!''}</font><br></p>
             </#if>
-            <center><p class="qrcode" id="qrcode" ><img class="kalecloud" id="qrcode_load" src="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/images/status/loading.gif" style="display: block;"></p></center>
+            <center><p class="qrcode" id="qrcode" ><img class="kalecloud" id="qrcode_load" src="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/images/status/loading.gif" style="display: block;"></p></center>
             <center>
                 <a id="startApp" type="button" class="btn btn-lg btn-block btn-danger" href="${payOrder.returnUrl}" style="font-size:13px;width:250px;display:none">一键启动APP支付</a>
             </center>
@@ -155,12 +155,12 @@
         </div>
     </div>
     <div class="right">
-        <img src="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/pay/console/images/alipay-sys.png" />
+        <img src="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/pay/console/images/alipay-sys.png" />
     </div>
 </div>
-<script src="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/component/layer/layer.js"></script>
-<script src="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/user/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-<script type="text/javascript" src="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/user/assets/vendor/libs/clipboard/clipboard.js"></script>
+<script src="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/component/layer/layer.js"></script>
+<script src="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/user/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+<script type="text/javascript" src="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/user/assets/vendor/libs/clipboard/clipboard.js"></script>
 <script type="text/javascript">
     var intDiff = parseInt('7200');//倒计时总秒数量
     function timer(){
@@ -180,11 +180,11 @@
             if (hour <= 0 && minute <= 0 && second <= 0 && updateQrOk !== 1) {
                 $("#startApp").hide();
                 $("#divTime").html("<small style='color:red; font-size:26px'>订单二维码已过期</small>");
-                $("#qrcode").html('<img id="qrcode_load" src="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/images/status/qrcode_timeout.png">');//输出过期二维码提示图片
+                $("#qrcode").html('<img id="qrcode_load" src="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/images/status/qrcode_timeout.png">');//输出过期二维码提示图片
             } else if (updateQrOk === 1){
                 $("#startApp").hide();
                 $("#divTime").html("<small style='color:red; font-size:22px'>"+ result.msg +"</small>");
-                $("#qrcode").html('<img id="qrcode_load" src="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/images/status/pay_ok.png">');//支付成功
+                $("#qrcode").html('<img id="qrcode_load" src="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/images/status/pay_ok.png">');//支付成功
             } else {
                 $("#divTime").html("二维码有效时间:<small style='color:red; font-size:24px'>" + minute + "</small>分<small style='color:red; font-size:24px'>" + second + "</small>秒,失效勿付");
             }
@@ -229,7 +229,7 @@
                 window.clearInterval(orderlst);
                 $("#startApp").hide();
                 $("#divTime").html("<small style='color:red; font-size:26px'>订单二维码已过期</small>");
-                $("#qrcode").html('<img id="qrcode_load" src="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/images/status/qrcode_timeout.png">');//输出过期二维码提示图片
+                $("#qrcode").html('<img id="qrcode_load" src="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/images/status/qrcode_timeout.png">');//输出过期二维码提示图片
                 Swal.fire({
                     title: '订单关闭',
                     text: result.msg,
@@ -245,7 +245,7 @@
                 updateQrOk = 1;
                 $("#startApp").hide();
                 $("#divTime").html("<small style='color:red; font-size:22px'>"+ result.msg +"</small>");
-                $("#qrcode").html('<img id="qrcode_load" src="https://static-1321271064.cos.ap-hongkong.myqcloud.com/static_7ezrzn/index/images/status/pay_ok.png">');//支付成功
+                $("#qrcode").html('<img id="qrcode_load" src="https://apihtmlshanghai-1321271064.cos.ap-shanghai.myqcloud.com/static_7ezrzn/index/images/status/pay_ok.png">');//支付成功
                 //回调页面
                 window.clearInterval(orderlst);
             }
