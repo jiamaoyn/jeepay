@@ -228,6 +228,25 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         }
         return payOrderMapper.payCount(param);
     }
+    public Map payCountBus(String busNo, Byte state, Byte refundState, String dayStart, String dayEnd) {
+        Map param = new HashMap<>();
+        if (state != null) {
+            param.put("state", state);
+        }
+        if (refundState != null) {
+            param.put("refundState", refundState);
+        }
+        if (StrUtil.isNotBlank(busNo)) {
+            param.put("busNo", busNo);
+        }
+        if (StrUtil.isNotBlank(dayStart)) {
+            param.put("createTimeStart", dayStart);
+        }
+        if (StrUtil.isNotBlank(dayEnd)) {
+            param.put("createTimeEnd", dayEnd);
+        }
+        return payOrderMapper.payCount(param);
+    }
     public Map payCountSuccess(String mchNo, Byte state, Byte refundState, String dayStart, String dayEnd) {
         Map param = new HashMap<>();
         if (state != null) {
@@ -247,7 +266,25 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         }
         return payOrderMapper.payCountSuccess(param);
     }
-
+    public Map payCountSuccessBus(String busNo, Byte state, Byte refundState, String dayStart, String dayEnd) {
+        Map param = new HashMap<>();
+        if (state != null) {
+            param.put("state", state);
+        }
+        if (refundState != null) {
+            param.put("refundState", refundState);
+        }
+        if (StrUtil.isNotBlank(busNo)) {
+            param.put("busNo", busNo);
+        }
+        if (StrUtil.isNotBlank(dayStart)) {
+            param.put("successTimeStart", dayStart);
+        }
+        if (StrUtil.isNotBlank(dayEnd)) {
+            param.put("successTimeEnd", dayEnd);
+        }
+        return payOrderMapper.payCountSuccess(param);
+    }
     public List<Map> payTypeCount(String mchNo, Byte state, Byte refundState, String dayStart, String dayEnd) {
         Map param = new HashMap<>();
         if (state != null) {
@@ -258,6 +295,25 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         }
         if (StrUtil.isNotBlank(mchNo)) {
             param.put("mchNo", mchNo);
+        }
+        if (StrUtil.isNotBlank(dayStart)) {
+            param.put("createTimeStart", dayStart);
+        }
+        if (StrUtil.isNotBlank(dayEnd)) {
+            param.put("createTimeEnd", dayEnd);
+        }
+        return payOrderMapper.payTypeCount(param);
+    }
+    public List<Map> payTypeCountBus(String busNo, Byte state, Byte refundState, String dayStart, String dayEnd) {
+        Map param = new HashMap<>();
+        if (state != null) {
+            param.put("state", state);
+        }
+        if (refundState != null) {
+            param.put("refundState", refundState);
+        }
+        if (StrUtil.isNotBlank(busNo)) {
+            param.put("busNo", busNo);
         }
         if (StrUtil.isNotBlank(dayStart)) {
             param.put("createTimeStart", dayStart);
@@ -363,7 +419,76 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         json.put("yesterdayAmountSuccess", yesterdayAmountSuccess);
         return json;
     }
+    /**
+     * 首页支付周统计
+     **/
+    public JSONObject mainPageWeekCountBus(String mchNo) {
+        JSONObject json = new JSONObject();
+        Map dayAmount;
+        ArrayList array = new ArrayList<>();
+        BigDecimal payAmount = new BigDecimal(0);    // 当日金额
+        BigDecimal payWeek = payAmount;   // 周总收益
+        String todayAmount = "0.00";    // 今日金额
+        String todayPayCount = "0";    // 今日交易笔数
+        String yesterdayAmount = "0.00";    // 昨日金额
+        Map dayAmountSuccess;
+        ArrayList arraySuccess = new ArrayList<>();
+        BigDecimal payAmountSuccess = new BigDecimal(0);    // 当日金额
+        BigDecimal payWeekSuccess = payAmountSuccess;   // 周总收益
+        String todayAmountSuccess = "0.00";    // 今日金额
+        String todayPayCountSuccess = "0";    // 今日交易笔数
+        String yesterdayAmountSuccess = "0.00";    // 昨日金额
+        Date today = new Date();
+        for (int i = 0; i < 7; i++) {
+            Date date = DateUtil.offsetDay(today, -i).toJdkDate();
+            String dayStart = DateUtil.beginOfDay(date).toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN);
+            String dayEnd = DateUtil.endOfDay(date).toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN);
+            // 每日交易金额查询
+            dayAmount = payCountBus(mchNo, PayOrder.STATE_SUCCESS, null, dayStart, dayEnd);
+            if (dayAmount != null) {
+                payAmount = new BigDecimal(dayAmount.get("payAmount").toString());
+            }
+            if (i == 0) {
+                todayAmount = dayAmount.get("payAmount").toString();
+                todayPayCount = dayAmount.get("payCount").toString();
+            }
+            if (i == 1) {
+                yesterdayAmount = dayAmount.get("payAmount").toString();
+            }
+            payWeek = payWeek.add(payAmount);
+            array.add(payAmount);
 
+            dayAmountSuccess = payCountSuccessBus(mchNo, PayOrder.STATE_SUCCESS, null, dayStart, dayEnd);
+            if (dayAmountSuccess != null) {
+                payAmountSuccess = new BigDecimal(dayAmountSuccess.get("payAmount").toString());
+            }
+            if (i == 0) {
+                todayAmountSuccess = dayAmountSuccess.get("payAmount").toString();
+                todayPayCountSuccess = dayAmountSuccess.get("payCount").toString();
+            }
+            if (i == 1) {
+                yesterdayAmountSuccess = dayAmountSuccess.get("payAmount").toString();
+            }
+            payWeekSuccess = payWeekSuccess.add(payAmountSuccess);
+            arraySuccess.add(payAmountSuccess);
+        }
+
+        // 倒序排列
+        Collections.reverse(array);
+        Collections.reverse(arraySuccess);
+        json.put("dataArray", array);
+        json.put("todayAmount", todayAmount);
+        json.put("todayPayCount", todayPayCount);
+        json.put("payWeek", payWeek);
+        json.put("yesterdayAmount", yesterdayAmount);
+
+        json.put("dataArraySuccess", arraySuccess);
+        json.put("todayAmountSuccess", todayAmountSuccess);
+        json.put("todayPayCountSuccess", todayPayCountSuccess);
+        json.put("payWeekSuccess", payWeekSuccess);
+        json.put("yesterdayAmountSuccess", yesterdayAmountSuccess);
+        return json;
+    }
     /**
      * 首页统计总数量
      **/
@@ -384,7 +509,20 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         json.put("totalCountAll", payCountMap.get("payCount"));
         return json;
     }
-
+    /**
+     * 首页统计总数量
+     **/
+    public JSONObject mainPageNumCountBus(String busNo) {
+        JSONObject json = new JSONObject();
+        // 总交易金额
+        Map<String, String> payCountMap = payCountBus(busNo, PayOrder.STATE_SUCCESS, null, null, null);
+        json.put("totalAmount", payCountMap.get("payAmount"));
+        json.put("totalCount", payCountMap.get("payCount"));
+        payCountMap = payCountBus(busNo, null, null, null, null);
+        json.put("totalAmountAll", payCountMap.get("payAmount"));
+        json.put("totalCountAll", payCountMap.get("payCount"));
+        return json;
+    }
     /**
      * 首页支付统计
      **/
@@ -404,6 +542,38 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
 
         if (StrUtil.isNotBlank(mchNo)) {
             param.put("mchNo", mchNo);
+        }
+        param.put("createTimeStart", createdStart);
+        param.put("createTimeEnd", createdEnd);
+        // 查询实际收款的记录
+        List<Map> payOrderList = payOrderMapper.selectOrderCount(param);
+        // 查询总收款的记录（不论成功失败）
+        List<Map> payOrderListAll = payOrderMapper.selectOrderCountAll(param);
+        // 查询退款的记录
+        List<Map> refundOrderList = payOrderMapper.selectOrderCount(param);
+        // 生成前端返回参数类型
+        List<Map> returnList = getReturnList(daySpace, createdEnd, payOrderList, refundOrderList, payOrderListAll);
+        return returnList;
+    }
+    /**
+     * 首页支付统计
+     **/
+    public List<Map> mainPagePayCountBus(String busNo, String createdStart, String createdEnd) {
+        Map param = new HashMap<>(); // 条件参数
+        int daySpace = 6; // 默认最近七天（含当天）
+        if (StringUtils.isNotEmpty(createdStart) && StringUtils.isNotEmpty(createdEnd)) {
+            createdStart = createdStart + " 00:00:00";
+            createdEnd = createdEnd + " 23:59:59";
+            // 计算两时间间隔天数
+            daySpace = Math.toIntExact(DateUtil.betweenDay(DateUtil.parseDate(createdStart), DateUtil.parseDate(createdEnd), true));
+        } else {
+            Date today = new Date();
+            createdStart = DateUtil.formatDate(DateUtil.offsetDay(today, -daySpace)) + " 00:00:00";
+            createdEnd = DateUtil.formatDate(today) + " 23:59:59";
+        }
+
+        if (StrUtil.isNotBlank(busNo)) {
+            param.put("busNo", busNo);
         }
         param.put("createTimeStart", createdStart);
         param.put("createTimeEnd", createdEnd);
@@ -499,6 +669,44 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         }
         // 统计列表
         List<Map> payCountMap = payTypeCount(mchNo, PayOrder.STATE_SUCCESS, null, createdStart, createdEnd);
+
+        // 得到所有支付方式
+        Map<String, String> payWayNameMap = new HashMap<>();
+        List<PayWay> payWayList = payWayMapper.selectList(PayWay.gw());
+        for (PayWay payWay : payWayList) {
+            payWayNameMap.put(payWay.getWayCode(), payWay.getWayName());
+        }
+        // 支付方式名称标注
+        for (Map payCount : payCountMap) {
+            if (StringUtils.isNotEmpty(payWayNameMap.get(payCount.get("wayCode")))) {
+                payCount.put("typeName", payWayNameMap.get(payCount.get("wayCode")));
+            } else {
+                payCount.put("typeName", payCount.get("wayCode"));
+            }
+        }
+        array.add(payCountMap);
+        return array;
+    }
+
+    /**
+     * 首页支付类型统计
+     **/
+    public ArrayList mainPagePayTypeCountBus(String mchNo, String createdStart, String createdEnd) {
+        // 返回数据列
+        ArrayList array = new ArrayList<>();
+        if (StringUtils.isNotEmpty(createdStart) && StringUtils.isNotEmpty(createdEnd)) {
+            createdStart = createdStart + " 00:00:00";
+            createdEnd = createdEnd + " 23:59:59";
+        } else {
+            Date endDay = new Date();    // 当前日期
+            Date startDay = DateUtil.lastWeek().toJdkDate(); // 一周前日期
+            String end = DateUtil.formatDate(endDay);
+            String start = DateUtil.formatDate(startDay);
+            createdStart = start + " 00:00:00";
+            createdEnd = end + " 23:59:59";
+        }
+        // 统计列表
+        List<Map> payCountMap = payTypeCountBus(mchNo, PayOrder.STATE_SUCCESS, null, createdStart, createdEnd);
 
         // 得到所有支付方式
         Map<String, String> payWayNameMap = new HashMap<>();
