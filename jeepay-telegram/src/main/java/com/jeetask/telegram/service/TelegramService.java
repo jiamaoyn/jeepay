@@ -23,8 +23,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -48,7 +46,8 @@ public class TelegramService extends AbstractCtrl {
                 dbRecord.setState(CS.NO);
                 mchAppService.updateById(dbRecord);
                 log.error("符合自动关闭逻辑，应用：{}----被关闭", mchApp.getAppName());
-                sendMessage(mchApp.getMchNo(),"符合自动关闭逻辑。\n应用："+mchApp.getAppName()+"----被关闭");
+                sendMessage(mchApp.getMchNo(),mchApp.getAppName()+"----被关闭\n（提示：该账号有连续多笔交易未成功，系统已自动停用，请检查账号状态，若账号正常，请10分钟后手动启用）");
+                sendMessageSys(mchApp.getAppName()+"----被关闭\n（提示：该账号有连续多笔交易未成功，系统已自动停用，请检查账号状态，若账号正常，请10分钟后手动启用）");
             }
         }
     }
@@ -75,40 +74,26 @@ public class TelegramService extends AbstractCtrl {
     public void sendMessage(String mchNo, String messageText) {
         TelegramChat telegramChat = telegramChatService.queryTelegramChatByMchNo(mchNo);
         SendMessage message = new SendMessage();
-        if (telegramChat == null){
-            message.setChatId(sysConfigService.getDBApplicationConfig().getBotTelegramChatId());
-        } else {
+        if (telegramChat != null){
             message.setChatId(telegramChat.getChatId());
+            message.setText(messageText);
+            executeSendMessage(message);
         }
+    }
+
+    public void sendMessageSys(String messageText) {
+        SendMessage message = new SendMessage();
+        message.setChatId(sysConfigService.getDBApplicationConfig().getBotTelegramChatId());
         message.setText(messageText);
+        executeSendMessage(message);
+    }
+
+    public void executeSendMessage(SendMessage message){
         try {
             myCustomBot.execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-    }
-
-    public String payOrderCount(String mchNo){
-        Date date = DateUtil.offsetDay(new Date(),-0).toJdkDate();
-        String dayStart = DateUtil.beginOfDay(date).toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN);
-        String dayEnd = DateUtil.endOfDay(date).toString(DatePattern.NORM_DATETIME_MINUTE_PATTERN);
-        // 每日交易金额查询
-        Map dayAmount = payOrderService.payCount(null, PayOrder.STATE_SUCCESS, null, dayStart, dayEnd);
-        Map dayAmountSuccess = payOrderService.payCountSuccess(mchNo, PayOrder.STATE_SUCCESS, null, dayStart, dayEnd);
-        String todayAmount = "0.00";    // 今日金额
-        String todayPayCount = "0";    // 今日交易笔数
-        String todayAmountSuccess = "0.00";    // 今日完成金额
-        String todayPayCountSuccess = "0";    // 今日完成交易笔数
-        if (dayAmount != null) {
-            todayAmount = dayAmount.get("payAmount").toString();
-            todayPayCount = dayAmount.get("payCount").toString();
-            todayAmountSuccess = dayAmountSuccess.get("payAmount").toString();
-            todayPayCountSuccess = dayAmountSuccess.get("payCount").toString();
-        }
-        return "今日收款金额：￥"+todayAmount+"元\n"+
-                "今日收款笔数："+todayPayCount+"笔\n"+
-                "今日完成金额：￥"+todayAmountSuccess+"元\n"+
-                "今日完成笔数："+todayPayCountSuccess+"笔\n";
     }
 
 

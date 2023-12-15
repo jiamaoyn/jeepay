@@ -1,10 +1,8 @@
 package com.jeetask.telegram.telegram;
 
 import com.jeequan.jeepay.core.entity.TelegramChat;
-import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
 import com.jeequan.jeepay.service.impl.TelegramChatService;
-import com.jeetask.telegram.service.TelegramService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
@@ -18,14 +16,12 @@ public class MyCustomBot extends TelegramLongPollingBot {
 
     private final SysConfigService sysConfigService;
     private final TelegramChatService telegramChatService;
-    private final TelegramService telegramService;
 
     @Autowired
-    public MyCustomBot(DefaultBotOptions options, SysConfigService sysConfigService, TelegramChatService telegramChatService, TelegramService telegramService) {
+    public MyCustomBot(DefaultBotOptions options, SysConfigService sysConfigService, TelegramChatService telegramChatService) {
         super(options);
         this.sysConfigService = sysConfigService;
         this.telegramChatService = telegramChatService;
-        this.telegramService = telegramService;
     }
 
     @Override
@@ -67,9 +63,9 @@ public class MyCustomBot extends TelegramLongPollingBot {
             } else if (messageText.equals("收款统计")) {
                 TelegramChat telegramChat = telegramChatService.queryTelegramChatByChatId(chatId);
                 if (telegramChat != null){
-                    sendText =  telegramService.payOrderCount(telegramChat.getMchNo());
+                    sendText =  telegramChatService.payOrderCount(telegramChat.getMchNo());
                 } else if (sysConfigService.getDBApplicationConfig().getBotTelegramChatId().equals(chatId)) {
-                    sendText =  telegramService.payOrderCount(null);
+                    sendText =  telegramChatService.payOrderCount(null);
                 } else {
                     sendText = "暂未绑定商户号，请绑定";
                 }
