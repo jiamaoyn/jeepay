@@ -133,11 +133,54 @@ public abstract class ApiController extends AbstractCtrl {
         MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfoByMchNo(mchNo);
 
         if (mchAppConfigContext == null) {
-            throw new BizException("商户或商户应用不存在");
+            throw new BizException("商户不存在2222");
+        }
+        if (mchAppConfigContext.getMchInfo().getMchNoPid() != null){
+            MchAppConfigContext mchAppConfigContextPid = configContextQueryService.queryMchInfoAndAppInfoByMchNo(mchAppConfigContext.getMchInfo().getMchNoPid());
+            if (mchAppConfigContextPid == null) {
+                throw new BizException("码商不存在");
+            }
+            if (mchAppConfigContextPid.getMchInfo() == null || mchAppConfigContextPid.getMchInfo().getState() != CS.YES) {
+                throw new BizException("码商信息不存在或码商状态不可用");
+            }
         }
 
-        if (mchAppConfigContext.getMchInfo() == null || mchAppConfigContext.getMchInfo().getState() != CS.YES) {
-            throw new BizException("商户信息不存在或商户状态不可用");
+        // 验签
+        String appSecret = mchAppConfigContext.getMchInfo().getSecret();
+        // 转换为 JSON
+        JSONObject bizReqJSON = (JSONObject) JSONObject.toJSON(bizRQ);
+
+        bizReqJSON.remove("sign");
+        if (!sign.equalsIgnoreCase(JeepayKit.getSign(bizReqJSON, appSecret))) {
+            throw new BizException("验签失败");
+        }
+        return bizRQ;
+    }
+    protected <T extends AbstractRQ> T getRQByWithMchSignPollingBus(Class<T> cls) {
+        //获取请求RQ, and 通用验证
+        T bizRQ = getRQ(cls);
+        AbstractMchAppRQ abstractMchAppRQ = (AbstractMchAppRQ) bizRQ;
+
+        //业务校验， 包括： 验签， 商户状态是否可用， 是否支持该支付方式下单等。
+        String mchNo = abstractMchAppRQ.getMchNo();
+        String sign = bizRQ.getSign();
+
+        if (StringUtils.isAnyBlank(mchNo, sign)) {
+            throw new BizException("参数有误！");
+        }
+
+        MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfoByMchNo(mchNo);
+
+        if (mchAppConfigContext == null) {
+            throw new BizException("商户不存在");
+        }
+        MchAppConfigContext mchAppConfigContextPid = configContextQueryService.queryMchInfoAndAppInfoByMchNo(mchAppConfigContext.getMchInfo().getMchNoPid());
+
+        if (mchAppConfigContextPid == null) {
+            throw new BizException("码商不存在");
+        }
+        if (mchAppConfigContextPid.getMchInfo() == null || mchAppConfigContextPid.getMchInfo().getState() != CS.YES) {
+            throw new BizException("码商信息不存在或码商状态不可用");
         }
 
         // 验签

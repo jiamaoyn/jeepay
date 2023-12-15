@@ -227,7 +227,6 @@ public abstract class AbstractPayOrderController extends ApiController {
     protected ApiRes unifiedOrderPolling(String wayCode, UnifiedOrderRQ bizRQ) {
         return unifiedOrderPolling(wayCode, bizRQ, null);
     }
-
     /**
      * 统一下单
      **/
@@ -235,40 +234,47 @@ public abstract class AbstractPayOrderController extends ApiController {
 
         // 响应数据
         UnifiedOrderRS bizRS = null;
-
         //是否新订单模式 [  一般接口都为新订单模式，  由于QR_CASHIER支付方式，需要先 在DB插入一个新订单， 导致此处需要特殊判断下。 如果已存在则直接更新，否则为插入。  ]
         boolean isNewOrder = payOrder == null;
-
         try {
-
-            if (payOrder != null) { //当订单存在时，封装公共参数。
-
-                if (payOrder.getState() != PayOrder.STATE_INIT) {
-                    throw new BizException("订单状态异常");
-                }
-
-                payOrder.setWayCode(wayCode); // 需要将订单更新 支付方式
-                payOrder.setChannelUser(bizRQ.getChannelUserId()); //更新渠道用户信息
-                bizRQ.setMchNo(payOrder.getMchNo());
-                bizRQ.setAppId(payOrder.getAppId());
-                bizRQ.setMchOrderNo(payOrder.getMchOrderNo());
-                bizRQ.setWayCode(wayCode);
-                bizRQ.setAmount(payOrder.getAmount());
-                bizRQ.setCurrency(payOrder.getCurrency());
-                bizRQ.setClientIp(payOrder.getClientIp());
-                bizRQ.setSubject(payOrder.getSubject());
-                bizRQ.setNotifyUrl(payOrder.getNotifyUrl());
-                bizRQ.setReturnUrl(payOrder.getReturnUrl());
-                bizRQ.setChannelExtra(payOrder.getChannelExtra());
-                bizRQ.setExtParam(payOrder.getExtParam());
-                bizRQ.setDivisionMode(payOrder.getDivisionMode());
-            }
-
             String mchNo = bizRQ.getMchNo();
+            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfoByMchNo(mchNo);
 
-            // 只有新订单模式，进行校验
-            if (isNewOrder && payOrderService.count(PayOrder.gw().eq(PayOrder::getMchNo, mchNo).eq(PayOrder::getMchOrderNo, bizRQ.getMchOrderNo())) > 0) {
-                throw new BizException("商户订单[" + bizRQ.getMchOrderNo() + "]已存在");
+            if (mchAppConfigContext == null) {
+                throw new BizException("商户不存在1111");
+            }
+            MchInfo mchInfo;
+            MchApp mchApp;
+            MchPayPassage mchPayPassage;
+            if (mchAppConfigContext.getMchInfo().getMchNoPid() != null){
+                MchAppConfigContext mchAppConfigContextPid = configContextQueryService.queryMchInfoAndAppInfoByPayCode(mchAppConfigContext.getMchInfo().getMchNoPid(), wayCode);
+                //获取支付参数 (缓存数据) 和 商户信息
+                if (mchAppConfigContextPid == null) {
+                    throw new BizException("获取码商应用信息失败280");
+                } else {
+                    // 只有新订单模式，进行校验
+                    if (payOrderService.count(PayOrder.gw().eq(PayOrder::getMchNo, mchAppConfigContext.getMchInfo().getMchNoPid()).eq(PayOrder::getMchOrderNo, bizRQ.getMchOrderNo())) > 0) {
+                        throw new BizException("商户订单[" + bizRQ.getMchOrderNo() + "]已存在，请更换订单号下单");
+                    }
+                    // 根据支付方式， 查询出 该商户 可用的支付接口
+                    mchPayPassage = mchPayPassageService.findMchPayPassage(mchAppConfigContextPid.getMchNo(), mchAppConfigContextPid.getAppId(), wayCode);
+                    mchInfo = mchAppConfigContextPid.getMchInfo();
+                    mchApp = mchAppConfigContextPid.getMchApp();
+                }
+            } else {
+                mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfoByPayCode(mchNo, wayCode);
+                //获取支付参数 (缓存数据) 和 商户信息
+                if (mchAppConfigContext == null) {
+                    throw new BizException("获取商户应用信息失败281");
+                } else {
+                    // 只有新订单模式，进行校验
+                    if (payOrderService.count(PayOrder.gw().eq(PayOrder::getMchNo, mchNo).eq(PayOrder::getMchOrderNo, bizRQ.getMchOrderNo())) > 0) {
+                        throw new BizException("商户订单[" + bizRQ.getMchOrderNo() + "]已存在，请更换订单号下单");
+                    }
+                    mchPayPassage = mchPayPassageService.findMchPayPassage(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), wayCode);
+                    mchInfo = mchAppConfigContext.getMchInfo();
+                    mchApp = mchAppConfigContext.getMchApp();
+                }
             }
 
             if (StringUtils.isNotEmpty(bizRQ.getNotifyUrl()) && !StringKit.isAvailableUrl(bizRQ.getNotifyUrl())) {
@@ -277,16 +283,6 @@ public abstract class AbstractPayOrderController extends ApiController {
             if (StringUtils.isNotEmpty(bizRQ.getReturnUrl()) && !StringKit.isAvailableUrl(bizRQ.getReturnUrl())) {
                 throw new BizException("同步通知地址协议仅支持http:// 或 https:// !");
             }
-
-            //获取支付参数 (缓存数据) 和 商户信息
-            MchAppConfigContext mchAppConfigContext = configContextQueryService.queryMchInfoAndAppInfoByPayCode(mchNo, wayCode);
-
-            if (mchAppConfigContext == null) {
-                throw new BizException("获取商户应用信息失败280");
-            }
-
-            MchInfo mchInfo = mchAppConfigContext.getMchInfo();
-            MchApp mchApp = mchAppConfigContext.getMchApp();
 
             //收银台支付并且只有新订单需要走这里，  收银台二次下单的wayCode应该为实际支付方式。
             if (isNewOrder && CS.PAY_WAY_CODE.QR_CASHIER.equals(wayCode)) {
@@ -313,12 +309,10 @@ public abstract class AbstractPayOrderController extends ApiController {
                 return packageApiResByPayOrder(bizRQ, qrCashierOrderRS, payOrder);
             }
 
-            // 根据支付方式， 查询出 该商户 可用的支付接口
-            MchPayPassage mchPayPassage = mchPayPassageService.findMchPayPassage(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), wayCode);
+
             if (mchPayPassage == null) {
                 throw new BizException("商户应用不支持该支付方式");
             }
-
             //获取支付接口
             IPaymentService paymentService = checkMchWayCodeAndGetService(mchAppConfigContext, mchPayPassage);
             String ifCode = paymentService.getIfCode();
@@ -386,6 +380,9 @@ public abstract class AbstractPayOrderController extends ApiController {
         PayOrder payOrder = new PayOrder();
         payOrder.setPayOrderId(SeqKit.genPayOrderId()); //生成订单ID
         payOrder.setMchNo(mchInfo.getMchNo()); //商户号
+        if (!rq.getMchNo().equals(mchInfo.getMchNo())) {
+            payOrder.setBusNo(rq.getMchNo());
+        }
         payOrder.setIsvNo(mchInfo.getIsvNo()); //服务商号
         payOrder.setMchName(mchInfo.getMchShortName()); //商户名称（简称）
         payOrder.setMchType(mchInfo.getType()); //商户类型
