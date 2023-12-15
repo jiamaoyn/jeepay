@@ -34,7 +34,6 @@ public class CS {
      */
     public static final byte MCH_TYPE_NORMAL = 1;
     public static final byte MCH_TYPE_ISVSUB = 2;
-    public static final byte MCH_TYPE_BUSINESS = 3;
     /**
      * 性别 1- 男， 2-女
      */

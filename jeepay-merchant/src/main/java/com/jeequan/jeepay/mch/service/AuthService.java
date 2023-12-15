@@ -97,10 +97,7 @@ public class AuthService {
         if (mchInfo != null) {
             // 判断当前商户状态是否可用
             if (mchInfo.getState() == CS.NO) {
-                throw new BizException("当前码商状态不可用！");
-            }
-            if (mchInfo.getType() != CS.MCH_TYPE_NORMAL) {
-                throw new BizException("非码商账户！");
+                throw new BizException("当前商户状态不可用！");
             }
         }
         // 放置权限集合

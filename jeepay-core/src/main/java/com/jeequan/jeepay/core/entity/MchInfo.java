@@ -26,7 +26,6 @@ public class MchInfo extends BaseModel implements Serializable {
 
     public static final byte TYPE_NORMAL = 1; //商户类型： 1-普通商户
     public static final byte TYPE_ISVSUB = 2; //商户类型： 2-特约商户
-    public static final byte TYPE_BUSINESS = 3; //商户类型： 3-商家
     private static final long serialVersionUID = 1L;
     /**
      * 商户号
@@ -47,18 +46,13 @@ public class MchInfo extends BaseModel implements Serializable {
     /**
      * 类型: 1-普通商户, 2-特约商户(服务商模式)
      */
-    @ApiModelProperty(value = "类型: 1-普通商户, 2-特约商户(服务商模式)，3-商家")
+    @ApiModelProperty(value = "类型: 1-普通商户, 2-特约商户(服务商模式)")
     private Byte type;
     /**
      * 服务商号
      */
     @ApiModelProperty(value = "服务商号")
     private String isvNo;
-    /**
-     * 商家上级商户号
-     */
-    @ApiModelProperty(value = "商家上级商户号")
-    private String mchNoPid;
     /**
      * 联系人姓名
      */
