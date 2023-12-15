@@ -45,13 +45,7 @@ public class PayMchNotifyService {
                 log.info("当前已存在通知消息， 不再发送。");
                 return;
             }
-            String appSecret;
-            if (dbPayOrder.getBusNo() == null) {
-                //商户app私钥
-                appSecret = configContextQueryService.queryMchInfo(dbPayOrder.getMchNo()).getSecret();
-            } else {
-                appSecret = configContextQueryService.queryMchInfo(dbPayOrder.getBusNo()).getSecret();
-            }
+            String appSecret = configContextQueryService.queryMchInfo(dbPayOrder.getMchNo()).getSecret();
             // 封装通知url
             String notifyUrl = createNotifyUrl(dbPayOrder, appSecret);
             mchNotifyRecord = new MchNotifyRecord();
