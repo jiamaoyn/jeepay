@@ -23,12 +23,11 @@ public class TelegramQueryOrderController extends AbstractCtrl {
     @RequestMapping(value = "/orderNch/{mchOrderNo}/{channelOrderNo}")
     private ApiRes<Object> toPayForm(@PathVariable("mchOrderNo") String mchOrderNo, @PathVariable("channelOrderNo") String channelOrderNo) {
         PayOrder payOrder = payOrderService.queryMchOrderNo(mchOrderNo);
-        System.out.println(payOrder.getWayCode().equals("ALI_BILL"));
         if (payOrder.getWayCode().equals("ALI_BILL")){
             payOrder.setChannelOrderNo(channelOrderNo);
             AccountLogItemResult accountLogItemResult = channelOrderReissueService.processPayOrderBillTelegramBot(payOrder);
             return ApiRes.ok(accountLogItemResult);
         }
-        return ApiRes.ok("不是商家账单，无法回调");
+        return ApiRes.ok("订单号不匹配或已支付成功");
     }
 }

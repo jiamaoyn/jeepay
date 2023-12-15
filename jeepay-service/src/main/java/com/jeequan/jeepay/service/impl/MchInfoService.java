@@ -1,7 +1,5 @@
 package com.jeequan.jeepay.service.impl;
 
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -20,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>
@@ -84,20 +81,6 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
         sysUser.setState(mchInfo.getState());
         sysUserService.addSysUser(sysUser, CS.SYS_TYPE.MCH);
 
-        // 插入商户默认应用
-        MchApp mchApp = new MchApp();
-        mchApp.setAppId(IdUtil.objectId());
-        mchApp.setMchNo(mchInfo.getMchNo());
-        mchApp.setAppName("默认应用");
-        mchApp.setAppSecret(RandomUtil.randomString(128));
-        mchApp.setState(CS.YES);
-        mchApp.setCreatedBy(sysUser.getRealname());
-        mchApp.setCreatedUid(sysUser.getSysUserId());
-        saveResult = mchAppService.save(mchApp);
-        if (!saveResult) {
-            throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
-        }
-
         // 存入商户默认用户ID
         MchInfo updateRecord = new MchInfo();
         updateRecord.setMchNo(mchInfo.getMchNo());
@@ -106,7 +89,6 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
         if (!saveResult) {
             throw new BizException(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
         }
-
     }
 
     /**
