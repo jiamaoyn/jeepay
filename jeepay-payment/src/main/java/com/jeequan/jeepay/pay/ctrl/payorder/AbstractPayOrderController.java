@@ -370,7 +370,7 @@ public abstract class AbstractPayOrderController extends ApiController {
 
 
         } catch (Exception e) {
-            log.error("系统异常：{}", e);
+            log.error("系统异常", e);
             return ApiRes.customFail("系统异常");
         }
     }
@@ -380,9 +380,6 @@ public abstract class AbstractPayOrderController extends ApiController {
         PayOrder payOrder = new PayOrder();
         payOrder.setPayOrderId(SeqKit.genPayOrderId()); //生成订单ID
         payOrder.setMchNo(mchInfo.getMchNo()); //商户号
-        if (!rq.getMchNo().equals(mchInfo.getMchNo())) {
-            payOrder.setBusNo(rq.getMchNo());
-        }
         payOrder.setIsvNo(mchInfo.getIsvNo()); //服务商号
         payOrder.setMchName(mchInfo.getMchShortName()); //商户名称（简称）
         payOrder.setMchType(mchInfo.getType()); //商户类型
