@@ -26,6 +26,7 @@ public class MchInfo extends BaseModel implements Serializable {
 
     public static final byte TYPE_NORMAL = 1; //商户类型： 1-普通商户
     public static final byte TYPE_ISVSUB = 2; //商户类型： 2-特约商户
+    public static final byte TYPE_BUSINESS = 3; //商户类型： 3-商家
     private static final long serialVersionUID = 1L;
     /**
      * 商户号

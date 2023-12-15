@@ -70,7 +70,7 @@ public class BusInfoController extends CommonCtrl {
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ApiPageRes<MchInfo> list() {
         MchInfo mchInfo = getObject(MchInfo.class);
-        mchInfo.setMchNoPid("-1");
+        mchInfo.setType((byte) 3);
         IPage<MchInfo> pages = mchInfoService.selectPage(getIPage(), mchInfo);
         return ApiPageRes.pages(pages);
     }
@@ -96,6 +96,7 @@ public class BusInfoController extends CommonCtrl {
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ApiRes add() {
         MchInfo mchInfo = getObject(MchInfo.class);
+        mchInfo.setType((byte) 3);
         // 获取传入的商户登录名
         String loginUserName = getValStringRequired("loginUserName");
         mchInfo.setMchNo("B" + DateUtil.currentSeconds());
@@ -211,7 +212,7 @@ public class BusInfoController extends CommonCtrl {
     @RequestMapping(value = "/{mchNo}", method = RequestMethod.GET)
     public ApiRes detail(@PathVariable("mchNo") String mchNo) {
         MchInfo mchInfo = mchInfoService.selectById(mchNo);
-        if (mchInfo == null || mchInfo.getMchNoPid() == null) {
+        if (mchInfo == null || mchInfo.getType() != (byte)3) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
 

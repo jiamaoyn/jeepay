@@ -34,7 +34,6 @@
     <module>jeepay-alibill</module>
       <module>jeepay-telegram</module>
       <module>test</module>
-      <module>jeepay-business</module>
   </modules>
 
   <!-- 配置属性声明, 支持自定义参数 -->

@@ -37,7 +37,7 @@ import java.util.Arrays;
 @ComponentScan(basePackages = "com.jeequan.jeepay.*")   //由于MainApplication没有在项目根目录， 需要配置basePackages属性使得成功扫描所有Spring组件；
 @ComponentScan(basePackages = "com.jeequan.alibill.*")   //由于MainApplication没有在项目根目录， 需要配置basePackages属性使得成功扫描所有Spring组件；
 @Configuration
-public class JeepayALiBillApplication {
+public class JeepayTaskALiBillApplication {
 
     @Autowired
     private SystemYmlConfig systemYmlConfig;
@@ -48,7 +48,7 @@ public class JeepayALiBillApplication {
     public static void main(String[] args) {
 
         //启动项目
-        SpringApplication.run(JeepayALiBillApplication.class, args);
+        SpringApplication.run(JeepayTaskALiBillApplication.class, args);
 
     }
 

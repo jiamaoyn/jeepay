@@ -49,7 +49,6 @@
         <if test="state != null"> AND state = #{state} </if>
         <if test="refundState != null"> AND refund_state = #{refundState} </if>
         <if test="mchNo != null"> AND mch_no = #{mchNo} </if>
-        <if test="busNo != null"> AND bus_no = #{busNo} </if>
         <if test="createTimeStart != null"> AND created_at &gt;= #{createTimeStart} </if>
         <if test="createTimeEnd != null"> AND created_at &lt;= #{createTimeEnd} </if>
         ;
@@ -62,7 +61,6 @@
         <if test="state != null"> AND state = #{state} </if>
         <if test="refundState != null"> AND refund_state = #{refundState} </if>
         <if test="mchNo != null"> AND mch_no = #{mchNo} </if>
-        <if test="busNo != null"> AND bus_no = #{busNo} </if>
         <if test="successTimeStart != null"> AND success_time &gt;= #{successTimeStart} </if>
         <if test="successTimeEnd != null"> AND success_time &lt;= #{successTimeEnd} </if>
         ;
@@ -75,7 +73,6 @@
         <if test="state != null"> AND state = #{state} </if>
         <if test="refundState != null"> AND refund_state = #{refundState} </if>
         <if test="mchNo != null"> AND mch_no = #{mchNo} </if>
-        <if test="busNo != null"> AND bus_no = #{busNo} </if>
         <if test="createTimeStart != null"> AND created_at &gt;= #{createTimeStart} </if>
         <if test="createTimeEnd != null"> AND created_at &lt;= #{createTimeEnd} </if>
         GROUP BY way_code
@@ -89,7 +86,6 @@
         WHERE  1=1
         AND state in (2,5)
         <if test="mchNo != null"> AND mch_no = #{mchNo} </if>
-        <if test="busNo != null"> AND bus_no = #{busNo} </if>
         <if test="createTimeStart != null"> AND created_at &gt;= #{createTimeStart} </if>
         <if test="createTimeEnd != null"> AND created_at &lt;= #{createTimeEnd} </if>
         GROUP BY groupDate
@@ -103,7 +99,6 @@
         WHERE  1=1
         AND state in (2,5)
         <if test="mchNo != null"> AND mch_no = #{mchNo} </if>
-        <if test="busNo != null"> AND bus_no = #{busNo} </if>
         <if test="appId != null"> AND app_id = #{appId} </if>
         <if test="createTimeStart != null"> AND created_at &gt;= #{createTimeStart} </if>
         <if test="createTimeEnd != null"> AND created_at &lt;= #{createTimeEnd} </if>
@@ -115,7 +110,6 @@
         FROM t_pay_order
         WHERE  1=1
         <if test="mchNo != null"> AND mch_no = #{mchNo} </if>
-        <if test="busNo != null"> AND bus_no = #{busNo} </if>
         <if test="appId != null"> AND app_id = #{appId} </if>
         <if test="createTimeStart != null"> AND created_at &gt;= #{createTimeStart} </if>
         <if test="createTimeEnd != null"> AND created_at &lt;= #{createTimeEnd} </if>
@@ -126,7 +120,6 @@
         FROM t_pay_order
         WHERE  1=1
         <if test="mchNo != null"> AND mch_no = #{mchNo} </if>
-        <if test="busNo != null"> AND bus_no = #{busNo} </if>
         <if test="createTimeStart != null"> AND created_at &gt;= #{createTimeStart} </if>
         <if test="createTimeEnd != null"> AND created_at &lt;= #{createTimeEnd} </if>
         GROUP BY groupDate

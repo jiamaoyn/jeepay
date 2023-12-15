@@ -179,15 +179,6 @@ public class MchInfoService extends ServiceImpl<MchInfoMapper, MchInfo> {
         if (mchInfo.getType() != null) {
             wrapper.eq(MchInfo::getType, mchInfo.getType());
         }
-        if (mchInfo.getMchNoPid() != null) {
-            if (mchInfo.getMchNoPid().equals("-1")){
-                wrapper.isNotNull(MchInfo::getMchNoPid);
-            } else {
-                wrapper.eq(MchInfo::getMchNoPid, mchInfo.getMchNoPid());
-            }
-        } else {
-            wrapper.isNull(MchInfo::getMchNoPid);
-        }
         if (mchInfo.getState() != null) {
             wrapper.eq(MchInfo::getState, mchInfo.getState());
         }

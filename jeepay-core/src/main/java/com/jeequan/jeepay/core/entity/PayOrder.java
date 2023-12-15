@@ -59,11 +59,6 @@ public class PayOrder extends BaseModel implements Serializable {
     @ApiModelProperty(value = "服务商号")
     private String isvNo;
     /**
-     * 商家上级商户号
-     */
-    @ApiModelProperty(value = "商家上级商户号")
-    private String busNo;
-    /**
      * 应用ID
      */
     @ApiModelProperty(value = "应用ID")
