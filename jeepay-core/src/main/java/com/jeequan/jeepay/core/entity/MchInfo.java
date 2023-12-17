@@ -79,6 +79,11 @@ public class MchInfo extends BaseModel implements Serializable {
     @ApiModelProperty(value = "商户备注")
     private String remark;
     /**
+     * 谷歌key
+     */
+    @ApiModelProperty(value = "谷歌key")
+    private String googleKey;
+    /**
      * 商户备注
      */
     @ApiModelProperty(value = "商户密钥")

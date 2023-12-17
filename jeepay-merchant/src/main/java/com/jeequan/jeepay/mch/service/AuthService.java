@@ -1,6 +1,8 @@
 package com.jeequan.jeepay.mch.service;
 
 import cn.hutool.core.util.IdUtil;
+import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
+import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.cache.ITokenService;
 import com.jeequan.jeepay.core.cache.RedisUtil;
 import com.jeequan.jeepay.core.constants.CS;
@@ -11,6 +13,7 @@ import com.jeequan.jeepay.core.exception.JeepayAuthenticationException;
 import com.jeequan.jeepay.core.jwt.JWTPayload;
 import com.jeequan.jeepay.core.jwt.JWTUtils;
 import com.jeequan.jeepay.core.model.security.JeeUserDetails;
+import com.jeequan.jeepay.core.utils.GoogleAuthenticator;
 import com.jeequan.jeepay.mch.config.SystemYmlConfig;
 import com.jeequan.jeepay.service.impl.MchInfoService;
 import com.jeequan.jeepay.service.impl.SysRoleEntRelaService;
@@ -40,7 +43,8 @@ public class AuthService {
 
     @Resource
     private AuthenticationManager authenticationManager;
-
+    @Autowired
+    private IMQSender mqSender;
     @Autowired
     private SysUserService sysUserService;
     @Autowired
@@ -57,7 +61,7 @@ public class AuthService {
     /**
      * 认证
      **/
-    public String auth(String username, String password, String clientIp) {
+    public String auth(String username, String password, String clientIp, long googleCode) {
 
         //1. 生成spring-security usernamePassword类型对象
         UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, password);
@@ -72,6 +76,7 @@ public class AuthService {
         } catch (JeepayAuthenticationException jex) {
             throw jex.getBizException() == null ? new BizException(jex.getMessage()) : jex.getBizException();
         } catch (BadCredentialsException e) {
+            mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, null, null,"码商登陆账号："+username+"\nip："+clientIp+"\n登陆失败----用户名/密码错误！！"));
             throw new BizException("用户名/密码错误！");
         } catch (AuthenticationException e) {
             log.error("AuthenticationException:", e);
@@ -94,6 +99,15 @@ public class AuthService {
             // 判断当前商户状态是否可用
             if (mchInfo.getState() == CS.NO) {
                 throw new BizException("当前商户状态不可用！");
+            }
+            if (mchInfo.getGoogleKey() != null) {
+                GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
+                log.info("googleCode:{}----getGoogleKey:{}----",googleCode,mchInfo.getGoogleKey());
+                boolean checked = googleAuthenticator.checkCode(mchInfo.getGoogleKey(), googleCode, System.currentTimeMillis());
+                if (!checked) {
+                    mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, null, null,"码商登陆账号："+username+"\nip："+clientIp+"\n登陆失败----谷歌验证码不正确！！"));
+                    throw new BizException("谷歌验证码不正确！");
+                }
             }
         }
         // 放置权限集合

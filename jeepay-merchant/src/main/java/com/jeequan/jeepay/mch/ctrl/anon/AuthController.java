@@ -5,6 +5,8 @@ import cn.hutool.captcha.LineCaptcha;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.lang.UUID;
 import com.alibaba.fastjson.JSONObject;
+import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
+import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.cache.RedisUtil;
 import com.jeequan.jeepay.core.constants.CS;
@@ -29,7 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/anon/auth")
 public class AuthController extends CommonCtrl {
-
+    @Autowired
+    private IMQSender mqSender;
     @Autowired
     private AuthService authService;
     /**
@@ -49,18 +52,21 @@ public class AuthController extends CommonCtrl {
         String account = Base64.decodeStr(getValStringRequired("ia"));  //用户名 i account, 已做base64处理
         String ipassport = Base64.decodeStr(getValStringRequired("ip"));    //密码 i passport,  已做base64处理
         String vercode = Base64.decodeStr(getValStringRequired("vc"));    //验证码 vercode,  已做base64处理
+        long googleCode = Long.parseLong(Base64.decodeStr(getValStringRequired("gc")));    //验证码 vercode,  已做base64处理
         String vercodeToken = Base64.decodeStr(getValStringRequired("vt"));    //验证码token, vercode token ,  已做base64处理
 
         String cacheCode = RedisUtil.getString(CS.getCacheKeyImgCode(vercodeToken));
         if (StringUtils.isEmpty(cacheCode) || !cacheCode.equalsIgnoreCase(vercode)) {
+            mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, null, null,"码商登陆账号："+account+"\nip："+requestKitBean.getClientIp()+"\n登陆失败----验证码有误！"));
             throw new BizException("验证码有误！");
         }
 
         // 返回前端 accessToken
-        String accessToken = authService.auth(account, ipassport, requestKitBean.getClientIp());
+        String accessToken = authService.auth(account, ipassport, requestKitBean.getClientIp(), googleCode);
 
         // 删除图形验证码缓存数据
         RedisUtil.del(CS.getCacheKeyImgCode(vercodeToken));
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, null, null,"码商登陆账号："+account+"\nip："+requestKitBean.getClientIp()+"\n登陆成功！"));
 
         return ApiRes.ok4newJson(CS.ACCESS_TOKEN_NAME, accessToken);
     }

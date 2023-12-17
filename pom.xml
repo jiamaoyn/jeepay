@@ -33,7 +33,6 @@
     <module>jeepay-components</module>
     <module>jeepay-alibill</module>
       <module>jeepay-telegram</module>
-      <module>test</module>
   </modules>
 
   <!-- 配置属性声明, 支持自定义参数 -->
@@ -64,7 +63,6 @@
   <!-- 依赖包管理， 按需添加 -->
   <dependencyManagement>
     <dependencies>
-
         <!-- 依赖 [ core ]包。  -->
         <dependency>
             <groupId>com.jeequan</groupId>

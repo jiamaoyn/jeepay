@@ -24,6 +24,7 @@ public class ResetIsvMchAppInfoConfigMQ extends AbstractMQ {
     public static final byte RESET_TYPE_ISV_INFO = 1;
     public static final byte RESET_TYPE_MCH_INFO = 2;
     public static final byte RESET_TYPE_MCH_APP = 3;
+    public static final byte RESET_TYPE_TELEGRAM_APP = 4;
     /**
      * 内置msg 消息体定义
      **/
@@ -33,7 +34,10 @@ public class ResetIsvMchAppInfoConfigMQ extends AbstractMQ {
      * 【！重要配置项！】 构造MQModel , 一般用于发送MQ时
      **/
     public static ResetIsvMchAppInfoConfigMQ build(Byte resetType, String isvNo, String mchNo, String appId) {
-        return new ResetIsvMchAppInfoConfigMQ(new MsgPayload(resetType, isvNo, mchNo, appId));
+        return new ResetIsvMchAppInfoConfigMQ(new MsgPayload(resetType, isvNo, mchNo, appId, null));
+    }
+    public static ResetIsvMchAppInfoConfigMQ build(Byte resetType, String isvNo, String mchNo, String appId, String msg) {
+        return new ResetIsvMchAppInfoConfigMQ(new MsgPayload(resetType, isvNo, mchNo, appId, msg));
     }
 
     /**
@@ -94,6 +98,10 @@ public class ResetIsvMchAppInfoConfigMQ extends AbstractMQ {
          * appId
          **/
         private String appId;
+        /**
+         * msg
+         **/
+        private String msg;
 
     }
 

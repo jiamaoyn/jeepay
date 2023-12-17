@@ -19,7 +19,6 @@ import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.DBApplicationConfig;
 import com.jeequan.jeepay.core.model.params.NormalMchParams;
 import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
-import com.jeequan.jeepay.core.utils.StringKit;
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.mch.model.AlipayClientWrapper;
 import com.jeequan.jeepay.service.impl.MchAppService;
@@ -66,9 +65,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     private IMQSender mqSender;
 
     /**
-     * @Author: ZhuXiao
-     * @Description: 查询商户支付接口配置列表
-     * @Date: 10:51 2021/5/13
+     * 查询商户支付接口配置列表
      */
     @ApiOperation("查询应用支付接口配置列表")
     @ApiImplicitParams({
@@ -90,9 +87,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     }
 
     /**
-     * @Author: ZhuXiao
-     * @Description: 根据 商户号、接口类型 获取商户参数配置
-     * @Date: 10:54 2021/5/13
+     * 根据 商户号、接口类型 获取商户参数配置
      */
     @ApiOperation("根据应用ID、接口类型 获取应用参数配置")
     @ApiImplicitParams({
@@ -127,9 +122,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
     }
 
     /**
-     * @Author: ZhuXiao
-     * @Description: 更新商户支付参数
-     * @Date: 10:56 2021/5/13
+     * 更新商户支付参数
      */
     @ApiOperation("更新商户支付参数")
     @ApiImplicitParams({
@@ -167,10 +160,8 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
         PayInterfaceConfig dbRecoed = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_MCH_APP, infoId, ifCode);
         //若配置存在，为saveOrUpdate添加ID，第一次配置添加创建者
         if (dbRecoed != null) {
-            payInterfaceConfig.setId(dbRecoed.getId());
-
-            // 合并支付参数
-            payInterfaceConfig.setIfParams(StringKit.marge(dbRecoed.getIfParams(), payInterfaceConfig.getIfParams()));
+            mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), infoId,"正在修改系统应用--已被禁止\n系统应用AppId："+infoId));
+            return ApiRes.fail(ApiCodeEnum.SYS_PROHIBIT_ERROR);
         } else {
             payInterfaceConfig.setCreatedUid(userId);
             payInterfaceConfig.setCreatedBy(realName);
@@ -191,14 +182,17 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
                 request.setBizModel(model);
                 AlipayDataBillAccountlogQueryResponse resp = alipayClientWrapper.execute(request);
                 if(!resp.isSuccess()){
+                    mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), infoId,"创建支付参数--密钥配置错误\n系统应用AppId："+infoId));
                     return ApiRes.customFail(resp.getMsg()+resp.getSubMsg());
                 }
             }
         }
         boolean result = payInterfaceConfigService.saveOrUpdate(payInterfaceConfig);
         if (!result) {
+            mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), infoId,"创建支付参数--系统错误创建失败\n系统应用AppId："+infoId));
             throw new BizException("配置失败");
         }
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), infoId,"创建支付参数--创建成功\n系统应用AppId："+infoId));
         mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, getCurrentMchNo(), infoId));
 
         return ApiRes.ok();
