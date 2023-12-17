@@ -20,16 +20,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * <p><b>Title: </b>JwtAuthenticationTokenFilter.java
- * <p><b>Description: </b>
  * spring security框架中验证组件的前置过滤器；
  * 用于验证token有效期，并放置ContextAuthentication信息,为后续spring security框架验证提供数据；
- * 避免使用@Component等bean自动装配注解：@Component会将filter被spring实例化为web容器的全局filter，导致重复过滤。
- *
- * @version V1.0
- * @modify terrfly
- * @site https://www.jeequan.com
- * @date 2021-04-27 15:50
+ * 避免使用@Component等bean自动装配注解：@Component会将filter被spring实例化为web容器的全局filter，导致重复过滤
  * <p>
  */
 public class JeeAuthenticationTokenFilter extends OncePerRequestFilter {
@@ -71,7 +64,7 @@ public class JeeAuthenticationTokenFilter extends OncePerRequestFilter {
 
         //根据用户名查找数据库
         JeeUserDetails jwtBaseUser = RedisUtil.getObject(jwtPayload.getCacheKey(), JeeUserDetails.class);
-        if (jwtBaseUser == null) {
+        if (jwtBaseUser == null || !jwtBaseUser.getLoginIp().equals(getClientIp(request))) {
             RedisUtil.del(jwtPayload.getCacheKey());
             return null; //数据库查询失败，删除redis
         }
@@ -80,6 +73,28 @@ public class JeeAuthenticationTokenFilter extends OncePerRequestFilter {
         RedisUtil.expire(jwtPayload.getCacheKey(), CS.TOKEN_TIME);
 
         return jwtBaseUser;
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        String ipAddress;
+        ipAddress = request.getHeader("x-forwarded-for");
+        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("Proxy-Client-IP");
+        }
+        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getRemoteAddr();
+        }
+
+        // 对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
+        if (ipAddress != null && ipAddress.length() > 15) {
+            if (ipAddress.indexOf(",") > 0) {
+                ipAddress = ipAddress.substring(0, ipAddress.indexOf(","));
+            }
+        }
+        return ipAddress;
     }
 
 
