@@ -127,7 +127,7 @@ public class MchPayPassageConfigController extends CommonCtrl {
 
         String mchNo = getCurrentUser().getSysUser().getBelongInfoId();
         MchInfo mchInfo = mchInfoService.getById(mchNo);
-        if (mchInfo == null || mchInfo.getState() != CS.YES) {
+        if (mchInfo == null) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
 
