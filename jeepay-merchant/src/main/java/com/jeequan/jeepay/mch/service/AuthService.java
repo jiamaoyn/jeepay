@@ -33,10 +33,6 @@ import java.util.*;
 
 /**
  * 认证Service
- *
- * @modify zhuxiao
- * @site https://www.jeequan.com
- * @date 2021-04-27 15:50
  */
 @Slf4j
 @Service
@@ -61,7 +57,7 @@ public class AuthService {
     /**
      * 认证
      **/
-    public String auth(String username, String password) {
+    public String auth(String username, String password, String clientIp) {
 
         //1. 生成spring-security usernamePassword类型对象
         UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken(username, password);
@@ -82,7 +78,7 @@ public class AuthService {
             throw new BizException("认证服务出现异常， 请重试或联系系统管理员！");
         }
         JeeUserDetails jeeUserDetails = (JeeUserDetails) authentication.getPrincipal();
-
+        jeeUserDetails.setLoginIp(clientIp);
         //验证通过后 再查询用户角色和权限信息集合
 
         SysUser sysUser = jeeUserDetails.getSysUser();

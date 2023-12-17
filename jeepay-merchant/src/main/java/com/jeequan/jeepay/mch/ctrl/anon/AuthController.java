@@ -32,7 +32,6 @@ public class AuthController extends CommonCtrl {
 
     @Autowired
     private AuthService authService;
-
     /**
      * 用户信息认证 获取iToken
      **/
@@ -58,7 +57,7 @@ public class AuthController extends CommonCtrl {
         }
 
         // 返回前端 accessToken
-        String accessToken = authService.auth(account, ipassport);
+        String accessToken = authService.auth(account, ipassport, requestKitBean.getClientIp());
 
         // 删除图形验证码缓存数据
         RedisUtil.del(CS.getCacheKeyImgCode(vercodeToken));
