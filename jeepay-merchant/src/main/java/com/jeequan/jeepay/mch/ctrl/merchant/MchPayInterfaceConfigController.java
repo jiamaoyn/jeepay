@@ -160,7 +160,7 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
         PayInterfaceConfig dbRecoed = payInterfaceConfigService.getByInfoIdAndIfCode(CS.INFO_TYPE_MCH_APP, infoId, ifCode);
         //若配置存在，为saveOrUpdate添加ID，第一次配置添加创建者
         if (dbRecoed != null) {
-            mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), infoId,"正在修改系统应用--已被禁止\n系统应用AppId："+infoId));
+            mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), infoId,"正在修改系统应用--已被禁止\n系统应用："+mchApp.getAppName()));
             return ApiRes.fail(ApiCodeEnum.SYS_PROHIBIT_ERROR);
         } else {
             payInterfaceConfig.setCreatedUid(userId);
@@ -182,17 +182,17 @@ public class MchPayInterfaceConfigController extends CommonCtrl {
                 request.setBizModel(model);
                 AlipayDataBillAccountlogQueryResponse resp = alipayClientWrapper.execute(request);
                 if(!resp.isSuccess()){
-                    mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), infoId,"创建支付参数--密钥配置错误\n系统应用AppId："+infoId));
+                    mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), infoId,"创建支付参数--密钥配置错误\n系统应用："+mchApp.getAppName()));
                     return ApiRes.customFail(resp.getMsg()+resp.getSubMsg());
                 }
             }
         }
         boolean result = payInterfaceConfigService.saveOrUpdate(payInterfaceConfig);
         if (!result) {
-            mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), infoId,"创建支付参数--系统错误创建失败\n系统应用AppId："+infoId));
+            mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), infoId,"创建支付参数--系统错误创建失败\n系统应用："+mchApp.getAppName()));
             throw new BizException("配置失败");
         }
-        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), infoId,"创建支付参数--创建成功\n系统应用AppId："+infoId));
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), infoId,"创建支付参数--创建成功\n系统应用："+mchApp.getAppName()));
         mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, getCurrentMchNo(), infoId));
 
         return ApiRes.ok();

@@ -75,7 +75,7 @@ public class MchAppController extends CommonCtrl {
         if (!result) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_CREATE);
         }
-        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), null,"手动创建应用成功\n应用AppId："+mchApp.getAppId()));
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), null,"手动创建应用成功\n应用："+mchApp.getAppName()));
         stringRedisTemplate.delete(mchApp.getMchNo());
         return ApiRes.ok();
     }
@@ -122,7 +122,7 @@ public class MchAppController extends CommonCtrl {
         if (!result) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE);
         }
-        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), null,"手动修改应用成功\n应用AppId："+mchApp.getAppId()));
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), null,"手动修改应用成功\n应用："+mchApp.getAppName()));
         stringRedisTemplate.delete(mchApp.getMchNo());
         // 推送修改应用消息
         mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, mchApp.getMchNo(), appId));
@@ -146,7 +146,7 @@ public class MchAppController extends CommonCtrl {
 
         mchAppService.removeByAppId(appId);
         stringRedisTemplate.delete(mchApp.getMchNo());
-        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), null,"手动删除应用成功\n应用AppId："+mchApp.getAppId()));
+        mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_TELEGRAM_APP, null, getCurrentMchNo(), null,"手动删除应用成功\n应用："+mchApp.getAppName()));
         // 推送mq到目前节点进行更新数据
         mqSender.send(ResetIsvMchAppInfoConfigMQ.build(ResetIsvMchAppInfoConfigMQ.RESET_TYPE_MCH_APP, null, mchApp.getMchNo(), appId));
         return ApiRes.ok();
