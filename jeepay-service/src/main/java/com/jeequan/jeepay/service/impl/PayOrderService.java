@@ -89,7 +89,7 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         updateRecord.setSuccessTime(new Date());
 
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
-                .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_ING));
+                .eq(PayOrder::getPayOrderId, payOrderId));
     }
     public boolean updateIng2SuccessDiy(String payOrderId) {
 
@@ -99,7 +99,7 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
         updateRecord.setSuccessTime(new Date());
 
         return update(updateRecord, new LambdaUpdateWrapper<PayOrder>()
-                .eq(PayOrder::getPayOrderId, payOrderId).eq(PayOrder::getState, PayOrder.STATE_ING));
+                .eq(PayOrder::getPayOrderId, payOrderId));
     }
 
     /**
