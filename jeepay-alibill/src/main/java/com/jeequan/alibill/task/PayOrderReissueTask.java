@@ -37,31 +37,13 @@ public class PayOrderReissueTask {
     @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
     public void start_bill() {
         Date startDate = DateUtil.offsetMinute(new Date(), -0);
-        Date endDate = DateUtil.offsetMinute(new Date(), -1);
-        startBillDateExecutorService(startDate, endDate);
-    }
-    @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
-    public void start_bill11() {
-        Date startDate = DateUtil.offsetMinute(new Date(), -1);
         Date endDate = DateUtil.offsetMinute(new Date(), -2);
         startBillDateExecutorService(startDate, endDate);
     }
-    @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
-    public void start_bill2_3() {
+    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
+    public void start_bill11() {
         Date startDate = DateUtil.offsetMinute(new Date(), -2);
-        Date endDate = DateUtil.offsetMinute(new Date(), -3);
-        startBillDateExecutorService(startDate, endDate);
-    }
-    @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
-    public void start_bill3_4() {
-        Date startDate = DateUtil.offsetMinute(new Date(), -3);
-        Date endDate = DateUtil.offsetMinute(new Date(), -4);
-        startBillDateExecutorService(startDate, endDate);
-    }
-    @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
-    public void start_bill0_4() {
-        Date startDate = DateUtil.offsetMinute(new Date(), -0);
-        Date endDate = DateUtil.offsetMinute(new Date(), -4);
+        Date endDate = DateUtil.offsetMinute(new Date(), -5);
         startBillDateExecutorService(startDate, endDate);
     }
     @Scheduled(cron = "*/4 * * * * ?") // 每2秒钟执行一次
@@ -76,12 +58,6 @@ public class PayOrderReissueTask {
         Date endDate = DateUtil.offsetMinute(new Date(), -20);
         startBillDateExecutorService(startDate, endDate);
     }
-    @Scheduled(cron = "* */9 * * * ?") // 每2秒钟执行一次
-    public void start_bill4() {
-        Date startDate = DateUtil.offsetMinute(new Date(), -19);
-        Date endDate = DateUtil.offsetMinute(new Date(), -50);
-        startBillDateExecutorService(startDate, endDate);
-    }
     @Scheduled(cron = "* */60 * * * ?") // 每2秒钟执行一次
     public void start_day1() {
         Date startDate = DateUtil.offsetMinute(new Date(), -0);
@@ -90,27 +66,11 @@ public class PayOrderReissueTask {
     }
 
     public void startBillDateExecutorService(Date startDate, Date endDate) {
-        List<MchApp> mchAppList = new ArrayList<>();
-        LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(10);
-        mchAppService.list(
-                MchApp.gw().eq(MchApp::getState, CS.YES).or(wrapper -> wrapper
-                        .eq(MchApp::getState, CS.NO)
-                        .ge(MchApp::getUpdatedAt, fiveMinutesAgo)
-                )).forEach(mchApp -> {
-            MchPayPassage payInterfaceConfig = mchPayPassageService.getOne(MchPayPassage.gw()
-                    .select(MchPayPassage::getIfCode, MchPayPassage::getAppId)
-                    .eq(MchPayPassage::getState, CS.YES)
-                    .eq(MchPayPassage::getAppId, mchApp.getAppId())
-                    .eq(MchPayPassage::getWayCode, "ALI_BILL")
-            );
-            if (payInterfaceConfig != null) {
-                mchAppList.add(mchApp);
-            }
-        });
+        List<MchApp> mchAppList = getMchApp();
         if (mchAppList.isEmpty()) {
             return;
         }
-        ExecutorService executor = Executors.newFixedThreadPool(16); // 根据服务器性能调整线程数
+        ExecutorService executor = Executors.newFixedThreadPool(8); // 根据服务器性能调整线程数
         try {
             for (MchApp mchApp : mchAppList) {
                 executor.submit(() -> {
@@ -125,5 +85,25 @@ public class PayOrderReissueTask {
                 Thread.currentThread().interrupt();
             }
         }
+    }
+    public List<MchApp> getMchApp(){
+        List<MchApp> mchAppList = new ArrayList<>();
+        LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(30);
+        mchAppService.list(
+                MchApp.gw().eq(MchApp::getState, CS.YES).or(wrapper -> wrapper
+                        .eq(MchApp::getState, CS.NO)
+                        .ge(MchApp::getUpdatedAt, fiveMinutesAgo)
+                )).forEach(mchApp -> {
+                    MchPayPassage payInterfaceConfig = mchPayPassageService.getOne(MchPayPassage.gw()
+                            .select(MchPayPassage::getIfCode, MchPayPassage::getAppId)
+                            .eq(MchPayPassage::getState, CS.YES)
+                            .eq(MchPayPassage::getAppId, mchApp.getAppId())
+                            .eq(MchPayPassage::getWayCode, "ALI_BILL")
+                    );
+                    if (payInterfaceConfig != null) {
+                        mchAppList.add(mchApp);
+                    }
+        });
+        return mchAppList;
     }
 }
