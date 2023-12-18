@@ -2,7 +2,6 @@ package com.jeequan.jeepay.mgr.ctrl.merchant;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.DateUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.components.mq.model.CleanMchLoginAuthCacheMQ;
 import com.jeequan.jeepay.components.mq.model.ResetIsvMchAppInfoConfigMQ;
@@ -22,7 +21,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,9 +53,7 @@ public class MchInfoController extends CommonCtrl {
     private IMQSender mqSender;
 
     /**
-     * @author: pangxiaoyu
-     * @date: 2021/6/7 16:14
-     * @describe: 商户信息列表
+     * 商户信息列表
      */
     @ApiOperation("查询商户列表")
     @ApiImplicitParams({
@@ -115,9 +111,7 @@ public class MchInfoController extends CommonCtrl {
     }
 
     /**
-     * @author: pangxiaoyu
-     * @date: 2021/6/7 16:14
-     * @describe: 删除商户信息
+     * 删除商户信息
      */
     @ApiOperation("删除商户信息")
     @ApiImplicitParams({
@@ -139,9 +133,7 @@ public class MchInfoController extends CommonCtrl {
     }
 
     /**
-     * @author: pangxiaoyu
-     * @date: 2021/6/7 16:14
-     * @describe: 更新商户信息
+     * 更新商户信息
      */
     @ApiOperation("更新商户信息")
     @ApiImplicitParams({
@@ -210,9 +202,7 @@ public class MchInfoController extends CommonCtrl {
     }
 
     /**
-     * @author: pangxiaoyu
-     * @date: 2021/6/7 16:14
-     * @describe: 查询商户信息
+     * 查询商户信息
      */
     @ApiOperation("查询商户信息")
     @ApiImplicitParams({
