@@ -4,10 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import com.jeequan.jeepay.components.mq.model.PayOrderReissueMQ;
 import com.jeequan.jeepay.components.mq.vender.IMQSender;
 import com.jeequan.jeepay.core.constants.CS;
-import com.jeequan.jeepay.core.entity.MchApp;
-import com.jeequan.jeepay.core.entity.MchInfo;
-import com.jeequan.jeepay.core.entity.MchPayPassage;
-import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.core.entity.*;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.DBApplicationConfig;
@@ -29,6 +26,7 @@ import com.jeequan.jeepay.pay.service.PayOrderProcessService;
 import com.jeequan.jeepay.service.impl.MchPayPassageService;
 import com.jeequan.jeepay.service.impl.PayOrderService;
 import com.jeequan.jeepay.service.impl.SysConfigService;
+import com.jeequan.jeepay.service.impl.SysPayDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +49,8 @@ public abstract class AbstractPayOrderController extends ApiController {
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private PayOrderService payOrderService;
+    @Autowired
+    private SysPayDomainService sysPayDomainService;
     @Autowired
     private ConfigContextQueryService configContextQueryService;
     @Autowired
@@ -352,7 +352,7 @@ public abstract class AbstractPayOrderController extends ApiController {
                 stringRedisTemplate.opsForValue().set(payOrder.getPayOrderId()+payOrder.getMchOrderNo(), "666", Duration.ofHours(24));
             }
             if (wayCode.equals("ALI_BILL")){
-                bizRQ.setDomain("https://" + request.getServerName());
+                bizRQ.setDomain("https://" + sysPayDomainService.arbitrarily());
             }
             //调起上游支付接口
             bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext);
