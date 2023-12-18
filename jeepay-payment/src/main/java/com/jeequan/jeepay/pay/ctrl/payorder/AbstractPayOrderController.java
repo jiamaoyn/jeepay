@@ -191,7 +191,7 @@ public abstract class AbstractPayOrderController extends ApiController {
                 payOrderService.save(payOrder);
             }
             if (wayCode.equals("ALI_BILL")){
-                bizRQ.setDomain("https://" + request.getServerName());
+                bizRQ.setDomain(sysPayDomainService.arbitrarily());
             }
             //调起上游支付接口
             bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext);
@@ -352,7 +352,7 @@ public abstract class AbstractPayOrderController extends ApiController {
                 stringRedisTemplate.opsForValue().set(payOrder.getPayOrderId()+payOrder.getMchOrderNo(), "666", Duration.ofHours(24));
             }
             if (wayCode.equals("ALI_BILL")){
-                bizRQ.setDomain("https://" + sysPayDomainService.arbitrarily());
+                bizRQ.setDomain(sysPayDomainService.arbitrarily());
             }
             //调起上游支付接口
             bizRS = (UnifiedOrderRS) paymentService.pay(bizRQ, payOrder, mchAppConfigContext);

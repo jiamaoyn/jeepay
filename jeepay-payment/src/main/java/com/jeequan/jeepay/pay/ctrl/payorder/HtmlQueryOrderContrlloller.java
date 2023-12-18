@@ -70,7 +70,7 @@ public class HtmlQueryOrderContrlloller extends ApiController {
         if (aliName!=null)request.setAttribute("aliName", aliName);
         request.setAttribute("payHtmlWarn", sysConfigService.getDBApplicationConfig().getPayHtmlWarn());
         request.setAttribute("amount", AmountUtil.convertCent2Dollar(payOrder.getAmount()));
-        payOrder1.setReturnUrl("alipayqr://platformapi/startapp?saId=10000007&qrcode="+ URLEncoder.encode("https://" + request.getServerName() + "/api/pay/bill/"+payOrderId, "UTF-8"));
+        payOrder1.setReturnUrl("https://www.alipay.com/?appId=20000116&actionType=toAccount&sourceId=contactStage&chatUserId="+pid+"&displayName=TK&chatUserName=TK&chatUserType=1&skipAuth=true&amount="+ AmountUtil.convertCent2Dollar(payOrder.getAmount().toString())+"&memo="+payOrderId);
         request.setAttribute("payOrder", payOrder1);
         return "pay/pay";
     }
