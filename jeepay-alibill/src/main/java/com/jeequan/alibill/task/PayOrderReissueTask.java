@@ -34,35 +34,29 @@ public class PayOrderReissueTask {
     @Autowired
     private ChannelOrderReissueService channelOrderReissueService;
 
-    @Scheduled(cron = "*/1 * * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
     public void start_bill() {
         Date startDate = DateUtil.offsetMinute(new Date(), -0);
         Date endDate = DateUtil.offsetMinute(new Date(), -2);
         startBillDateExecutorService(startDate, endDate);
     }
-    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "* */2 * * * ?") // 每2秒钟执行一次
     public void start_bill11() {
         Date startDate = DateUtil.offsetMinute(new Date(), -2);
         Date endDate = DateUtil.offsetMinute(new Date(), -5);
-        startBillDateExecutorService(startDate, endDate);
+        startBillDateService(startDate, endDate);
     }
-    @Scheduled(cron = "*/4 * * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "* */4 * * * ?") // 每2秒钟执行一次s
     public void start_bill2() {
         Date startDate = DateUtil.offsetMinute(new Date(), -4);
         Date endDate = DateUtil.offsetMinute(new Date(), -10);
-        startBillDateExecutorService(startDate, endDate);
+        startBillDateService(startDate, endDate);
     }
-    @Scheduled(cron = "* */1 * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "* */8 * * * ?") // 每2秒钟执行一次
     public void start_bill3() {
         Date startDate = DateUtil.offsetMinute(new Date(), -8);
         Date endDate = DateUtil.offsetMinute(new Date(), -20);
-        startBillDateExecutorService(startDate, endDate);
-    }
-    @Scheduled(cron = "* */60 * * * ?") // 每2秒钟执行一次
-    public void start_day1() {
-        Date startDate = DateUtil.offsetMinute(new Date(), -0);
-        Date endDate = DateUtil.offsetMinute(new Date(), -120);
-        startBillDateExecutorService(startDate, endDate);
+        startBillDateService(startDate, endDate);
     }
 
     public void startBillDateExecutorService(Date startDate, Date endDate) {
@@ -88,7 +82,7 @@ public class PayOrderReissueTask {
     }
     public List<MchApp> getMchApp(){
         List<MchApp> mchAppList = new ArrayList<>();
-        LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(30);
+        LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(10);
         mchAppService.list(
                 MchApp.gw().eq(MchApp::getState, CS.YES).or(wrapper -> wrapper
                         .eq(MchApp::getState, CS.NO)
@@ -105,5 +99,15 @@ public class PayOrderReissueTask {
                     }
         });
         return mchAppList;
+    }
+
+    public void startBillDateService(Date startDate, Date endDate) {
+        List<MchApp> mchAppList = getMchApp();
+        if (mchAppList.isEmpty()) {
+            return;
+        }
+        for (MchApp mchApp : mchAppList) {
+            channelOrderReissueService.processPayOrderBill(mchApp, startDate, endDate);
+        }
     }
 }
