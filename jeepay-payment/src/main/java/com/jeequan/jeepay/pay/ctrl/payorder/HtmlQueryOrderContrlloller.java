@@ -16,9 +16,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-
 @Slf4j
 @Controller
 public class HtmlQueryOrderContrlloller extends ApiController {
@@ -30,7 +27,7 @@ public class HtmlQueryOrderContrlloller extends ApiController {
     private SysConfigService sysConfigService;
 
     @RequestMapping("/api/pay/bill_pay/{payOrderId}")
-    public String getAliPayBill(@PathVariable("payOrderId") String payOrderId) throws IOException {
+    public String getAliPayBill(@PathVariable("payOrderId") String payOrderId) {
         PayOrder payOrder = payOrderService.queryMchOrder(payOrderId);
         if (payOrder == null) {
             throw new BizException("订单不存在");
