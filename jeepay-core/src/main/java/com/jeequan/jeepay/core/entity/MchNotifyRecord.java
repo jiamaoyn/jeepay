@@ -66,6 +66,11 @@ public class MchNotifyRecord extends BaseModel implements Serializable {
     @ApiModelProperty(value = "服务商号")
     private String isvNo;
     /**
+     * 商家号
+     */
+    @ApiModelProperty(value = "商家号")
+    private String busNo;
+    /**
      * 应用ID
      */
     @ApiModelProperty(value = "应用ID")
