@@ -1,6 +1,5 @@
 package com.jeequan.jeepay.pay.model;
 
-import com.jeequan.jeepay.core.entity.BusInfo;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchInfo;
 import com.jeequan.jeepay.core.model.params.IsvsubMchParams;
@@ -27,7 +26,6 @@ public class MchAppConfigContext {
     private Byte mchType;
     private MchInfo mchInfo;
     private MchApp mchApp;
-    private BusInfo busInfo;
 
     /**
      * 商户支付配置信息缓存,  <接口代码, 支付参数>
