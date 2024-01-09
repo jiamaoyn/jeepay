@@ -1,7 +1,10 @@
 package com.jeequan.jeepay.pay.channel.alipay.payway;
 
-import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PayOrder;
+import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.model.params.alipay.AlipayIsvsubMchParams;
+import com.jeequan.jeepay.core.model.params.alipay.AlipayNormalMchParams;
+import com.jeequan.jeepay.core.utils.AmountUtil;
 import com.jeequan.jeepay.pay.channel.alipay.AlipayPaymentService;
 import com.jeequan.jeepay.pay.model.MchAppConfigContext;
 import com.jeequan.jeepay.pay.rqrs.AbstractRS;
@@ -20,12 +23,24 @@ public class AliBill extends AlipayPaymentService {
     public AbstractRS pay(UnifiedOrderRQ rq, PayOrder payOrder, MchAppConfigContext mchAppConfigContext) {
         // 构造函数响应数据
         AliBillOrderRS res = new AliBillOrderRS();
-        String url;
-        if (rq.getPayHtmlModel() != null && rq.getPayHtmlModel() == CS.YES){
-            url = rq.getDomain() + "/api/pay/bill_pay/" + payOrder.getPayOrderId();
-        } else {
-            url = rq.getDomain() + "/api/pay/bill/" + payOrder.getPayOrderId();
+        if (payOrder == null) {
+            throw new BizException("订单不存在");
         }
+        String pid;
+        if (!mchAppConfigContext.isIsvsubMch()){
+            AlipayNormalMchParams normalMchParams = (AlipayNormalMchParams) configContextQueryService.queryNormalMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), "alipay");
+            if (normalMchParams == null) {
+                throw new BizException("商户支付宝接口没有配置！");
+            }
+            pid = normalMchParams.getPid();
+        } else {
+            AlipayIsvsubMchParams normalMchParams = (AlipayIsvsubMchParams) configContextQueryService.queryIsvsubMchParams(mchAppConfigContext.getMchNo(), mchAppConfigContext.getAppId(), "alipay");
+            if (normalMchParams == null) {
+                throw new BizException("商户支付宝接口没有配置！");
+            }
+            pid = normalMchParams.getUserId();
+        }
+        String url = "https://www.alipay.com?appId=20000116&actionType=toAccount&sourceId=contactStage&chatUserId="+pid+"&displayName=TK&chatUserName=TK&chatUserType=1&skipAuth=true&amount="+ AmountUtil.convertCent2Dollar(payOrder.getAmount().toString())+"&memo="+payOrder.getPayOrderId();
         // ↓↓↓↓↓↓ 调起接口成功后业务判断务必谨慎！！ 避免因代码编写bug，导致不能正确返回订单状态信息  ↓↓↓↓↓↓
         res.setCodeUrl(url);
         return res;

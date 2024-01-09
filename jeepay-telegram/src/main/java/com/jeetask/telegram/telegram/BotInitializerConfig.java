@@ -15,7 +15,7 @@ public class BotInitializerConfig {
     @Bean
     public DefaultBotOptions botOptions() {
         DefaultBotOptions options = new DefaultBotOptions();
-        options.setBaseUrl(sysConfigService.getDBApplicationConfig().getBotTelegramUrl());
+//        options.setBaseUrl(sysConfigService.getDBApplicationConfig().getBotTelegramUrl());
         return options;
     }
 }
