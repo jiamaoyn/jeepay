@@ -34,19 +34,25 @@ public class PayOrderReissueTask {
     @Autowired
     private ChannelOrderReissueService channelOrderReissueService;
 
-    @Scheduled(cron = "*/2 * * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "*/2 * * * * ?")
     public void start_bill() {
         Date startDate = DateUtil.offsetMinute(new Date(), -0);
-        Date endDate = DateUtil.offsetMinute(new Date(), -2);
+        Date endDate = DateUtil.offsetMinute(new Date(), -1);
         startBillDateExecutorService(startDate, endDate);
     }
-    @Scheduled(cron = "* */2 * * * ?") // 每2秒钟执行一次
+    @Scheduled(cron = "*/3 * * * * ?") // 每2秒钟执行一次
+    public void start_bill13() {
+        Date startDate = DateUtil.offsetMinute(new Date(), -1);
+        Date endDate = DateUtil.offsetMinute(new Date(), -2);
+        startBillDateService(startDate, endDate);
+    }
+    @Scheduled(cron = "*/10 * * * * ?") // 每2秒钟执行一次
     public void start_bill11() {
         Date startDate = DateUtil.offsetMinute(new Date(), -2);
         Date endDate = DateUtil.offsetMinute(new Date(), -5);
         startBillDateService(startDate, endDate);
     }
-    @Scheduled(cron = "* */4 * * * ?") // 每2秒钟执行一次s
+    @Scheduled(cron = "*/20 * * * * ?") // 每2秒钟执行一次s
     public void start_bill2() {
         Date startDate = DateUtil.offsetMinute(new Date(), -4);
         Date endDate = DateUtil.offsetMinute(new Date(), -10);
